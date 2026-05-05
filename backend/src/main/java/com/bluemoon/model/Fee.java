@@ -18,7 +18,7 @@ public class Fee {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "apartment_id")
     private Apartment apartment;
@@ -43,6 +43,7 @@ public class Fee {
     @Column(name = "due_date")
     private LocalDate dueDate;
 
+    // 0 chua thanh toan; 1 da thanh toan
     @ColumnDefault("0")
     @Column(name = "paid")
     private Boolean paid;
