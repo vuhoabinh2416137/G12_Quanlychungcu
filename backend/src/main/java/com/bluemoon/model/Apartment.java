@@ -1,18 +1,21 @@
 package com.bluemoon.model;
 
 import jakarta.persistence.*;
+
+
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "apartments")
+
 public class Apartment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(unique = true, nullable = false)
     private String apartmentNumber;
-    
+
     private String building;
     private String floor;
     private BigDecimal area;
