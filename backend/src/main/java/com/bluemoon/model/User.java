@@ -2,6 +2,7 @@ package com.bluemoon.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.ColumnDefault;
 
@@ -26,6 +27,10 @@ public class User {
     private String password;
 
     @Size(max = 20)
+    @Pattern(
+            regexp = "ADMIN|MANAGER|RESIDENT",
+            message = "role không hợp lệ"
+    )
     @NotNull
     @Column(name = "role", nullable = false, length = 20)
     private String role;

@@ -2,6 +2,7 @@ package com.bluemoon.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
@@ -33,6 +34,10 @@ public class Incident {
     private String description;
 
     @Size(max = 50)
+    @Pattern(
+            regexp = "PENDING|PROCESSING|RESOLVED",
+            message = "status không hợp lệ"
+    )
     @ColumnDefault("'PENDING'")
     @Column(name = "status", length = 50)
     private String status;

@@ -2,6 +2,7 @@ package com.bluemoon.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.ColumnDefault;
 
@@ -32,6 +33,10 @@ public class Apartment {
     private BigDecimal area;
 
     @Size(max = 20)
+    @Pattern(
+            regexp = "VACANT|OCCUPIED",
+            message = "status chỉ được phép là VACANT hoặc OCCUPIED"
+    )
     @ColumnDefault("'VACANT'")
     @Column(name = "status", length = 20)
     private String status;
