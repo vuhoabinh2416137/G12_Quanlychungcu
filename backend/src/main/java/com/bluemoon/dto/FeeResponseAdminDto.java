@@ -12,6 +12,6 @@ import java.time.LocalDate;
  */
 public record FeeResponseAdminDto(Long id,Long apartmentId,
                                   String apartmentNumber,
-                                  @NotNull BigDecimal amount, @Size(max = 50) String type, LocalDate dueDate,
+                                    BigDecimal amount, String type, LocalDate dueDate,
                                   Boolean paid) implements Serializable {
 }

@@ -11,8 +11,8 @@ import java.time.LocalDate;
  */
 public record ResidentResponseAdminDto(Long id, Long apartmentId,
                                        String apartmentNumber,
-                                       @NotNull @Size(max = 100) String fullName, LocalDate dateOfBirth,
-                                       @Size(max = 10) String gender, @Size(max = 20) String idCard,
-                                       @Size(max = 20) String phone, @Size(max = 100) String email,
-                                       @Size(max = 50) String relationship) implements Serializable {
+                                        String fullName, LocalDate dateOfBirth,
+                                        String gender,  String idCard,
+                                       String phone,  String email,
+                                       String relationship) implements Serializable {
 }
