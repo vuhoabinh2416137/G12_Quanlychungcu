@@ -31,7 +31,7 @@ public class PaymentServiceImpl implements PaymentService {
             throw new RuntimeException("Hóa đơn này đã được thanh toán đầy đủ!");
         }
 
-        payment.setId(feeId); // Gắn khóa ngoại
+        payment.setFee(fee); // Gắn khóa ngoại
         Payment savedPayment = paymentRepository.save(payment);
 
         // Logic tự động đánh dấu hoàn tất hóa đơn nếu đã nộp đủ tiền
