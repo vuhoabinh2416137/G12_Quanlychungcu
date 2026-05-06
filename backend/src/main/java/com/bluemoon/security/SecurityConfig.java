@@ -26,6 +26,13 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/index.html",   // ← thêm
+                                "/webjars/**"               // ← thêm, Swagger UI load CSS/JS qua đây
+                        ).permitAll()
                         // Cấu hình cơ bản, các API chi tiết sẽ bị chặn bởi @PreAuthorize ở Controller
                         .anyRequest().authenticated()
                 )
