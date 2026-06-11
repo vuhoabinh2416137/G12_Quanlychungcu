@@ -1,0 +1,93 @@
+{
+  "apartments": [
+    {
+      "id": "1",
+      "apartmentNumber": "A101",
+      "building": "A",
+      "floor": "1",
+      "area": 75.5,
+      "status": "OCCUPIED"
+    },
+    {
+      "id": "2",
+      "apartmentNumber": "B205",
+      "building": "B",
+      "floor": "2",
+      "area": 90,
+      "status": "OCCUPIED"
+    },
+    {
+      "id": "3",
+      "apartmentNumber": "C501",
+      "building": "C",
+      "floor": "5",
+      "area": 120.5,
+      "status": "VACANT"
+    }
+  ],
+  "residents": [
+    {
+      "id": "1",
+      "apartmentId": 1,
+      "fullName": "Nguyễn Văn A",
+      "dateOfBirth": "1985-10-20",
+      "gender": "Nam",
+      "idCard": "012345678901",
+      "phone": "0905123456",
+      "email": "vana@example.com",
+      "relationship": "CHU_HO"
+    },
+    {
+      "id": "2",
+      "apartmentId": 1,
+      "fullName": "Trần Thị B",
+      "dateOfBirth": "1988-05-15",
+      "gender": "Nữ",
+      "idCard": "012345678902",
+      "phone": "0905123457",
+      "email": "thib@example.com",
+      "relationship": "VO_CHONG"
+    },
+    {
+      "id": "3",
+      "apartmentId": 2,
+      "fullName": "Lê Văn C",
+      "dateOfBirth": "1990-01-01",
+      "gender": "Nam",
+      "idCard": "012345678903",
+      "phone": "0905123458",
+      "email": "vanc@example.com",
+      "relationship": "CHU_HO"
+    },
+    {
+      "apartmentId": 1002,
+      "fullName": "Tô Lâm",
+      "dateOfBirth": "1888-10-09",
+      "gender": "Nam",
+      "idCard": "0123456789",
+      "phone": "0000000000",
+      "email": "tolam@gmail.com",
+      "relationship": "CHU_HO",
+      "id": "heaeXxXT5RI"
+    }
+  ],
+  "fees": [
+    {
+      "id": "1",
+      "apartmentId": 1,
+      "name": "Phí quản lý tháng 05/2026",
+      "amount": 500000,
+      "dueDate": "2026-05-15",
+      "paid": false
+    },
+    {
+      "id": "2",
+      "apartmentId": 2,
+      "name": "Phí quản lý tháng 05/2026",
+      "amount": 650000,
+      "dueDate": "2026-05-15",
+      "paid": false
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}
