@@ -1,7 +1,11 @@
 package com.bluemoon.service.impl;
 
+import com.bluemoon.exception.DuplicateResourceException;
+import com.bluemoon.exception.ResourceNotFoundException;
 import com.bluemoon.model.Apartment;
+import com.bluemoon.model.Resident;
 import com.bluemoon.repository.ApartmentRepository;
+import com.bluemoon.repository.ResidentRepository;
 import com.bluemoon.service.ApartmentService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,13 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-
 public class ApartmentServiceImpl implements ApartmentService {
 
     private final ApartmentRepository apartmentRepository;
-    private final com.bluemoon.repository.ResidentRepository residentRepository;
+    private final ResidentRepository residentRepository;
 
-    public ApartmentServiceImpl(ApartmentRepository apartmentRepository, com.bluemoon.repository.ResidentRepository residentRepository) {
+    public ApartmentServiceImpl(ApartmentRepository apartmentRepository, ResidentRepository residentRepository) {
         this.apartmentRepository = apartmentRepository;
         this.residentRepository = residentRepository;
     }
@@ -28,21 +31,20 @@ public class ApartmentServiceImpl implements ApartmentService {
     @Override
     public Apartment getApartmentById(Long id) {
         return apartmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy căn hộ với ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy căn hộ với ID: " + id));
     }
 
     @Override
     public Apartment getApartmentByNumber(String apartmentNumber) {
         return apartmentRepository.findByApartmentNumber(apartmentNumber)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy căn hộ số: " + apartmentNumber));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy căn hộ số: " + apartmentNumber));
     }
 
     @Override
     @Transactional
     public Apartment createApartment(Apartment apartment) {
-        // Có thể thêm logic kiểm tra trùng số phòng ở đây
         if (apartmentRepository.findByApartmentNumber(apartment.getApartmentNumber()).isPresent()) {
-            throw new RuntimeException("Số căn hộ đã tồn tại!");
+            throw new DuplicateResourceException("Số căn hộ đã tồn tại!");
         }
         return apartmentRepository.save(apartment);
     }
@@ -66,9 +68,9 @@ public class ApartmentServiceImpl implements ApartmentService {
     @Transactional
     public void deleteApartment(Long id) {
         Apartment existingApartment = getApartmentById(id);
-        
+
         // Xóa tất cả cư dân đang ở trong căn hộ này trước khi xóa căn hộ
-        java.util.List<com.bluemoon.model.Resident> residents = residentRepository.findByApartment_Id(id);
+        List<Resident> residents = residentRepository.findByApartment_Id(id);
         residentRepository.deleteAll(residents);
 
         apartmentRepository.delete(existingApartment);

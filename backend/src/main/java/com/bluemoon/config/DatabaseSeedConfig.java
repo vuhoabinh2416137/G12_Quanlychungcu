@@ -27,9 +27,10 @@ public class DatabaseSeedConfig {
             SystemConfigRepository systemConfigRepository
     ) {
         return args -> {
-            seedUserIfMissing(userRepository, passwordEncoder, "admin", "admin123", "ADMIN", "Admin");
-            seedUserIfMissing(userRepository, passwordEncoder, "cashier", "cashier123", "CASHIER", "Cashier");
-            seedUserIfMissing(userRepository, passwordEncoder, "maintenance", "maintenance123", "MAINTENANCE", "Maintenance");
+            // Seed admin account only if no users exist in the system at all
+            if (userRepository.count() == 0) {
+                seedUserIfMissing(userRepository, passwordEncoder, "admin", "admin123", "ADMIN", "Admin");
+            }
 
             // Seed cấu hình phí cố định mặc định
             seedConfigIfMissing(systemConfigRepository, "fee.management_per_sqm", "10000", "Đơn giá phí quản lý (VNĐ/m²)");

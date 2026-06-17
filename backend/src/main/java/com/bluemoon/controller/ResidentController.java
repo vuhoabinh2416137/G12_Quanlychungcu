@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,7 +35,7 @@ public class ResidentController {
     }
 
     @GetMapping
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<List<ResidentResponseAdminDto>> getAll(Authentication auth) {
         List<Resident> list;
         if (residentAccessService.isResident(auth)) {
@@ -47,7 +48,7 @@ public class ResidentController {
     }
 
     @GetMapping("/apartment/{apartmentId}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<List<ResidentResponseAdminDto>> getByApartment(
             @PathVariable Long apartmentId,
             Authentication auth
@@ -57,7 +58,7 @@ public class ResidentController {
     }
 
     @GetMapping("/{id}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<ResidentResponseAdminDto> getById(
             @PathVariable Long id,
             Authentication auth
@@ -71,7 +72,7 @@ public class ResidentController {
     }
 
     @GetMapping("/phone/{phone}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<ResidentResponseAdminDto> getByPhone(
             @PathVariable String phone,
             Authentication auth
@@ -85,7 +86,7 @@ public class ResidentController {
     }
 
     @GetMapping("/apartment/{apartmentId}/members")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('RESIDENT')")
+    @PreAuthorize("hasRole('RESIDENT')")
     public ResponseEntity<List<ResidentResponseUserDto>> getMembersForResident(
             @PathVariable Long apartmentId,
             Authentication auth
@@ -95,7 +96,7 @@ public class ResidentController {
     }
 
     @PostMapping("/apartment/{apartmentId}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResidentResponseAdminDto> addToApartment(
             @PathVariable Long apartmentId,
             @Valid @RequestBody ResidentRequestDto requestDto
@@ -106,7 +107,7 @@ public class ResidentController {
     }
 
     @PutMapping("/{id}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResidentResponseAdminDto> update(
             @PathVariable Long id,
             @Valid @RequestBody ResidentRequestDto requestDto
@@ -118,7 +119,7 @@ public class ResidentController {
     }
 
     @DeleteMapping("/{id}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         residentService.deleteResident(id);
         return ResponseEntity.noContent().build();

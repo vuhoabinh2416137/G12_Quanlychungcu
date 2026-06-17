@@ -1,4 +1,4 @@
-package com.bluemoon.service.impl;
+package com.bluemoon.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;

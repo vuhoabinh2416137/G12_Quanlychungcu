@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,19 +35,19 @@ public class IncidentController {
     }
 
     @GetMapping("/pending")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<List<IncidentResponseAdminDto>> getPending() {
         return ResponseEntity.ok(incidentMapper.toAdminDtoList(incidentService.getPendingIncidents()));
     }
 
     @GetMapping("/apartment/{apartmentId}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<List<IncidentResponseAdminDto>> getByApartment(@PathVariable Long apartmentId) {
         return ResponseEntity.ok(incidentMapper.toAdminDtoList(incidentService.getIncidentsByApartment(apartmentId)));
     }
 
     @GetMapping("/apartment/{apartmentId}/my")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('RESIDENT')")
+    @PreAuthorize("hasRole('RESIDENT')")
     public ResponseEntity<List<IncidentResponseUserDto>> getByApartmentForResident(
             @PathVariable Long apartmentId,
             Authentication auth
@@ -56,7 +57,7 @@ public class IncidentController {
     }
 
     @PostMapping("/apartment/{apartmentId}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<IncidentResponseUserDto> report(
             @PathVariable Long apartmentId,
             @Valid @RequestBody IncidentRequestDto requestDto,
@@ -69,7 +70,7 @@ public class IncidentController {
     }
 
     @PatchMapping("/{id}/status")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<IncidentResponseAdminDto> updateStatus(
             @PathVariable Long id,
             @RequestParam String status

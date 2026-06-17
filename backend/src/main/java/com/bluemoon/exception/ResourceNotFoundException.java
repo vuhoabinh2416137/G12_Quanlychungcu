@@ -1,4 +1,4 @@
-package com.bluemoon.service.impl;
+package com.bluemoon.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(String message) {

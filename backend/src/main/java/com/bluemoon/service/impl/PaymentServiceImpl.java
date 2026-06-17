@@ -145,19 +145,14 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentRepository.findByFeeId(feeId);
     }
     
+    @Override
     public List<Payment> getPendingPayments() {
-        // Can be improved with custom repository method
-        return paymentRepository.findAll().stream()
-                .filter(p -> "PENDING".equals(p.getStatus()))
-                .toList();
+        return paymentRepository.findByStatus("PENDING");
     }
 
     @Override
     public List<Payment> getPaymentsByApartmentHistory(Long apartmentId) {
-        return paymentRepository.findAll().stream()
-                .filter(p -> p.getFee().getApartment().getId().equals(apartmentId) 
-                        && "COMPLETED".equals(p.getStatus()))
-                .toList();
+        return paymentRepository.findByFee_Apartment_IdAndStatus(apartmentId, "COMPLETED");
     }
 
     @Override
@@ -195,8 +190,6 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public List<Payment> getRefundPayments() {
-        return paymentRepository.findAll().stream()
-                .filter(p -> p.getRefundAmount() != null && p.getRefundAmount().compareTo(BigDecimal.ZERO) > 0)
-                .toList();
+        return paymentRepository.findByRefundAmountGreaterThan(BigDecimal.ZERO);
     }
 }

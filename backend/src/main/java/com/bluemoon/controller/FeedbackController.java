@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,7 +35,7 @@ public class FeedbackController {
     }
 
     @PostMapping
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('RESIDENT')")
+    @PreAuthorize("hasRole('RESIDENT')")
     public ResponseEntity<FeedbackResponseDto> createFeedback(
             @Valid @RequestBody FeedbackRequestDto requestDto,
             Authentication authentication
@@ -47,13 +48,13 @@ public class FeedbackController {
     }
 
     @GetMapping
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<List<FeedbackResponseDto>> getAllFeedbacks() {
         return ResponseEntity.ok(feedbackMapper.toDtoList(feedbackService.getAllFeedbacks()));
     }
 
     @GetMapping("/apartment/{apartmentId}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<List<FeedbackResponseDto>> getFeedbacksByApartment(
             @PathVariable Long apartmentId,
             Authentication authentication
@@ -63,7 +64,7 @@ public class FeedbackController {
     }
 
     @PutMapping("/{id}/reply")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<FeedbackResponseDto> replyFeedback(
             @PathVariable Long id,
             @Valid @RequestBody FeedbackReplyDto replyDto

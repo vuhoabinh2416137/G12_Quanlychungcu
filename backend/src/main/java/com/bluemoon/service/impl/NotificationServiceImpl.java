@@ -1,5 +1,6 @@
 package com.bluemoon.service.impl;
 
+import com.bluemoon.exception.ResourceNotFoundException;
 import com.bluemoon.model.Apartment;
 import com.bluemoon.model.Notification;
 import com.bluemoon.model.User;
@@ -34,7 +35,7 @@ public class NotificationServiceImpl implements NotificationService {
         User sender = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
         
-        java.util.List<Notification> toSave = new java.util.ArrayList<>();
+        List<Notification> toSave = new java.util.ArrayList<>();
         
         if (apartmentIds == null || apartmentIds.isEmpty()) {
             Notification n = new Notification();

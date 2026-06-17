@@ -3,6 +3,8 @@ package com.bluemoon.service.impl;
 import com.bluemoon.dto.request.*;
 import com.bluemoon.model.User;
 import com.bluemoon.repository.UserRepository;
+import com.bluemoon.exception.DuplicateResourceException;
+import com.bluemoon.exception.ResourceNotFoundException;
 import com.bluemoon.service.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

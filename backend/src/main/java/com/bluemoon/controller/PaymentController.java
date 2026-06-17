@@ -14,9 +14,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -40,14 +42,14 @@ public class PaymentController {
     }
 
     @GetMapping("/fee/{feeId}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     @Transactional(readOnly = true)
     public ResponseEntity<List<PaymentResponseAdminDto>> getHistoryForAdmin(@PathVariable Long feeId) {
         return ResponseEntity.ok(paymentMapper.toAdminDtoList(paymentService.getPaymentHistory(feeId)));
     }
 
     @GetMapping("/fee/{feeId}/my")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('RESIDENT')")
+    @PreAuthorize("hasRole('RESIDENT')")
     @Transactional(readOnly = true)
     public ResponseEntity<List<PaymentResponseUserDto>> getHistoryForResident(
             @PathVariable Long feeId,
@@ -58,7 +60,7 @@ public class PaymentController {
     }
 
     @PostMapping("/fee/{feeId}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     @Transactional
     public ResponseEntity<PaymentResponseAdminDto> process(
             @PathVariable Long feeId,
@@ -74,14 +76,14 @@ public class PaymentController {
     }
 
     @GetMapping("/apartment/{apartmentId}/history")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     @Transactional(readOnly = true)
     public ResponseEntity<List<PaymentResponseAdminDto>> getHistoryByApartmentForAdmin(@PathVariable Long apartmentId) {
         return ResponseEntity.ok(paymentMapper.toAdminDtoList(paymentService.getPaymentsByApartmentHistory(apartmentId)));
     }
 
     @GetMapping("/apartment/{apartmentId}/history/my")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('RESIDENT')")
+    @PreAuthorize("hasRole('RESIDENT')")
     @Transactional(readOnly = true)
     public ResponseEntity<List<PaymentResponseUserDto>> getHistoryByApartmentForResident(
             @PathVariable Long apartmentId,
@@ -92,11 +94,11 @@ public class PaymentController {
     }
 
     @PostMapping("/{id}/refund-info")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('RESIDENT')")
+    @PreAuthorize("hasRole('RESIDENT')")
     @Transactional
     public ResponseEntity<PaymentResponseUserDto> submitRefundInfo(
             @PathVariable Long id,
-            @RequestBody java.util.Map<String, String> payload
+            @RequestBody Map<String, String> payload
     ) {
         String bankName = payload.get("bankName");
         String accountNumber = payload.get("accountNumber");
@@ -111,7 +113,7 @@ public class PaymentController {
     }
 
     @PostMapping("/{id}/confirm-refund")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     @Transactional
     public ResponseEntity<PaymentResponseAdminDto> confirmRefund(@PathVariable Long id) {
         Payment saved = paymentService.confirmRefund(id);
@@ -119,7 +121,7 @@ public class PaymentController {
     }
 
     @GetMapping("/refunds")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     @Transactional(readOnly = true)
     public ResponseEntity<List<PaymentResponseAdminDto>> getRefundPayments() {
         return ResponseEntity.ok(paymentMapper.toAdminDtoList(paymentService.getRefundPayments()));

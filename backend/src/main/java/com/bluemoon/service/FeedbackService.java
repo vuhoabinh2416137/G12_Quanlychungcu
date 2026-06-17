@@ -1,6 +1,6 @@
 package com.bluemoon.service;
 
-import com.bluemoon.service.impl.ResourceNotFoundException;
+import com.bluemoon.exception.ResourceNotFoundException;
 import com.bluemoon.model.Apartment;
 import com.bluemoon.model.Feedback;
 import com.bluemoon.model.FeedbackStatus;

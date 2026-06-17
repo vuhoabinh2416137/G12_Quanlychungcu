@@ -1,5 +1,7 @@
 package com.bluemoon.service.impl;
 
+import com.bluemoon.exception.DuplicateResourceException;
+import com.bluemoon.exception.ResourceNotFoundException;
 import com.bluemoon.model.Apartment;
 import com.bluemoon.model.Resident;
 import com.bluemoon.repository.ApartmentRepository;

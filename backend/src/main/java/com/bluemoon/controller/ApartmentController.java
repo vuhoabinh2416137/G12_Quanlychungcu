@@ -4,6 +4,7 @@ import com.bluemoon.dto.ApartmentResponseAdminDto;
 import com.bluemoon.dto.ApartmentResponseUserDto;
 import com.bluemoon.dto.mapper.ApartmentMapper;
 import com.bluemoon.dto.request.ApartmentRequestDto;
+import com.bluemoon.dto.request.ConsumptionRequestDto;
 import com.bluemoon.model.Apartment;
 import com.bluemoon.security.ResidentAccessService;
 import com.bluemoon.service.ApartmentService;
@@ -11,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,7 +36,7 @@ public class ApartmentController {
     }
 
     @GetMapping
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<List<ApartmentResponseAdminDto>> getAll(Authentication auth) {
         List<Apartment> list = apartmentService.getAllApartments();
         if (residentAccessService.isResident(auth)) {
@@ -45,7 +47,7 @@ public class ApartmentController {
     }
 
     @GetMapping("/{id}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<ApartmentResponseAdminDto> getById(
             @PathVariable Long id,
             Authentication auth
@@ -55,7 +57,7 @@ public class ApartmentController {
     }
 
     @GetMapping("/{id}/info")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('RESIDENT')")
+    @PreAuthorize("hasRole('RESIDENT')")
     public ResponseEntity<ApartmentResponseUserDto> getInfoForResident(
             @PathVariable Long id,
             Authentication auth
@@ -65,7 +67,7 @@ public class ApartmentController {
     }
 
     @PostMapping
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApartmentResponseAdminDto> create(@Valid @RequestBody ApartmentRequestDto requestDto) {
         Apartment apartment = apartmentMapper.toEntity(requestDto);
         Apartment saved = apartmentService.createApartment(apartment);
@@ -73,7 +75,7 @@ public class ApartmentController {
     }
 
     @PutMapping("/{id}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApartmentResponseAdminDto> update(
             @PathVariable Long id,
             @Valid @RequestBody ApartmentRequestDto requestDto
@@ -85,7 +87,7 @@ public class ApartmentController {
     }
 
     @DeleteMapping("/{id}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         apartmentService.deleteApartment(id);
         return ResponseEntity.noContent().build();
@@ -95,10 +97,10 @@ public class ApartmentController {
      * Cập nhật số liệu tiêu thụ điện/nước cho 1 căn hộ
      */
     @PatchMapping("/{id}/consumption")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<ApartmentResponseAdminDto> updateConsumption(
             @PathVariable Long id,
-            @Valid @RequestBody com.bluemoon.dto.request.ConsumptionRequestDto dto
+            @Valid @RequestBody ConsumptionRequestDto dto
     ) {
         Apartment apartment = apartmentService.getApartmentById(id);
         apartment.setSoDienTieuThu(dto.soDienTieuThu());

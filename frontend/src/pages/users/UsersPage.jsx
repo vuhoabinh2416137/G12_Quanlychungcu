@@ -96,10 +96,11 @@ export default function UsersPage() {
   const canSubmitCreate = useMemo(() => Object.keys(createErrors).length === 0, [createErrors]);
 
   const filteredUsers = useMemo(() => {
+    const list = users.filter(u => u.username !== 'admin');
     const q = query.trim().toLowerCase();
-    if (!q) return users;
+    if (!q) return list;
 
-    return users.filter((user) => {
+    return list.filter((user) => {
       const fields = [user.username, user.fullName, user.email, user.phone, user.role];
       return fields.some((field) => String(field || '').toLowerCase().includes(q));
     });
@@ -200,18 +201,9 @@ export default function UsersPage() {
                       <div className="text-xs text-slate-500">{user.username}</div>
                     </td>
                     <td className="px-5 py-4">
-                      <select
-                        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
-                        value={user.role}
-                        disabled={roleBusy}
-                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                      >
-                        {ROLES.map((role) => (
-                          <option key={role} value={role}>
-                            {ROLE_LABELS[role]}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="inline-flex items-center rounded-md bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-500/10">
+                        {ROLE_LABELS[user.role] || user.role}
+                      </div>
                     </td>
                     <td className="px-5 py-4 text-slate-600">
                       <div>{user.email || '---'}</div>

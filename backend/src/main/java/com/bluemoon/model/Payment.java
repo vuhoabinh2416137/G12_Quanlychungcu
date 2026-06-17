@@ -13,6 +13,9 @@ import java.time.Instant;
 @Entity
 @Table(name = "payments")
 public class Payment {
+
+    // ==================== Fields ====================
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -50,6 +53,31 @@ public class Payment {
     @ColumnDefault("'COMPLETED'")
     @Column(name = "status", length = 20)
     private String status;
+
+    @Size(max = 50)
+    @Column(name = "receipt_number", length = 50, unique = true)
+    private String receiptNumber;
+
+    @Column(name = "refund_amount", precision = 15, scale = 2)
+    private BigDecimal refundAmount;
+
+    @Size(max = 100)
+    @Column(name = "refund_bank", length = 100)
+    private String refundBank;
+
+    @Size(max = 50)
+    @Column(name = "refund_account_number", length = 50)
+    private String refundAccountNumber;
+
+    @Size(max = 100)
+    @Column(name = "refund_account_name", length = 100)
+    private String refundAccountName;
+
+    @Size(max = 20)
+    @Column(name = "refund_status", length = 20)
+    private String refundStatus;
+
+    // ==================== Getters & Setters ====================
 
     public Long getId() {
         return id;
@@ -123,24 +151,13 @@ public class Payment {
         this.status = status;
     }
 
-    @Column(name = "refund_amount", precision = 15, scale = 2)
-    private BigDecimal refundAmount;
+    public String getReceiptNumber() {
+        return receiptNumber;
+    }
 
-    @Size(max = 100)
-    @Column(name = "refund_bank", length = 100)
-    private String refundBank;
-
-    @Size(max = 50)
-    @Column(name = "refund_account_number", length = 50)
-    private String refundAccountNumber;
-
-    @Size(max = 100)
-    @Column(name = "refund_account_name", length = 100)
-    private String refundAccountName;
-
-    @Size(max = 20)
-    @Column(name = "refund_status", length = 20)
-    private String refundStatus;
+    public void setReceiptNumber(String receiptNumber) {
+        this.receiptNumber = receiptNumber;
+    }
 
     public BigDecimal getRefundAmount() {
         return refundAmount;
@@ -180,17 +197,5 @@ public class Payment {
 
     public void setRefundStatus(String refundStatus) {
         this.refundStatus = refundStatus;
-    }
-
-    @Size(max = 50)
-    @Column(name = "receipt_number", length = 50, unique = true)
-    private String receiptNumber;
-
-    public String getReceiptNumber() {
-        return receiptNumber;
-    }
-
-    public void setReceiptNumber(String receiptNumber) {
-        this.receiptNumber = receiptNumber;
     }
 }
