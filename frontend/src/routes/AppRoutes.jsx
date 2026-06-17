@@ -8,7 +8,7 @@ import ResidentsPage from '../pages/residents/ResidentsPage.jsx';
 import ApartmentsPage from '../pages/residents/ApartmentsPage.jsx';
 import FeesPage from '../pages/fees/FeesPage.jsx';
 import NotificationsPage from '../pages/notifications/NotificationsPage.jsx';
-import InvoicesPage from '../pages/invoices/InvoicesPage.jsx';
+import PaymentHistoryPage from '../pages/payments/PaymentHistoryPage.jsx';
 import ProfilePage from '../pages/profile/ProfilePage.jsx';
 import FeedbackPage from '../pages/feedback/FeedbackPage.jsx';
 import UsersPage from '../pages/users/UsersPage.jsx';
@@ -90,7 +90,7 @@ export default function AppRoutes() {
             },
             { path: '/fees', element: <FeesPage /> },
             { path: '/notifications', element: <NotificationsPage /> },
-            { path: '/invoices', element: <InvoicesPage /> },
+            { path: '/payment-history', element: <PaymentHistoryPage /> },
             {
               path: '/users',
               element: (

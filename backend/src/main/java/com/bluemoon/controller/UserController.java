@@ -58,6 +58,13 @@ public class UserController {
         return ResponseEntity.ok(toDto(userService.updateUserActive(id, requestDto)));
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/me")
     @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<UserResponseDto> getMyProfile(org.springframework.security.core.Authentication auth) {

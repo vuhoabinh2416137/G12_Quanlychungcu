@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isMockApi } from '../../api/apiBaseUrl.js';
-import { loginWithJwt } from '../../api/authApi.js';
+import { loginWithJwt, registerUser, checkResidentForAuth } from '../../api/authApi.js';
+import { getResidentByPhone } from '../../api/residentsApi.js';
 import { useAuth } from '../../hooks/useAuth.js';
-import { isNonEmptyString } from '../../utils/validators.js';
+import { isNonEmptyString, isValidVietnamPhone } from '../../utils/validators.js';
 
 const ROLES = ['ADMIN', 'CASHIER', 'RESIDENT'];
 
@@ -19,7 +20,12 @@ export default function LoginPage() {
 
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('admin123');
-  const [touched, setTouched] = useState({ username: false, password: false });
+  
+  const [isRegister, setIsRegister] = useState(false);
+  const [regPhone, setRegPhone] = useState('');
+  const [regFullName, setRegFullName] = useState('');
+
+  const [touched, setTouched] = useState({ username: false, password: false, phone: false, fullName: false });
   const [formError, setFormError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -33,8 +39,15 @@ export default function LoginPage() {
     if (!isNonEmptyString(password)) next.password = 'Vui lòng nhập mật khẩu.';
     else if (password.trim().length < 6) next.password = 'Mật khẩu tối thiểu 6 ký tự.';
 
+    if (isRegister) {
+      if (!isNonEmptyString(regPhone)) next.phone = 'Vui lòng nhập số điện thoại.';
+      else if (!isValidVietnamPhone(regPhone)) next.phone = 'Số điện thoại phải gồm 10 chữ số.';
+      
+
+    }
+
     return next;
-  }, [password, username]);
+  }, [password, username, isRegister, regPhone, regFullName]);
 
   const canSubmit = useMemo(() => Object.keys(errors).length === 0, [errors]);
 
@@ -70,10 +83,10 @@ export default function LoginPage() {
           onSubmit={async (e) => {
             e.preventDefault();
             setFormError('');
-            setTouched({ username: true, password: true });
+            setTouched({ username: true, password: true, phone: true, fullName: true });
 
             if (!canSubmit) {
-              setFormError('Vui lòng kiểm tra lại thông tin đăng nhập.');
+              setFormError('Vui lòng kiểm tra lại thông tin.');
               return;
             }
 
@@ -82,24 +95,65 @@ export default function LoginPage() {
 
             setSubmitting(true);
             try {
-              if (isMockApi()) {
-                login({
-                  token: 'mock-token',
-                  role: 'ADMIN', // Fallback for mock
-                  username: trimmedUsername,
-                  fullName: trimmedUsername,
-                });
-                navigate('/dashboard', { replace: true });
+              if (isRegister) {
+                try {
+                   // Sử dụng endpoint public /auth/check-resident để kiểm tra
+                   const resData = await checkResidentForAuth(regPhone.trim());
+                   if (resData.hasAccount) {
+                       throw new Error('Tài khoản đã tồn tại, vui lòng đăng nhập.');
+                   }
+                   
+                   // Nếu hệ thống trả về thông tin (fullName) và hasAccount = false
+                   // Hỏi người dùng xác nhận
+                   const isConfirmed = window.confirm(`Hệ thống tìm thấy tên bạn là: ${resData.fullName}. Bạn có muốn tạo tài khoản không?`);
+                   if (!isConfirmed) {
+                       return;
+                   }
+                   
+                   await registerUser({
+                     username: trimmedUsername,
+                     password: trimmedPassword,
+                     role: 'RESIDENT',
+                     fullName: resData.fullName,
+                     phone: regPhone.trim(),
+                   });
+                   
+                   const response = await loginWithJwt({
+                     username: trimmedUsername,
+                     password: trimmedPassword,
+                   });
+                   login(response);
+                   navigate('/apartments', { replace: true });
+
+                } catch(err) {
+                   const msg = err?.response?.data?.message || err.message || 'Lỗi kiểm tra cư dân.';
+                   throw new Error(msg);
+                }
               } else {
-                const response = await loginWithJwt({
-                  username: trimmedUsername,
-                  password: trimmedPassword,
-                });
-                login(response);
-                navigate(response.role === 'RESIDENT' ? '/apartments' : '/dashboard', { replace: true });
+                if (isMockApi()) {
+                  login({
+                    token: 'mock-token',
+                    role: 'ADMIN',
+                    username: trimmedUsername,
+                    fullName: trimmedUsername,
+                  });
+                  navigate('/dashboard', { replace: true });
+                } else {
+                  const response = await loginWithJwt({
+                    username: trimmedUsername,
+                    password: trimmedPassword,
+                  });
+                  login(response);
+                  navigate(response.role === 'RESIDENT' ? '/apartments' : '/dashboard', { replace: true });
+                }
               }
             } catch (err) {
-              setFormError(err?.response?.data?.message || 'Sai thông tin đăng nhập, sai vai trò hoặc backend chưa chạy.');
+              const msg = err?.response?.data?.message || err.message || 'Có lỗi xảy ra.';
+              if (msg.includes('Bad credentials')) {
+                setFormError('Tên đăng nhập hoặc mật khẩu không chính xác');
+              } else {
+                setFormError(msg);
+              }
             } finally {
               setSubmitting(false);
             }
@@ -140,14 +194,47 @@ export default function LoginPage() {
             {touched.password && errors.password ? <div className="text-xs text-red-500">{errors.password}</div> : null}
           </div>
 
+          {isRegister && (
+            <>
+              <div className="space-y-1.5 animate-fade-in-up">
+                <label className="text-sm font-medium text-slate-700">Số điện thoại</label>
+                <div className="relative">
+                  <input
+                    className={`w-full rounded-xl border py-3 px-4 text-sm outline-none transition-all focus:ring-4 ${touched.phone && errors.phone ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10' : 'border-slate-200 focus:border-primary-500 focus:ring-primary-500/10'}`}
+                    value={regPhone}
+                    onChange={(e) => setRegPhone(e.target.value)}
+                    onBlur={() => setTouched((t) => ({ ...t, phone: true }))}
+                    placeholder="0912345678"
+                  />
+                </div>
+                {touched.phone && errors.phone ? <div className="text-xs text-red-500">{errors.phone}</div> : null}
+              </div>
+            </>
+          )}
+
 
           <button
             className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-primary-600 py-3.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-95 disabled:pointer-events-none disabled:opacity-70"
             type="submit"
             disabled={!canSubmit || submitting}
           >
-            {submitting ? 'Đang xử lý...' : 'Đăng nhập hệ thống'}
+            {submitting ? 'Đang xử lý...' : isRegister ? 'Đăng ký tài khoản' : 'Đăng nhập hệ thống'}
           </button>
+          
+          <div className="text-center text-sm text-slate-500">
+            {isRegister ? 'Đã có tài khoản?' : 'Chưa có tài khoản?'}
+            <button
+              type="button"
+              className="ml-1 text-primary-600 hover:text-primary-700 hover:underline"
+              onClick={() => {
+                setIsRegister(!isRegister);
+                setFormError('');
+                setTouched({ username: false, password: false, phone: false, fullName: false });
+              }}
+            >
+              {isRegister ? 'Đăng nhập' : 'Đăng ký ngay'}
+            </button>
+          </div>
         </form>
 
         <div className="mt-8 border-t border-slate-100 pt-6 text-center text-xs text-slate-500">

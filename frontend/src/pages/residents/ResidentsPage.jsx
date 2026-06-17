@@ -124,7 +124,8 @@ export default function ResidentsPage() {
   const canSubmitEdit = useMemo(() => Object.keys(editErrors).length === 0, [editErrors]);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const normalize = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const q = normalize(query.trim());
     if (!q) return residents;
     return residents.filter((r) => {
       const fields = [
@@ -135,7 +136,7 @@ export default function ResidentsPage() {
         String(r.apartmentId),
         r.apartmentNumber,
       ];
-      return fields.some((f) => String(f || '').toLowerCase().includes(q));
+      return fields.some((f) => normalize(f).includes(q));
     });
   }, [query, residents]);
 

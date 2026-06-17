@@ -7,6 +7,7 @@ import {
   getAllNotifications,
   getNotificationsForApartment,
 } from '../../api/notificationsApi.js';
+import RefundInfoModal from './RefundInfoModal.jsx';
 
 export default function NotificationsPage() {
   const { auth } = useAuth();
@@ -20,8 +21,10 @@ export default function NotificationsPage() {
   const [error, setError] = useState('');
 
   const [createOpen, setCreateOpen] = useState(false);
-  const [createForm, setCreateForm] = useState({ title: '', content: '', type: 'INFO', apartmentId: '' });
+  const [createForm, setCreateForm] = useState({ title: '', content: '', type: 'INFO', apartmentIds: [] });
   const [createStatus, setCreateStatus] = useState({ submitting: false, error: '', success: '' });
+
+  const [selectedRefundPaymentId, setSelectedRefundPaymentId] = useState(null);
 
   // 1. Tải danh sách căn hộ (để filter hoặc để admin chọn khi tạo mới)
   useEffect(() => {
@@ -43,34 +46,29 @@ export default function NotificationsPage() {
     return () => { cancelled = true; };
   }, [isAdminOrManager]);
 
+  const loadData = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      let data;
+      if (isAdminOrManager) {
+        data = await getAllNotifications();
+      } else {
+        if (!selectedApartmentId) { setLoading(false); return; }
+        data = await getNotificationsForApartment(Number(selectedApartmentId));
+      }
+      data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setNotifications(data);
+    } catch (err) {
+      setError('Không tải được thông báo. Kiểm tra kết nối.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // 2. Tải thông báo
   useEffect(() => {
-    let cancelled = false;
-    async function loadData() {
-      setLoading(true);
-      setError('');
-      try {
-        let data;
-        if (isAdminOrManager) {
-          data = await getAllNotifications();
-        } else {
-          if (!selectedApartmentId) return; // Đợi load xong apartment
-          data = await getNotificationsForApartment(Number(selectedApartmentId));
-        }
-        if (!cancelled) {
-          // Sắp xếp giảm dần theo thời gian (nếu backend chưa sort)
-          data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-          setNotifications(data);
-        }
-      } catch (err) {
-        if (cancelled) return;
-        setError('Không tải được thông báo. Kiểm tra kết nối.');
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
     loadData();
-    return () => { cancelled = true; };
   }, [isAdminOrManager, selectedApartmentId]);
 
   const handleCreate = async (e) => {
@@ -85,12 +83,12 @@ export default function NotificationsPage() {
         title: createForm.title.trim(),
         content: createForm.content.trim(),
         type: createForm.type,
-        apartmentId: createForm.apartmentId ? Number(createForm.apartmentId) : null,
+        apartmentIds: createForm.apartmentIds,
       };
-      const created = await createNotification(payload);
-      setNotifications(prev => [created, ...prev]);
+      const createdList = await createNotification(payload);
+      setNotifications(prev => [...createdList, ...prev]);
       setCreateStatus({ submitting: false, error: '', success: 'Tạo thông báo thành công!' });
-      setCreateForm({ title: '', content: '', type: 'INFO', apartmentId: '' });
+      setCreateForm({ title: '', content: '', type: 'INFO', apartmentIds: [] });
     } catch (err) {
       setCreateStatus({ submitting: false, error: 'Lỗi khi tạo thông báo.', success: '' });
     }
@@ -175,22 +173,44 @@ export default function NotificationsPage() {
                   <option value="INFO">Thông tin (Info)</option>
                   <option value="WARNING">Cảnh báo (Warning)</option>
                   <option value="URGENT">Khẩn cấp (Urgent)</option>
+                  <option value="REFUND_REQUEST">Yêu cầu hoàn tiền</option>
                 </select>
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Đối tượng nhận (Bỏ trống = Gửi tất cả)</label>
-              <select
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                value={createForm.apartmentId}
-                onChange={e => setCreateForm(f => ({ ...f, apartmentId: e.target.value }))}
-              >
-                <option value="">-- Tất cả cư dân --</option>
+              <div className="max-h-48 overflow-y-auto border border-slate-300 rounded-lg p-2 space-y-1 bg-white">
                 {apartments.map(a => (
-                  <option key={a.id} value={a.id}>Căn hộ P.{a.apartmentNumber}</option>
+                  <label key={a.id} className="flex items-center gap-3 cursor-pointer p-1.5 hover:bg-slate-50 rounded transition-colors">
+                    <input 
+                      type="checkbox"
+                      className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      checked={createForm.apartmentIds.includes(a.id)}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setCreateForm(prev => {
+                          if (checked) {
+                            return { ...prev, apartmentIds: [...prev.apartmentIds, a.id] };
+                          } else {
+                            return { ...prev, apartmentIds: prev.apartmentIds.filter(id => id !== a.id) };
+                          }
+                        });
+                      }}
+                    />
+                    <span className="text-sm text-slate-700 font-medium select-none">Căn hộ P.{a.apartmentNumber}</span>
+                  </label>
                 ))}
-              </select>
+                {apartments.length === 0 && (
+                  <div className="text-sm text-slate-500 italic p-2">Không có căn hộ nào</div>
+                )}
+              </div>
+              <div className="mt-2 text-xs text-slate-500 flex justify-between">
+                <span>Đã chọn: {createForm.apartmentIds.length} căn hộ</span>
+                {createForm.apartmentIds.length > 0 && (
+                  <button type="button" className="text-blue-600 hover:underline" onClick={() => setCreateForm(prev => ({...prev, apartmentIds: []}))}>Bỏ chọn tất cả</button>
+                )}
+              </div>
             </div>
 
             <div>
@@ -249,12 +269,13 @@ export default function NotificationsPage() {
               <div className="flex items-center gap-2 mb-2">
                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold
                   ${n.type === 'URGENT' ? 'bg-red-100 text-red-700' : 
-                    n.type === 'WARNING' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}
+                    n.type === 'WARNING' ? 'bg-amber-100 text-amber-700' : 
+                    n.type === 'REFUND_REQUEST' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}
                 `}>
-                  {n.type === 'URGENT' ? 'Khẩn cấp' : n.type === 'WARNING' ? 'Cảnh báo' : 'Thông tin'}
+                  {n.type === 'URGENT' ? 'Khẩn cấp' : n.type === 'WARNING' ? 'Cảnh báo' : n.type === 'REFUND_REQUEST' ? 'Yêu cầu hoàn trả' : 'Thông tin'}
                 </span>
                 {n.apartmentId && (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
                     Gửi riêng: P.{n.apartmentNumber}
                   </span>
                 )}
@@ -269,10 +290,34 @@ export default function NotificationsPage() {
                 Đăng lúc: {formatDate(n.createdAt)} {n.senderUsername ? `bởi ${n.senderUsername}` : ''}
               </p>
               <div className="text-sm text-slate-700 whitespace-pre-wrap">{n.content}</div>
+              
+              {n.type === 'REFUND_REQUEST' && !isAdminOrManager && (
+                <div className="mt-4 pt-4 border-t border-slate-100">
+                  <button 
+                    onClick={() => setSelectedRefundPaymentId(n.referenceId)}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 hover:bg-indigo-100 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Nhập thông tin hoàn tiền
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
+
+      <RefundInfoModal 
+        isOpen={Boolean(selectedRefundPaymentId)} 
+        paymentId={selectedRefundPaymentId} 
+        onClose={() => setSelectedRefundPaymentId(null)} 
+        onSuccess={() => {
+          setSelectedRefundPaymentId(null);
+          alert('Đã gửi thông tin hoàn tiền thành công!');
+        }} 
+      />
     </div>
   );
 }

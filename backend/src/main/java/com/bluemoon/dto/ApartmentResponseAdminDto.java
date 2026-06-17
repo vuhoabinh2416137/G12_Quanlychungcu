@@ -10,9 +10,15 @@ import java.math.BigDecimal;
 /**
  * DTO for {@link com.bluemoon.model.Apartment}
  */
-public record ApartmentResponseAdminDto(Long id, @NotNull @Size(max = 20) String apartmentNumber,
-                                         String building, String floor, BigDecimal area,
-                                        String status,
-                                        BigDecimal soDienTieuThu,
-                                        BigDecimal soNuocTieuThu) implements Serializable {
-}
+public record ApartmentResponseAdminDto(
+        Long id, 
+        @NotNull @Size(max = 20) String apartmentNumber,
+        String building, 
+        String floor, 
+        BigDecimal area,
+        String status,
+        BigDecimal soDienTieuThu,
+        BigDecimal soNuocTieuThu,
+        Integer motorbikeCount,
+        Integer carCount
+) implements Serializable {}

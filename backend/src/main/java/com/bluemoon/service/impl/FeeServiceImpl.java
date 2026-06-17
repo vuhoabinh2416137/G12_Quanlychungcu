@@ -5,8 +5,6 @@ import com.bluemoon.model.Fee;
 import com.bluemoon.repository.ApartmentRepository;
 import com.bluemoon.repository.FeeRepository;
 import com.bluemoon.service.FeeService;
-import com.bluemoon.service.InvoiceService;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,18 +18,15 @@ public class FeeServiceImpl implements FeeService {
 
     private final FeeRepository feeRepository;
     private final ApartmentRepository apartmentRepository;
-    private final InvoiceService invoiceService;
     private final com.bluemoon.repository.VehicleRepository vehicleRepository;
     private final com.bluemoon.repository.SystemConfigRepository systemConfigRepository;
 
     public FeeServiceImpl(FeeRepository feeRepository, 
                           ApartmentRepository apartmentRepository,
-                          @Lazy InvoiceService invoiceService,
                           com.bluemoon.repository.VehicleRepository vehicleRepository,
                           com.bluemoon.repository.SystemConfigRepository systemConfigRepository) {
         this.feeRepository = feeRepository;
         this.apartmentRepository = apartmentRepository;
-        this.invoiceService = invoiceService;
         this.vehicleRepository = vehicleRepository;
         this.systemConfigRepository = systemConfigRepository;
     }
@@ -42,12 +37,13 @@ public class FeeServiceImpl implements FeeService {
         Apartment apartment = apartmentRepository.findById(apartmentId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy căn hộ!"));
 
+        if (!"OCCUPIED".equalsIgnoreCase(apartment.getStatus())) {
+            throw new RuntimeException("Không thể tạo phí cho căn hộ không có người ở!");
+        }
+
         fee.setApartment(apartment);
         fee.setAmount(resolveAmount(fee, apartment));
         fee.setPaid(false); // mặc định khi tạo mới là chưa thanh toán
-        
-        // Thêm phí vào hóa đơn (tự động xử lý tạo mới hoặc cộng dồn)
-        invoiceService.addFeeToCurrentInvoice(apartmentId, fee);
 
         return feeRepository.save(fee);
     }
@@ -95,9 +91,6 @@ public class FeeServiceImpl implements FeeService {
             newFee.setType(feeBase.getType());
             newFee.setDueDate(feeBase.getDueDate());
             newFee.setPaid(false);
-            
-            // Gán vào hóa đơn
-            invoiceService.addFeeToCurrentInvoice(apartment.getId(), newFee);
             
             feesToSave.add(newFee);
         }

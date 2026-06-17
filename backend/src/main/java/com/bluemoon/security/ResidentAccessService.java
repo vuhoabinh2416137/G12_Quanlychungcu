@@ -1,7 +1,7 @@
 package com.bluemoon.security;
 
 import com.bluemoon.model.Fee;
-import com.bluemoon.model.Invoice;
+
 import com.bluemoon.model.Resident;
 import com.bluemoon.repository.ResidentRepository;
 import org.springframework.security.access.AccessDeniedException;
@@ -61,13 +61,4 @@ public class ResidentAccessService {
         ensureResidentApartmentAccess(auth, fee.getApartment().getId());
     }
 
-    public void ensureResidentInvoiceAccess(Authentication auth, Invoice invoice) {
-        if (!isResident(auth)) {
-            return;
-        }
-        if (invoice == null || invoice.getApartment() == null || invoice.getApartment().getId() == null) {
-            throw new AccessDeniedException("Access Denied");
-        }
-        ensureResidentApartmentAccess(auth, invoice.getApartment().getId());
-    }
 }

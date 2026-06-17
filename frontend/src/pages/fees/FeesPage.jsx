@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchApartments } from '../../api/apartmentsApi.js';
 import {
   createFeeForAllApartments,
@@ -6,6 +7,7 @@ import {
   fetchFeesByApartment,
   updateFeePaidStatus,
 } from '../../api/feesApi.js';
+import { createPayment } from '../../api/paymentsApi.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { isNonEmptyString, isValidISODate } from '../../utils/validators.js';
 import QrPaymentModal from '../../components/payment/QrPaymentModal.jsx';
@@ -42,6 +44,7 @@ function getFeeTypeLabel(type) {
 
 export default function FeesPage() {
   const { auth } = useAuth();
+  const navigate = useNavigate();
   const canCreate = auth?.role === 'ADMIN' || auth?.role === 'CASHIER';
   const canMarkPaid = auth?.role === 'ADMIN' || auth?.role === 'CASHIER';
   const canActOnFees = canMarkPaid || auth?.role === 'RESIDENT';
@@ -358,7 +361,7 @@ export default function FeesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {fees.map((f) => (
+              {fees.filter(f => !f.paid).map((f) => (
                 <tr key={f.id} className="group transition-colors hover:bg-slate-50/70">
                   <td className="px-6 py-4">
                     <span className="font-medium text-slate-900">{f.name}</span>
@@ -379,12 +382,7 @@ export default function FeesPage() {
                     ) : '-'}
                   </td>
                   <td className="px-6 py-4">
-                    {f.paid ? (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                        Đã thanh toán
-                      </span>
-                    ) : f.paymentStatus === 'PENDING' ? (
+                    {f.paymentStatus === 'PENDING' ? (
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20">
                         <span className="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
                         Chờ xác nhận
@@ -399,27 +397,37 @@ export default function FeesPage() {
                   {canActOnFees ? (
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
-                        {canMarkPaid ? (
-                          <button
-                            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                              f.paid
-                                ? 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 focus:ring-slate-200'
-                                : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 focus:ring-emerald-500'
-                            }`}
-                            onClick={async () => {
-                              try {
-                                const nextPaid = !Boolean(f.paid);
-                                const updated = await updateFeePaidStatus(f.id, nextPaid);
-                                setFees((prev) => prev.map((x) => (x.id === f.id ? updated : x)));
-                              } catch (e) {
-                                const status = e?.response?.status;
-                                if (status === 401 || status === 403) alert('Không có quyền cập nhật trạng thái.');
-                                else alert('Không cập nhật được trạng thái. Kiểm tra backend/log.');
-                              }
-                            }}
-                          >
-                            {f.paid ? 'Hủy nộp' : 'Thu tiền'}
-                          </button>
+                        {canMarkPaid && !f.paid ? (
+                          f.paymentStatus === 'PENDING' ? (
+                            <button
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 transition-all hover:bg-blue-100 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                              onClick={() => navigate('/cashier')}
+                            >
+                              Xác nhận
+                            </button>
+                          ) : (
+                            <button
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition-all hover:bg-emerald-100 hover:text-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1"
+                              onClick={async () => {
+                                try {
+                                  await createPayment(f.id, {
+                                    amount: f.amount,
+                                    method: 'TRỰC TIẾP',
+                                    note: 'Thu tiền trực tiếp',
+                                    transferTime: new Date().toISOString()
+                                  });
+                                  alert('Thu tiền thành công!');
+                                  reloadFees(selectedApartmentId);
+                                } catch (e) {
+                                  const status = e?.response?.status;
+                                  if (status === 401 || status === 403) alert('Không có quyền tạo thanh toán.');
+                                  else alert('Không tạo được thanh toán. Kiểm tra backend/log.');
+                                }
+                              }}
+                            >
+                              Thu tiền
+                            </button>
+                          )
                         ) : null}
                         {auth?.role === 'RESIDENT' && !f.paid && f.paymentStatus !== 'PENDING' ? (
                           <button
@@ -434,7 +442,7 @@ export default function FeesPage() {
                   ) : null}
                 </tr>
               ))}
-              {fees.length === 0 && !loading ? (
+              {fees.filter(f => !f.paid).length === 0 && !loading ? (
                 <tr>
                   <td className="px-6 py-12 text-center text-slate-500" colSpan={canActOnFees ? 6 : 5}>
                     <div className="flex flex-col items-center justify-center">

@@ -35,14 +35,14 @@ public class NotificationController {
 
     @PostMapping
     @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
-    public ResponseEntity<NotificationResponseAdminDto> createNotification(
+    public ResponseEntity<List<NotificationResponseAdminDto>> createNotification(
             @Valid @RequestBody NotificationRequestDto requestDto,
             Authentication authentication
     ) {
         String username = authentication.getName();
         Notification notification = notificationMapper.toEntity(requestDto);
-        Notification saved = notificationService.createNotification(username, notification, requestDto.getApartmentId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(notificationMapper.toAdminDto(saved));
+        List<Notification> savedList = notificationService.createNotifications(username, notification, requestDto.getApartmentIds());
+        return ResponseEntity.status(HttpStatus.CREATED).body(notificationMapper.toAdminDtoList(savedList));
     }
 
     @GetMapping

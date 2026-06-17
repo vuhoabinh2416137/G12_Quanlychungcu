@@ -70,6 +70,20 @@ public class ResidentController {
         return ResponseEntity.ok(residentMapper.toAdminDto(resident));
     }
 
+    @GetMapping("/phone/{phone}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
+    public ResponseEntity<ResidentResponseAdminDto> getByPhone(
+            @PathVariable String phone,
+            Authentication auth
+    ) {
+        Resident resident = residentService.getResidentByPhone(phone);
+        if (residentAccessService.isResident(auth)) {
+            Long apartmentId = resident.getApartment() != null ? resident.getApartment().getId() : null;
+            residentAccessService.ensureResidentApartmentAccess(auth, apartmentId);
+        }
+        return ResponseEntity.ok(residentMapper.toAdminDto(resident));
+    }
+
     @GetMapping("/apartment/{apartmentId}/members")
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('RESIDENT')")
     public ResponseEntity<List<ResidentResponseUserDto>> getMembersForResident(

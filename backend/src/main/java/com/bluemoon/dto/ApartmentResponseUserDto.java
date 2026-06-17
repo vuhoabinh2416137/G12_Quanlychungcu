@@ -9,7 +9,12 @@ import java.math.BigDecimal;
 /**
  * DTO for {@link com.bluemoon.model.Apartment}
  */
-public record ApartmentResponseUserDto(Long id, String apartmentNumber,
-                                       String building,
-                                       String floor, BigDecimal area) implements Serializable {
-}
+public record ApartmentResponseUserDto(
+        Long id, 
+        String apartmentNumber,
+        String building,
+        String floor, 
+        BigDecimal area,
+        Integer motorbikeCount,
+        Integer carCount
+) implements Serializable {}

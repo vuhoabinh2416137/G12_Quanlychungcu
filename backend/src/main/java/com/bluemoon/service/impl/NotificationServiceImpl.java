@@ -30,22 +30,39 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public Notification createNotification(String username, Notification notification, Long apartmentId) {
+    public List<Notification> createNotifications(String username, Notification notificationTemplate, List<Long> apartmentIds) {
         User sender = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
         
-        notification.setSender(sender);
-        notification.setCreatedAt(Instant.now());
-
-        if (apartmentId != null) {
-            Apartment apartment = apartmentRepository.findById(apartmentId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Apartment not found with id: " + apartmentId));
-            notification.setApartment(apartment);
+        java.util.List<Notification> toSave = new java.util.ArrayList<>();
+        
+        if (apartmentIds == null || apartmentIds.isEmpty()) {
+            Notification n = new Notification();
+            n.setTitle(notificationTemplate.getTitle());
+            n.setContent(notificationTemplate.getContent());
+            n.setType(notificationTemplate.getType());
+            n.setReferenceId(notificationTemplate.getReferenceId());
+            n.setSender(sender);
+            n.setCreatedAt(Instant.now());
+            n.setApartment(null);
+            toSave.add(n);
         } else {
-            notification.setApartment(null); // Thông báo chung
+            for (Long id : apartmentIds) {
+                Apartment apt = apartmentRepository.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Apartment not found with id: " + id));
+                Notification n = new Notification();
+                n.setTitle(notificationTemplate.getTitle());
+                n.setContent(notificationTemplate.getContent());
+                n.setType(notificationTemplate.getType());
+                n.setReferenceId(notificationTemplate.getReferenceId());
+                n.setSender(sender);
+                n.setCreatedAt(Instant.now());
+                n.setApartment(apt);
+                toSave.add(n);
+            }
         }
 
-        return notificationRepository.save(notification);
+        return notificationRepository.saveAll(toSave);
     }
 
     @Override

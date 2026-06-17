@@ -125,4 +125,28 @@ public class Apartment {
         this.soNuocTieuThu = soNuocTieuThu;
     }
 
+    @Column(name = "motorbike_count")
+    @ColumnDefault("0")
+    private Integer motorbikeCount = 0;
+
+    @Column(name = "car_count")
+    @ColumnDefault("0")
+    private Integer carCount = 0;
+
+    public Integer getMotorbikeCount() {
+        return motorbikeCount;
+    }
+
+    public void setMotorbikeCount(Integer motorbikeCount) {
+        this.motorbikeCount = motorbikeCount;
+    }
+
+    public Integer getCarCount() {
+        return carCount;
+    }
+
+    public void setCarCount(Integer carCount) {
+        this.carCount = carCount;
+    }
+
 }

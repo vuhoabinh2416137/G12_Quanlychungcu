@@ -33,7 +33,13 @@ public class ResidentServiceImpl implements ResidentService {
     @Override
     public Resident getResidentById(Long id) {
         return residentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy cư dân với ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Resident not found with id: " + id));
+    }
+
+    @Override
+    public Resident getResidentByPhone(String phone) {
+        return residentRepository.findByPhone(phone)
+                .orElseThrow(() -> new ResourceNotFoundException("Resident not found with phone: " + phone));
     }
 
     @Override

@@ -6,7 +6,6 @@ import com.bluemoon.model.Vehicle;
 import com.bluemoon.repository.ApartmentRepository;
 import com.bluemoon.repository.FeeRepository;
 import com.bluemoon.repository.VehicleRepository;
-import com.bluemoon.service.InvoiceService;
 import com.bluemoon.service.SystemConfigService;
 import com.bluemoon.service.impl.SystemConfigServiceImpl;
 import org.slf4j.Logger;
@@ -30,20 +29,17 @@ public class FeeScheduler {
     private final ApartmentRepository apartmentRepository;
     private final FeeRepository feeRepository;
     private final VehicleRepository vehicleRepository;
-    private final InvoiceService invoiceService;
     private final SystemConfigService systemConfigService;
 
     public FeeScheduler(
             ApartmentRepository apartmentRepository,
             FeeRepository feeRepository,
             VehicleRepository vehicleRepository,
-            InvoiceService invoiceService,
             SystemConfigService systemConfigService
     ) {
         this.apartmentRepository = apartmentRepository;
         this.feeRepository = feeRepository;
         this.vehicleRepository = vehicleRepository;
-        this.invoiceService = invoiceService;
         this.systemConfigService = systemConfigService;
     }
 
@@ -99,39 +95,31 @@ public class FeeScheduler {
                 mgmtFee.setType("QUAN_LY");
                 mgmtFee.setDueDate(dueDate);
                 mgmtFee.setPaid(false);
-                invoiceService.addFeeToCurrentInvoice(apartment.getId(), mgmtFee);
                 feesToSave.add(mgmtFee);
             }
 
-            // 2. Phí Gửi xe (đếm từ bảng vehicles)
-            List<Vehicle> vehicles = vehicleRepository.findByApartmentId(apartment.getId());
-            if (!vehicles.isEmpty()) {
-                BigDecimal totalVehicleFee = BigDecimal.ZERO;
-                int motorbikeCount = 0;
-                int carCount = 0;
+            // 2. Phí Gửi xe (từ motorbikeCount và carCount của căn hộ)
+            int motorbikeCount = apartment.getMotorbikeCount();
+            int carCount = apartment.getCarCount();
+            BigDecimal totalVehicleFee = BigDecimal.ZERO;
+            
+            if (motorbikeCount > 0) {
+                totalVehicleFee = totalVehicleFee.add(motorbikeFee.multiply(new BigDecimal(motorbikeCount)));
+            }
+            if (carCount > 0) {
+                totalVehicleFee = totalVehicleFee.add(carFee.multiply(new BigDecimal(carCount)));
+            }
 
-                for (Vehicle v : vehicles) {
-                    if ("Xe máy".equalsIgnoreCase(v.getType())) {
-                        totalVehicleFee = totalVehicleFee.add(motorbikeFee);
-                        motorbikeCount++;
-                    } else if ("Ô tô".equalsIgnoreCase(v.getType())) {
-                        totalVehicleFee = totalVehicleFee.add(carFee);
-                        carCount++;
-                    }
-                }
-
-                if (totalVehicleFee.compareTo(BigDecimal.ZERO) > 0) {
-                    Fee vehicleFeeEntry = new Fee();
-                    vehicleFeeEntry.setApartment(apartment);
-                    vehicleFeeEntry.setName("Phí gửi xe tháng " + monthYear);
-                    vehicleFeeEntry.setDescription(motorbikeCount + " xe máy × " + motorbikeFee + " + " + carCount + " ô tô × " + carFee);
-                    vehicleFeeEntry.setAmount(totalVehicleFee);
-                    vehicleFeeEntry.setType("GUI_XE");
-                    vehicleFeeEntry.setDueDate(dueDate);
-                    vehicleFeeEntry.setPaid(false);
-                    invoiceService.addFeeToCurrentInvoice(apartment.getId(), vehicleFeeEntry);
-                    feesToSave.add(vehicleFeeEntry);
-                }
+            if (totalVehicleFee.compareTo(BigDecimal.ZERO) > 0) {
+                Fee vehicleFeeEntry = new Fee();
+                vehicleFeeEntry.setApartment(apartment);
+                vehicleFeeEntry.setName("Phí gửi xe tháng " + monthYear);
+                vehicleFeeEntry.setDescription(motorbikeCount + " xe máy × " + motorbikeFee + " + " + carCount + " ô tô × " + carFee);
+                vehicleFeeEntry.setAmount(totalVehicleFee);
+                vehicleFeeEntry.setType("GUI_XE");
+                vehicleFeeEntry.setDueDate(dueDate);
+                vehicleFeeEntry.setPaid(false);
+                feesToSave.add(vehicleFeeEntry);
             }
 
             // 3. Phí Điện (soDienTieuThu × đơn giá) - chỉ tạo nếu > 0
@@ -147,7 +135,6 @@ public class FeeScheduler {
                 electricityFee.setType("DIEN");
                 electricityFee.setDueDate(dueDate);
                 electricityFee.setPaid(false);
-                invoiceService.addFeeToCurrentInvoice(apartment.getId(), electricityFee);
                 feesToSave.add(electricityFee);
             }
 
@@ -164,7 +151,6 @@ public class FeeScheduler {
                 waterFee.setType("NUOC");
                 waterFee.setDueDate(dueDate);
                 waterFee.setPaid(false);
-                invoiceService.addFeeToCurrentInvoice(apartment.getId(), waterFee);
                 feesToSave.add(waterFee);
             }
 

@@ -11,6 +11,8 @@ public interface ResidentService {
 
     Resident getResidentById(Long id);
 
+    Resident getResidentByPhone(String phone);
+
     Resident addResidentToApartment(Long apartmentId, Resident resident);
 
     Resident updateResident(Long id, Resident residentDetails);

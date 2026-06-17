@@ -69,8 +69,60 @@ public class PaymentController {
             residentAccessService.ensureResidentFeeAccess(auth, getFeeOrThrow(feeId));
         }
         Payment payment = paymentMapper.toEntity(requestDto);
-        Payment saved = paymentService.processPayment(feeId, payment);
+        Payment saved = paymentService.processPayment(feeId, payment, auth.getName());
         return ResponseEntity.status(HttpStatus.CREATED).body(paymentMapper.toAdminDto(saved));
+    }
+
+    @GetMapping("/apartment/{apartmentId}/history")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<PaymentResponseAdminDto>> getHistoryByApartmentForAdmin(@PathVariable Long apartmentId) {
+        return ResponseEntity.ok(paymentMapper.toAdminDtoList(paymentService.getPaymentsByApartmentHistory(apartmentId)));
+    }
+
+    @GetMapping("/apartment/{apartmentId}/history/my")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('RESIDENT')")
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<PaymentResponseUserDto>> getHistoryByApartmentForResident(
+            @PathVariable Long apartmentId,
+            Authentication auth
+    ) {
+        residentAccessService.ensureResidentApartmentAccess(auth, apartmentId);
+        return ResponseEntity.ok(paymentMapper.toUserDtoList(paymentService.getPaymentsByApartmentHistory(apartmentId)));
+    }
+
+    @PostMapping("/{id}/refund-info")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('RESIDENT')")
+    @Transactional
+    public ResponseEntity<PaymentResponseUserDto> submitRefundInfo(
+            @PathVariable Long id,
+            @RequestBody java.util.Map<String, String> payload
+    ) {
+        String bankName = payload.get("bankName");
+        String accountNumber = payload.get("accountNumber");
+        String accountName = payload.get("accountName");
+        
+        if (bankName == null || accountNumber == null || accountName == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Payment saved = paymentService.submitRefundInfo(id, bankName, accountNumber, accountName);
+        return ResponseEntity.ok(paymentMapper.toUserDto(saved));
+    }
+
+    @PostMapping("/{id}/confirm-refund")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
+    @Transactional
+    public ResponseEntity<PaymentResponseAdminDto> confirmRefund(@PathVariable Long id) {
+        Payment saved = paymentService.confirmRefund(id);
+        return ResponseEntity.ok(paymentMapper.toAdminDto(saved));
+    }
+
+    @GetMapping("/refunds")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<PaymentResponseAdminDto>> getRefundPayments() {
+        return ResponseEntity.ok(paymentMapper.toAdminDtoList(paymentService.getRefundPayments()));
     }
 
     private Fee getFeeOrThrow(Long feeId) {

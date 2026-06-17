@@ -11,6 +11,7 @@ public record NotificationResponseUserDto(
         String title,
         String content,
         String type,
-        Instant createdAt
+        Instant createdAt,
+        Long referenceId
 ) implements Serializable {
 }

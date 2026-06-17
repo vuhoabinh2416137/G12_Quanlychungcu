@@ -18,3 +18,8 @@ export async function updateResident(id, payload) {
 export async function deleteResident(id) {
   await apiClient.delete(`/residents/${id}`);
 }
+
+export async function getResidentByPhone(phone) {
+  const { data } = await apiClient.get(`/residents/phone/${phone}`);
+  return data;
+}

@@ -20,6 +20,10 @@ export async function updateUserActive(userId, active) {
   return data;
 }
 
+export async function deleteUser(userId) {
+  await apiClient.delete(`/users/${userId}`);
+}
+
 export async function fetchMyProfile() {
   const { data } = await apiClient.get('/users/me');
   return data;

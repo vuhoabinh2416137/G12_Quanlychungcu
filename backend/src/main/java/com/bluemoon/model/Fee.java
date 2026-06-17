@@ -47,10 +47,6 @@ public class Fee {
     @Column(name = "paid")
     private Boolean paid;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "invoice_id")
-    private Invoice invoice;
-
     public Long getId() {
         return id;
     }
@@ -115,13 +111,7 @@ public class Fee {
         this.paid = paid;
     }
 
-    public Invoice getInvoice() {
-        return invoice;
-    }
 
-    public void setInvoice(Invoice invoice) {
-        this.invoice = invoice;
-    }
 
     @OneToMany(mappedBy = "fee", fetch = FetchType.LAZY)
     private java.util.List<Payment> payments;

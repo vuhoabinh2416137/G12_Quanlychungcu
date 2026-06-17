@@ -40,6 +40,8 @@ export default function ApartmentsPage() {
     floor: '',
     area: '',
     status: 'VACANT',
+    motorbikeCount: '',
+    carCount: '',
   });
 
   const [editId, setEditId] = useState(null);
@@ -51,6 +53,8 @@ export default function ApartmentsPage() {
     floor: '',
     area: '',
     status: 'VACANT',
+    motorbikeCount: '',
+    carCount: '',
   });
 
   useEffect(() => {
@@ -77,11 +81,13 @@ export default function ApartmentsPage() {
   }, []);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const normalize = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const q = normalize(query.trim());
     if (!q) return apartments;
     return apartments.filter((a) => {
-      const fields = [a.apartmentNumber, a.building, a.floor, a.status];
-      return fields.some((f) => String(f || '').toLowerCase().includes(q));
+      const statusText = a.status === 'VACANT' ? 'trống' : 'đang ở';
+      const fields = [a.apartmentNumber, a.floor, statusText];
+      return fields.some((f) => normalize(f).includes(q));
     });
   }, [apartments, query]);
 
@@ -108,7 +114,7 @@ export default function ApartmentsPage() {
             </svg>
             <input
               className="w-full rounded-lg border border-slate-200 bg-surface pl-10 pr-4 py-2 text-sm text-slate-800 outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 shadow-sm"
-              placeholder="Tìm theo mã căn, tòa, trạng thái..."
+              placeholder="Tìm theo mã căn, trạng thái..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -194,12 +200,14 @@ export default function ApartmentsPage() {
                     floor: createForm.floor.trim() || null,
                     area: createForm.area === '' ? null : Number(createForm.area),
                     status: createForm.status,
+                    motorbikeCount: createForm.motorbikeCount === '' ? 0 : Number(createForm.motorbikeCount),
+                    carCount: createForm.carCount === '' ? 0 : Number(createForm.carCount),
                   };
 
                   const created = await createApartment(payload);
                   setApartments((prev) => [created, ...prev]);
                   setCreateStatus({ submitting: false, error: '', success: 'Tạo căn hộ thành công.' });
-                  setCreateForm({ apartmentNumber: '', building: '', floor: '', area: '', status: 'VACANT' });
+                  setCreateForm({ apartmentNumber: '', building: '', floor: '', area: '', status: 'VACANT', motorbikeCount: '', carCount: '' });
                   setCreateTouched({});
                 } catch (err) {
                   const status = err?.response?.status;
@@ -288,12 +296,34 @@ export default function ApartmentsPage() {
                 ) : null}
               </div>
 
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-700">Số xe máy</label>
+                <input
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
+                  value={createForm.motorbikeCount}
+                  onChange={(e) => setCreateForm((f) => ({ ...f, motorbikeCount: e.target.value }))}
+                  placeholder="VD: 2"
+                  inputMode="numeric"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-700">Số ô tô</label>
+                <input
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
+                  value={createForm.carCount}
+                  onChange={(e) => setCreateForm((f) => ({ ...f, carCount: e.target.value }))}
+                  placeholder="VD: 1"
+                  inputMode="numeric"
+                />
+              </div>
+
               <div className="md:col-span-2 mt-2 flex items-center justify-end gap-3 pt-5 border-t border-slate-100">
                 <button
                   type="button"
                   className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-200"
                   onClick={() => {
-                    setCreateForm({ apartmentNumber: '', building: '', floor: '', area: '', status: 'VACANT' });
+                    setCreateForm({ apartmentNumber: '', building: '', floor: '', area: '', status: 'VACANT', motorbikeCount: '', carCount: '' });
                     setCreateTouched({});
                     setCreateStatus({ submitting: false, error: '', success: '' });
                   }}
@@ -332,6 +362,8 @@ export default function ApartmentsPage() {
                 <th className="px-5 py-3.5 text-left font-semibold text-slate-600">Tòa</th>
                 <th className="px-5 py-3.5 text-left font-semibold text-slate-600">Tầng</th>
                 <th className="px-5 py-3.5 text-right font-semibold text-slate-600">Diện tích</th>
+                <th className="px-5 py-3.5 text-center font-semibold text-slate-600">Xe máy</th>
+                <th className="px-5 py-3.5 text-center font-semibold text-slate-600">Ô tô</th>
                 <th className="px-5 py-3.5 text-left font-semibold text-slate-600">Trạng thái</th>
                 <th className="px-5 py-3.5 text-center font-semibold text-slate-600">⚡ Điện (kWh)</th>
                 <th className="px-5 py-3.5 text-center font-semibold text-slate-600">💧 Nước (m³)</th>
@@ -346,6 +378,12 @@ export default function ApartmentsPage() {
                   <td className="px-5 py-3 text-slate-600">{a.floor || '-'}</td>
                   <td className="px-5 py-3 text-right text-slate-600">
                     {a.area == null ? '-' : `${Number(a.area).toLocaleString('vi-VN')} m²`}
+                  </td>
+                  <td className="px-5 py-3 text-center text-slate-600 font-medium">
+                    {a.motorbikeCount != null ? a.motorbikeCount : '0'}
+                  </td>
+                  <td className="px-5 py-3 text-center text-slate-600 font-medium">
+                    {a.carCount != null ? a.carCount : '0'}
                   </td>
                   <td className="px-5 py-3">
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -387,6 +425,8 @@ export default function ApartmentsPage() {
                               floor: a.floor || '',
                               area: a.area == null ? '' : String(a.area),
                               status: a.status || 'VACANT',
+                              motorbikeCount: a.motorbikeCount != null ? String(a.motorbikeCount) : '',
+                              carCount: a.carCount != null ? String(a.carCount) : '',
                             });
                           }}
                         >
@@ -487,6 +527,8 @@ export default function ApartmentsPage() {
                       floor: editForm.floor.trim() || null,
                       area: editForm.area === '' ? null : Number(editForm.area),
                       status: editForm.status,
+                      motorbikeCount: editForm.motorbikeCount === '' ? 0 : Number(editForm.motorbikeCount),
+                      carCount: editForm.carCount === '' ? 0 : Number(editForm.carCount),
                     };
 
                     const updated = await updateApartment(editId, payload);
@@ -566,6 +608,28 @@ export default function ApartmentsPage() {
                   {editTouched.area && editErrors.area ? (
                     <div className="text-xs text-red-500">{editErrors.area}</div>
                   ) : null}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-slate-700">Số xe máy</label>
+                  <input
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
+                    value={editForm.motorbikeCount}
+                    onChange={(e) => setEditForm((f) => ({ ...f, motorbikeCount: e.target.value }))}
+                    placeholder="VD: 2"
+                    inputMode="numeric"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-slate-700">Số ô tô</label>
+                  <input
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
+                    value={editForm.carCount}
+                    onChange={(e) => setEditForm((f) => ({ ...f, carCount: e.target.value }))}
+                    placeholder="VD: 1"
+                    inputMode="numeric"
+                  />
                 </div>
 
                 <div className="md:col-span-2 mt-4 flex items-center justify-end gap-3 pt-5 border-t border-slate-100">

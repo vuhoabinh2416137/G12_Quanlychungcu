@@ -100,4 +100,15 @@ public class Notification {
         this.createdAt = createdAt;
     }
 
+    @Column(name = "reference_id")
+    private Long referenceId;
+
+    public Long getReferenceId() {
+        return referenceId;
+    }
+
+    public void setReferenceId(Long referenceId) {
+        this.referenceId = referenceId;
+    }
+
 }

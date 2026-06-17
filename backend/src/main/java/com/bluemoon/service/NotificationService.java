@@ -6,7 +6,7 @@ import java.util.List;
 public interface NotificationService {
     
     // Gửi thông báo (từ admin/manager)
-    Notification createNotification(String username, Notification notification, Long apartmentId);
+    List<Notification> createNotifications(String username, Notification notification, List<Long> apartmentIds);
 
     // Lấy thông báo theo ID
     Notification getNotificationById(Long id);

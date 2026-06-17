@@ -16,11 +16,20 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final com.bluemoon.repository.ResidentRepository residentRepository;
+    private final com.bluemoon.repository.PaymentRepository paymentRepository;
+    private final com.bluemoon.repository.NotificationRepository notificationRepository;
+    private final com.bluemoon.repository.FeedbackRepository feedbackRepository;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, com.bluemoon.repository.ResidentRepository residentRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, com.bluemoon.repository.ResidentRepository residentRepository,
+                           com.bluemoon.repository.PaymentRepository paymentRepository,
+                           com.bluemoon.repository.NotificationRepository notificationRepository,
+                           com.bluemoon.repository.FeedbackRepository feedbackRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.residentRepository = residentRepository;
+        this.paymentRepository = paymentRepository;
+        this.notificationRepository = notificationRepository;
+        this.feedbackRepository = feedbackRepository;
     }
 
     @Override
@@ -124,6 +133,25 @@ public class UserServiceImpl implements UserService {
         User user = getUserById(id);
         user.setActive(requestDto.active());
         return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(Long id) {
+        User user = getUserById(id);
+        
+        // Unlink resident if exists
+        com.bluemoon.model.Resident resident = residentRepository.findByUser_Username(user.getUsername()).orElse(null);
+        if (resident != null) {
+            resident.setUser(null);
+            residentRepository.save(resident);
+        }
+
+        paymentRepository.unlinkPayer(user);
+        notificationRepository.unlinkSender(user);
+        feedbackRepository.unlinkAuthor(user);
+        
+        userRepository.delete(user);
     }
 
     private String normalizeBlank(String value) {

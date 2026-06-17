@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Modal from '../../components/common/Modal.jsx';
-import { createUser, fetchUsers, updateUserActive, updateUserRole } from '../../api/usersApi.js';
+import { createUser, fetchUsers, updateUserActive, updateUserRole, deleteUser } from '../../api/usersApi.js';
+import { getResidentByPhone } from '../../api/residentsApi.js';
 import { isNonEmptyString, isValidEmail, isValidVietnamPhone } from '../../utils/validators.js';
 
 const ROLES = ['ADMIN', 'CASHIER', 'RESIDENT'];
@@ -22,9 +23,15 @@ function validateCreateForm(form) {
   else if (form.password.trim().length < 6) errors.password = 'Mật khẩu tối thiểu 6 ký tự.';
 
   if (!ROLES.includes(form.role)) errors.role = 'Vai trò không hợp lệ.';
-  if (!isNonEmptyString(form.fullName)) errors.fullName = 'Vui lòng nhập họ và tên.';
+  if (form.role !== 'RESIDENT' && !isNonEmptyString(form.fullName)) errors.fullName = 'Vui lòng nhập họ và tên.';
   if (form.email && !isValidEmail(form.email)) errors.email = 'Email không đúng định dạng.';
-  if (form.phone && !isValidVietnamPhone(form.phone)) errors.phone = 'Số điện thoại phải gồm 10 chữ số, bắt đầu bằng 0.';
+  
+  if (form.role === 'RESIDENT') {
+    if (!isNonEmptyString(form.phone)) errors.phone = 'Vui lòng nhập số điện thoại để tìm cư dân.';
+    else if (!isValidVietnamPhone(form.phone)) errors.phone = 'Số điện thoại phải gồm 10 chữ số, bắt đầu bằng 0.';
+  } else {
+    if (form.phone && !isValidVietnamPhone(form.phone)) errors.phone = 'Số điện thoại phải gồm 10 chữ số, bắt đầu bằng 0.';
+  }
 
   return errors;
 }
@@ -52,6 +59,12 @@ export default function UsersPage() {
   });
   const [createTouched, setCreateTouched] = useState({});
   const [createStatus, setCreateStatus] = useState({ submitting: false, error: '', success: '' });
+  
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    fullName: '',
+    pendingPayload: null,
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -113,6 +126,20 @@ export default function UsersPage() {
       setUsers((prev) => prev.map((item) => (item.id === user.id ? updated : item)));
     } catch (err) {
       const message = err?.response?.data?.message || 'Không cập nhật được trạng thái tài khoản.';
+      window.alert(message);
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [`active-${user.id}`]: false }));
+    }
+  }
+
+  async function handleDeleteUser(user) {
+    if (!window.confirm(`Bạn có chắc muốn xóa tài khoản ${user.username}?`)) return;
+    setActionLoading((prev) => ({ ...prev, [`active-${user.id}`]: true }));
+    try {
+      await deleteUser(user.id);
+      setUsers((prev) => prev.filter((item) => item.id !== user.id));
+    } catch (err) {
+      const message = err?.response?.data?.message || 'Không xóa được tài khoản.';
       window.alert(message);
     } finally {
       setActionLoading((prev) => ({ ...prev, [`active-${user.id}`]: false }));
@@ -199,17 +226,26 @@ export default function UsersPage() {
                     </td>
                     <td className="px-5 py-4 text-slate-600">{formatDateTime(user.createdAt)}</td>
                     <td className="px-5 py-4 text-right">
-                      <button
-                        className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                          user.active
-                            ? 'border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 focus:ring-red-500'
-                            : 'border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 focus:ring-emerald-500'
-                        }`}
-                        disabled={activeBusy}
-                        onClick={() => handleActiveToggle(user)}
-                      >
-                        {activeBusy ? 'Đang xử lý...' : user.active ? 'Khóa tài khoản' : 'Mở khóa'}
-                      </button>
+                      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-end">
+                        <button
+                          className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+                            user.active
+                              ? 'border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 focus:ring-amber-500'
+                              : 'border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 focus:ring-emerald-500'
+                          }`}
+                          disabled={activeBusy}
+                          onClick={() => handleActiveToggle(user)}
+                        >
+                          {activeBusy ? '...' : user.active ? 'Khóa tài khoản' : 'Mở khóa'}
+                        </button>
+                        <button
+                          className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 transition-all hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
+                          disabled={activeBusy}
+                          onClick={() => handleDeleteUser(user)}
+                        >
+                          Xóa tài khoản
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -254,14 +290,42 @@ export default function UsersPage() {
 
             setCreateStatus({ submitting: true, error: '', success: '' });
             try {
-              const created = await createUser({
+              let fetchedFullName = createForm.fullName.trim();
+
+              if (createForm.role === 'RESIDENT') {
+                try {
+                  const resident = await getResidentByPhone(createForm.phone.trim());
+                  fetchedFullName = resident.fullName;
+                } catch (err) {
+                  throw new Error('Không tìm thấy thông tin cư dân nào có số điện thoại này trong hệ thống.');
+                }
+                
+                setConfirmModal({
+                  isOpen: true,
+                  fullName: fetchedFullName,
+                  pendingPayload: {
+                    username: createForm.username.trim(),
+                    password: createForm.password.trim(),
+                    role: createForm.role,
+                    fullName: fetchedFullName,
+                    email: createForm.email.trim() || null,
+                    phone: createForm.phone.trim() || null,
+                  }
+                });
+                return; // Wait for modal confirmation
+              }
+
+              // If not RESIDENT, proceed directly
+              const payload = {
                 username: createForm.username.trim(),
                 password: createForm.password.trim(),
                 role: createForm.role,
-                fullName: createForm.fullName.trim(),
+                fullName: fetchedFullName,
                 email: createForm.email.trim() || null,
                 phone: createForm.phone.trim() || null,
-              });
+              };
+
+              const created = await createUser(payload);
               setUsers((prev) => [created, ...prev]);
               setCreateStatus({ submitting: false, error: '', success: 'Tạo tài khoản thành công.' });
               setCreateForm({
@@ -274,7 +338,7 @@ export default function UsersPage() {
               });
               setCreateTouched({});
             } catch (err) {
-              const message = err?.response?.data?.message || 'Không tạo được tài khoản.';
+              const message = err?.response?.data?.message || err.message || 'Không tạo được tài khoản.';
               setCreateStatus({ submitting: false, error: message, success: '' });
             }
           }}
@@ -317,16 +381,18 @@ export default function UsersPage() {
             </select>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-700">Họ và tên <span className="text-red-500">*</span></label>
-            <input
-              className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all focus:ring-4 ${createTouched.fullName && createErrors.fullName ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10' : 'border-slate-200 focus:border-primary-500 focus:ring-primary-500/10'}`}
-              value={createForm.fullName}
-              onChange={(e) => setCreateForm((prev) => ({ ...prev, fullName: e.target.value }))}
-              onBlur={() => setCreateTouched((prev) => ({ ...prev, fullName: true }))}
-            />
-            {createTouched.fullName && createErrors.fullName ? <div className="text-xs text-red-500">{createErrors.fullName}</div> : null}
-          </div>
+          {createForm.role !== 'RESIDENT' && (
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-700">Họ và tên <span className="text-red-500">*</span></label>
+              <input
+                className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all focus:ring-4 ${createTouched.fullName && createErrors.fullName ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10' : 'border-slate-200 focus:border-primary-500 focus:ring-primary-500/10'}`}
+                value={createForm.fullName}
+                onChange={(e) => setCreateForm((prev) => ({ ...prev, fullName: e.target.value }))}
+                onBlur={() => setCreateTouched((prev) => ({ ...prev, fullName: true }))}
+              />
+              {createTouched.fullName && createErrors.fullName ? <div className="text-xs text-red-500">{createErrors.fullName}</div> : null}
+            </div>
+          )}
 
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-slate-700">Email</label>
@@ -340,7 +406,7 @@ export default function UsersPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-700">Số điện thoại</label>
+            <label className="text-sm font-medium text-slate-700">Số điện thoại {createForm.role === 'RESIDENT' && <span className="text-red-500">*</span>}</label>
             <input
               className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all focus:ring-4 ${createTouched.phone && createErrors.phone ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10' : 'border-slate-200 focus:border-primary-500 focus:ring-primary-500/10'}`}
               value={createForm.phone}
@@ -367,6 +433,67 @@ export default function UsersPage() {
             </button>
           </div>
         </form>
+      </Modal>
+
+      {/* Confirmation Modal */}
+      <Modal 
+        isOpen={confirmModal.isOpen} 
+        onClose={() => {
+          setConfirmModal({ isOpen: false, fullName: '', pendingPayload: null });
+          setCreateStatus({ submitting: false, error: 'Đã hủy thao tác tạo tài khoản.', success: '' });
+        }} 
+        title="Xác nhận người dùng"
+      >
+        <div className="space-y-4">
+          <div className="rounded-lg bg-indigo-50 p-4 border border-indigo-100">
+            <p className="text-sm text-indigo-900">
+              Hệ thống tìm thấy cư dân khớp với số điện thoại này. Có phải người dùng tên là <span className="font-bold text-indigo-700">{confirmModal.fullName}</span> không?
+            </p>
+          </div>
+          
+          <div className="flex items-center justify-end gap-3 pt-3">
+            <button
+              type="button"
+              className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+              onClick={() => {
+                setConfirmModal({ isOpen: false, fullName: '', pendingPayload: null });
+                setCreateStatus({ submitting: false, error: 'Đã hủy thao tác tạo tài khoản.', success: '' });
+              }}
+            >
+              Hủy
+            </button>
+            <button
+              type="button"
+              disabled={createStatus.submitting}
+              className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-primary-700 disabled:pointer-events-none disabled:opacity-70"
+              onClick={async () => {
+                setCreateStatus({ submitting: true, error: '', success: '' });
+                try {
+                  const created = await createUser(confirmModal.pendingPayload);
+                  setUsers((prev) => [created, ...prev]);
+                  setCreateStatus({ submitting: false, error: '', success: 'Tạo tài khoản thành công.' });
+                  setCreateForm({
+                    username: '',
+                    password: '',
+                    role: 'CASHIER',
+                    fullName: '',
+                    email: '',
+                    phone: '',
+                  });
+                  setCreateTouched({});
+                  setConfirmModal({ isOpen: false, fullName: '', pendingPayload: null });
+                  setCreateOpen(false); // Close the main modal as well
+                } catch (err) {
+                  const message = err?.response?.data?.message || err.message || 'Không tạo được tài khoản.';
+                  setCreateStatus({ submitting: false, error: message, success: '' });
+                  setConfirmModal({ isOpen: false, fullName: '', pendingPayload: null });
+                }
+              }}
+            >
+              {createStatus.submitting ? 'Đang tạo...' : 'Xác nhận'}
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
