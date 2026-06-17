@@ -4,6 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 public record UpdateUserRoleRequestDto(
-        @NotBlank @Pattern(regexp = "ADMIN|MANAGER|RESIDENT") String role
+        @NotBlank @Pattern(regexp = "ADMIN|CASHIER|MAINTENANCE|RESIDENT") String role
 ) {
 }

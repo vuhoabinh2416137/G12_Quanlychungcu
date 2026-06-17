@@ -42,10 +42,6 @@ public class AuthController {
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!user.getRole().equalsIgnoreCase(requestDto.role())) {
-            throw new BadCredentialsException("Vai trò không khớp với tài khoản");
-        }
-
         String token = jwtUtil.generateToken(userDetails, user.getRole(), user.getFullName());
         return ResponseEntity.ok(new LoginResponseDto(
                 token,

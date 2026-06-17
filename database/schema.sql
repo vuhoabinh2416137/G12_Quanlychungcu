@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
     id         BIGINT AUTO_INCREMENT PRIMARY KEY,
     username   VARCHAR(50) UNIQUE NOT NULL,
     password   VARCHAR(255)       NOT NULL,
-    role       VARCHAR(20)        NOT NULL, -- ADMIN, MANAGER, RESIDENT
+    role       VARCHAR(20)        NOT NULL, -- ADMIN, CASHIER, MAINTENANCE, RESIDENT
     full_name  VARCHAR(100)       NOT NULL,
     email      VARCHAR(100) UNIQUE,
     phone      VARCHAR(20),
@@ -25,6 +25,9 @@ CREATE TABLE IF NOT EXISTS apartments (
     building         VARCHAR(50),
     floor            VARCHAR(10),
     area             DECIMAL(10, 2),
+    balance          DECIMAL(15, 2) DEFAULT 0.0,
+    so_dien_tieu_thu DECIMAL(10, 2) DEFAULT 0,
+    so_nuoc_tieu_thu DECIMAL(10, 2) DEFAULT 0,
     status           VARCHAR(20) DEFAULT 'VACANT' -- VACANT, OCCUPIED
 ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -72,6 +75,7 @@ CREATE TABLE IF NOT EXISTS payments (
     amount       DECIMAL(15, 2) NOT NULL,
     payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     method       VARCHAR(50), -- TIEN_MAT, CHUYEN_KHOAN, MOMO
+    status       VARCHAR(20) DEFAULT 'COMPLETED', -- PENDING, COMPLETED, REJECTED
     note         TEXT,
     FOREIGN KEY (fee_id) REFERENCES fees (id) ON DELETE CASCADE
 ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -99,3 +103,20 @@ CREATE TABLE IF NOT EXISTS incidents (
     created_at   TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (apartment_id) REFERENCES apartments (id) ON DELETE CASCADE
 ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 9. System Config table (Cấu hình hệ thống)
+CREATE TABLE IF NOT EXISTS system_config (
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    config_key   VARCHAR(100) UNIQUE NOT NULL,
+    config_value TEXT,
+    description  VARCHAR(255)
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Seed default fee configs
+INSERT IGNORE INTO system_config (config_key, config_value, description) VALUES
+('fee.management_per_sqm', '10000', 'Đơn giá phí quản lý (VNĐ/m²)'),
+('fee.motorbike', '150000', 'Đơn giá gửi xe máy (VNĐ/xe/tháng)'),
+('fee.car', '1000000', 'Đơn giá gửi ô tô (VNĐ/xe/tháng)'),
+('fee.electricity_per_kwh', '3500', 'Đơn giá điện (VNĐ/kWh)'),
+('fee.water_per_m3', '15000', 'Đơn giá nước (VNĐ/m³)'),
+('fee.due_day_of_month', '15', 'Ngày hạn nộp hàng tháng');

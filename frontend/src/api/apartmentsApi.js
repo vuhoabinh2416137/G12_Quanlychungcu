@@ -18,3 +18,8 @@ export async function updateApartment(id, payload) {
 export async function deleteApartment(id) {
   await apiClient.delete(`/apartments/${id}`);
 }
+
+export async function updateConsumption(id, payload) {
+  const { data } = await apiClient.patch(`/apartments/${id}/consumption`, payload);
+  return data;
+}

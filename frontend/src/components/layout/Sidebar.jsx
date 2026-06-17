@@ -41,13 +41,14 @@ export default function Sidebar() {
             Tổng quan
           </SidebarLink>
         ) : null}
-        {!isResident ? <SidebarLink to="/residents">Cư dân</SidebarLink> : null}
-        <SidebarLink to="/apartments">Căn hộ</SidebarLink>
+        {!isResident && auth?.role !== 'CASHIER' ? <SidebarLink to="/residents">Cư dân</SidebarLink> : null}
+        {auth?.role !== 'CASHIER' ? <SidebarLink to="/apartments">Căn hộ</SidebarLink> : null}
         <SidebarLink to="/fees">Khoản phí</SidebarLink>
+        {auth?.role === 'ADMIN' || auth?.role === 'CASHIER' ? <SidebarLink to="/cashier">Duyệt thanh toán</SidebarLink> : null}
         <SidebarLink to="/notifications">Thông báo</SidebarLink>
         <SidebarLink to="/invoices">Hóa đơn</SidebarLink>
         {auth?.role === 'ADMIN' ? <SidebarLink to="/users">Quản lý tài khoản</SidebarLink> : null}
-        {!isResident ? <SidebarLink to="/feedbacks">Ý kiến đóng góp</SidebarLink> : null}
+        {!isResident && auth?.role !== 'CASHIER' ? <SidebarLink to="/feedbacks">Ý kiến đóng góp</SidebarLink> : null}
         {!isResident ? <SidebarLink to="/profile">Tài khoản</SidebarLink> : null}
       </nav>
 

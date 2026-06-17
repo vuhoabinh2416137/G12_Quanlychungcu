@@ -47,13 +47,13 @@ public class FeedbackController {
     }
 
     @GetMapping
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<List<FeedbackResponseDto>> getAllFeedbacks() {
         return ResponseEntity.ok(feedbackMapper.toDtoList(feedbackService.getAllFeedbacks()));
     }
 
     @GetMapping("/apartment/{apartmentId}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RESIDENT')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<List<FeedbackResponseDto>> getFeedbacksByApartment(
             @PathVariable Long apartmentId,
             Authentication authentication
@@ -63,7 +63,7 @@ public class FeedbackController {
     }
 
     @PutMapping("/{id}/reply")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<FeedbackResponseDto> replyFeedback(
             @PathVariable Long id,
             @Valid @RequestBody FeedbackReplyDto replyDto

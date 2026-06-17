@@ -30,13 +30,13 @@ public class InvoiceController {
     }
 
     @GetMapping
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<List<InvoiceResponseDto>> getAllInvoices() {
         return ResponseEntity.ok(invoiceMapper.toDtoList(invoiceService.getAllInvoices()));
     }
 
     @GetMapping("/apartment/{apartmentId}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RESIDENT')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<List<InvoiceResponseDto>> getInvoicesByApartment(
             @PathVariable Long apartmentId,
             Authentication auth
@@ -46,7 +46,7 @@ public class InvoiceController {
     }
 
     @GetMapping("/{id}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RESIDENT')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<InvoiceResponseDto> getInvoiceById(
             @PathVariable Long id,
             Authentication auth
@@ -57,7 +57,7 @@ public class InvoiceController {
     }
 
     @PatchMapping("/{id}/payment")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<InvoiceResponseDto> updateInvoicePayment(
             @PathVariable Long id,
             @RequestParam Long paymentId

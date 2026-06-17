@@ -13,9 +13,11 @@ import java.util.List;
 public class ApartmentServiceImpl implements ApartmentService {
 
     private final ApartmentRepository apartmentRepository;
+    private final com.bluemoon.repository.ResidentRepository residentRepository;
 
-    public ApartmentServiceImpl(ApartmentRepository apartmentRepository) {
+    public ApartmentServiceImpl(ApartmentRepository apartmentRepository, com.bluemoon.repository.ResidentRepository residentRepository) {
         this.apartmentRepository = apartmentRepository;
+        this.residentRepository = residentRepository;
     }
 
     @Override
@@ -54,6 +56,8 @@ public class ApartmentServiceImpl implements ApartmentService {
         existingApartment.setFloor(apartmentDetails.getFloor());
         existingApartment.setArea(apartmentDetails.getArea());
         existingApartment.setStatus(apartmentDetails.getStatus());
+        existingApartment.setSoDienTieuThu(apartmentDetails.getSoDienTieuThu());
+        existingApartment.setSoNuocTieuThu(apartmentDetails.getSoNuocTieuThu());
 
         return apartmentRepository.save(existingApartment);
     }
@@ -62,6 +66,11 @@ public class ApartmentServiceImpl implements ApartmentService {
     @Transactional
     public void deleteApartment(Long id) {
         Apartment existingApartment = getApartmentById(id);
+        
+        // Xóa tất cả cư dân đang ở trong căn hộ này trước khi xóa căn hộ
+        java.util.List<com.bluemoon.model.Resident> residents = residentRepository.findByApartment_Id(id);
+        residentRepository.deleteAll(residents);
+
         apartmentRepository.delete(existingApartment);
     }
 }

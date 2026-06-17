@@ -13,5 +13,5 @@ import java.time.Instant;
 public record PaymentResponseAdminDto(Long id,
                                       Long feeId,
                                       String feeName, String apartmentNumber, BigDecimal amount, Instant paymentDate,
-                                      String method, String note) implements Serializable {
+                                      String method, String note, String status) implements Serializable {
 }

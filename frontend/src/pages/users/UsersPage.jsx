@@ -3,11 +3,11 @@ import Modal from '../../components/common/Modal.jsx';
 import { createUser, fetchUsers, updateUserActive, updateUserRole } from '../../api/usersApi.js';
 import { isNonEmptyString, isValidEmail, isValidVietnamPhone } from '../../utils/validators.js';
 
-const ROLES = ['ADMIN', 'MANAGER', 'RESIDENT'];
+const ROLES = ['ADMIN', 'CASHIER', 'RESIDENT'];
 
 const ROLE_LABELS = {
   ADMIN: 'Quản trị viên',
-  MANAGER: 'Quản lý',
+  CASHIER: 'Thủ quỹ',
   RESIDENT: 'Cư dân',
 };
 
@@ -45,7 +45,7 @@ export default function UsersPage() {
   const [createForm, setCreateForm] = useState({
     username: '',
     password: '',
-    role: 'MANAGER',
+    role: 'CASHIER',
     fullName: '',
     email: '',
     phone: '',
@@ -267,7 +267,7 @@ export default function UsersPage() {
               setCreateForm({
                 username: '',
                 password: '',
-                role: 'MANAGER',
+                role: 'CASHIER',
                 fullName: '',
                 email: '',
                 phone: '',

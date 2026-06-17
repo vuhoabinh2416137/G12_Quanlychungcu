@@ -28,7 +28,7 @@ public class User {
 
     @Size(max = 20)
     @Pattern(
-            regexp = "ADMIN|MANAGER|RESIDENT",
+            regexp = "ADMIN|CASHIER|MAINTENANCE|RESIDENT",
             message = "role không hợp lệ"
     )
     @NotNull

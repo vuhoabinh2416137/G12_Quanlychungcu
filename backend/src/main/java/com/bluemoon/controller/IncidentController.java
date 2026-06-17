@@ -34,13 +34,13 @@ public class IncidentController {
     }
 
     @GetMapping("/pending")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<List<IncidentResponseAdminDto>> getPending() {
         return ResponseEntity.ok(incidentMapper.toAdminDtoList(incidentService.getPendingIncidents()));
     }
 
     @GetMapping("/apartment/{apartmentId}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<List<IncidentResponseAdminDto>> getByApartment(@PathVariable Long apartmentId) {
         return ResponseEntity.ok(incidentMapper.toAdminDtoList(incidentService.getIncidentsByApartment(apartmentId)));
     }
@@ -56,7 +56,7 @@ public class IncidentController {
     }
 
     @PostMapping("/apartment/{apartmentId}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RESIDENT')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<IncidentResponseUserDto> report(
             @PathVariable Long apartmentId,
             @Valid @RequestBody IncidentRequestDto requestDto,
@@ -69,7 +69,7 @@ public class IncidentController {
     }
 
     @PatchMapping("/{id}/status")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<IncidentResponseAdminDto> updateStatus(
             @PathVariable Long id,
             @RequestParam String status

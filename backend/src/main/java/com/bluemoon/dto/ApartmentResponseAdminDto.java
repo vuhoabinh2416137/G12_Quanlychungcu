@@ -12,5 +12,7 @@ import java.math.BigDecimal;
  */
 public record ApartmentResponseAdminDto(Long id, @NotNull @Size(max = 20) String apartmentNumber,
                                          String building, String floor, BigDecimal area,
-                                        String status) implements Serializable {
+                                        String status,
+                                        BigDecimal soDienTieuThu,
+                                        BigDecimal soNuocTieuThu) implements Serializable {
 }

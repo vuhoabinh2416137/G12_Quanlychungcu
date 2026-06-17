@@ -59,13 +59,13 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RESIDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<UserResponseDto> getMyProfile(org.springframework.security.core.Authentication auth) {
         return ResponseEntity.ok(toDto(userService.getUserByUsername(auth.getName())));
     }
 
     @PutMapping("/me")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RESIDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<UserResponseDto> updateMyProfile(
             org.springframework.security.core.Authentication auth,
             @Valid @RequestBody UpdateMyProfileRequestDto requestDto
@@ -74,7 +74,7 @@ public class UserController {
     }
 
     @PatchMapping("/me/password")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RESIDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<Void> changeMyPassword(
             org.springframework.security.core.Authentication auth,
             @Valid @RequestBody ChangePasswordRequestDto requestDto

@@ -5,11 +5,11 @@ import { loginWithJwt } from '../../api/authApi.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { isNonEmptyString } from '../../utils/validators.js';
 
-const ROLES = ['ADMIN', 'MANAGER', 'RESIDENT'];
+const ROLES = ['ADMIN', 'CASHIER', 'RESIDENT'];
 
 const ROLE_LABELS = {
   ADMIN: 'Quản trị viên',
-  MANAGER: 'Quản lý',
+  MANAGER: 'Thủ quỹ',
   RESIDENT: 'Cư dân',
 };
 
@@ -19,7 +19,6 @@ export default function LoginPage() {
 
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('admin123');
-  const [role, setRole] = useState('ADMIN');
   const [touched, setTouched] = useState({ username: false, password: false });
   const [formError, setFormError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -86,16 +85,15 @@ export default function LoginPage() {
               if (isMockApi()) {
                 login({
                   token: 'mock-token',
-                  role,
+                  role: 'ADMIN', // Fallback for mock
                   username: trimmedUsername,
                   fullName: trimmedUsername,
                 });
-                navigate(role === 'RESIDENT' ? '/apartments' : '/dashboard', { replace: true });
+                navigate('/dashboard', { replace: true });
               } else {
                 const response = await loginWithJwt({
                   username: trimmedUsername,
                   password: trimmedPassword,
-                  role,
                 });
                 login(response);
                 navigate(response.role === 'RESIDENT' ? '/apartments' : '/dashboard', { replace: true });
@@ -142,24 +140,6 @@ export default function LoginPage() {
             {touched.password && errors.password ? <div className="text-xs text-red-500">{errors.password}</div> : null}
           </div>
 
-          <div className="space-y-1.5 pt-2">
-            <label className="text-sm font-medium text-slate-700">
-              Vai trò đăng nhập {isMockApi() ? '(Demo)' : ''}
-            </label>
-            <div className="relative">
-              <select
-                className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-              >
-                {ROLES.map((r) => (
-                  <option key={r} value={r}>
-                    {ROLE_LABELS[r]}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
 
           <button
             className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-primary-600 py-3.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-95 disabled:pointer-events-none disabled:opacity-70"

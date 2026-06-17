@@ -38,6 +38,11 @@ public class Payment {
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
 
+    @Size(max = 20)
+    @ColumnDefault("'COMPLETED'")
+    @Column(name = "status", length = 20)
+    private String status;
+
     public Long getId() {
         return id;
     }
@@ -84,6 +89,14 @@ public class Payment {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
 }

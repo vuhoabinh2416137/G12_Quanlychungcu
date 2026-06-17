@@ -123,4 +123,20 @@ public class Fee {
         this.invoice = invoice;
     }
 
+    @OneToMany(mappedBy = "fee", fetch = FetchType.LAZY)
+    private java.util.List<Payment> payments;
+
+    public java.util.List<Payment> getPayments() {
+        return payments;
+    }
+
+    public void setPayments(java.util.List<Payment> payments) {
+        this.payments = payments;
+    }
+
+    public String getPaymentStatus() {
+        if (payments == null || payments.isEmpty()) return "NONE";
+        boolean hasPending = payments.stream().anyMatch(p -> "PENDING".equals(p.getStatus()));
+        return hasPending ? "PENDING" : "NONE";
+    }
 }

@@ -34,7 +34,7 @@ public class FeeController {
     }
 
     @GetMapping("/apartment/{apartmentId}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RESIDENT')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<List<FeeResponseAdminDto>> getByApartment(
             @PathVariable Long apartmentId,
             Authentication auth
@@ -54,7 +54,7 @@ public class FeeController {
     }
 
     @GetMapping("/apartment/{apartmentId}/unpaid")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RESIDENT')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<List<FeeResponseUserDto>> getUnpaid(
             @PathVariable Long apartmentId,
             Authentication auth
@@ -64,13 +64,13 @@ public class FeeController {
     }
 
     @GetMapping("/{id}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<FeeResponseAdminDto> getById(@PathVariable Long id) {
         return ResponseEntity.ok(feeMapper.toAdminDto(feeService.getFeeById(id)));
     }
 
     @PostMapping("/apartment/{apartmentId}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<FeeResponseAdminDto> createForApartment(
             @PathVariable Long apartmentId,
             @Valid @RequestBody FeeRequestDto requestDto
@@ -81,7 +81,7 @@ public class FeeController {
     }
 
     @PostMapping("/all-apartments")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<List<FeeResponseAdminDto>> createForAllApartments(
             @Valid @RequestBody FeeRequestDto requestDto
     ) {
@@ -91,7 +91,7 @@ public class FeeController {
     }
 
     @PatchMapping("/{id}/status")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<FeeResponseAdminDto> updateStatus(
             @PathVariable Long id,
             @RequestParam Boolean paid
@@ -101,7 +101,7 @@ public class FeeController {
     }
 
     @PutMapping("/{id}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<FeeResponseAdminDto> update(
             @PathVariable Long id,
             @Valid @RequestBody FeeRequestDto requestDto

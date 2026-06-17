@@ -15,10 +15,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final com.bluemoon.repository.ResidentRepository residentRepository;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, com.bluemoon.repository.ResidentRepository residentRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.residentRepository = residentRepository;
     }
 
     @Override
@@ -51,6 +53,24 @@ public class UserServiceImpl implements UserService {
             throw new DuplicateResourceException("Email already exists: " + requestDto.email());
         }
 
+        com.bluemoon.model.Resident residentToLink = null;
+
+        if ("RESIDENT".equals(requestDto.role())) {
+            if (requestDto.phone() == null || requestDto.phone().isBlank()) {
+                throw new IllegalArgumentException("Vui lòng nhập số điện thoại để tạo tài khoản cư dân.");
+            }
+            residentToLink = residentRepository.findByPhone(requestDto.phone().trim())
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy thông tin cư dân nào có số điện thoại này."));
+
+            if (requestDto.fullName() == null || !requestDto.fullName().trim().equalsIgnoreCase(residentToLink.getFullName().trim())) {
+                throw new IllegalArgumentException("Có phải tên của bạn là " + residentToLink.getFullName() + "?");
+            }
+
+            if (residentToLink.getUser() != null) {
+                throw new IllegalArgumentException("Cư dân này đã có tài khoản!");
+            }
+        }
+
         User user = new User();
         user.setUsername(requestDto.username().trim());
         user.setPassword(passwordEncoder.encode(requestDto.password()));
@@ -59,7 +79,14 @@ public class UserServiceImpl implements UserService {
         user.setEmail(normalizeBlank(requestDto.email()));
         user.setPhone(normalizeBlank(requestDto.phone()));
         user.setActive(true);
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        if (residentToLink != null) {
+            residentToLink.setUser(savedUser);
+            residentRepository.save(residentToLink);
+        }
+
+        return savedUser;
     }
 
     @Override

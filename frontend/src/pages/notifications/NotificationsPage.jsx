@@ -10,7 +10,7 @@ import {
 
 export default function NotificationsPage() {
   const { auth } = useAuth();
-  const isAdminOrManager = auth?.role === 'ADMIN' || auth?.role === 'MANAGER';
+  const isAdminOrManager = auth?.role === 'ADMIN' || auth?.role === 'CASHIER';
 
   const [apartments, setApartments] = useState([]);
   const [selectedApartmentId, setSelectedApartmentId] = useState('');

@@ -5,9 +5,6 @@ import jakarta.validation.constraints.Pattern;
 
 public record LoginRequestDto(
         @NotBlank String username,
-        @NotBlank String password,
-        @NotBlank
-        @Pattern(regexp = "ADMIN|MANAGER|RESIDENT", message = "Vai trò không hợp lệ")
-        String role
+        @NotBlank String password
 ) {
 }

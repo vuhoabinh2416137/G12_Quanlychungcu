@@ -34,7 +34,7 @@ public class ResidentController {
     }
 
     @GetMapping
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RESIDENT')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<List<ResidentResponseAdminDto>> getAll(Authentication auth) {
         List<Resident> list;
         if (residentAccessService.isResident(auth)) {
@@ -47,7 +47,7 @@ public class ResidentController {
     }
 
     @GetMapping("/apartment/{apartmentId}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RESIDENT')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<List<ResidentResponseAdminDto>> getByApartment(
             @PathVariable Long apartmentId,
             Authentication auth
@@ -57,7 +57,7 @@ public class ResidentController {
     }
 
     @GetMapping("/{id}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RESIDENT')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<ResidentResponseAdminDto> getById(
             @PathVariable Long id,
             Authentication auth

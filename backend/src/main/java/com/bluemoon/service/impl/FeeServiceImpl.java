@@ -21,13 +21,19 @@ public class FeeServiceImpl implements FeeService {
     private final FeeRepository feeRepository;
     private final ApartmentRepository apartmentRepository;
     private final InvoiceService invoiceService;
+    private final com.bluemoon.repository.VehicleRepository vehicleRepository;
+    private final com.bluemoon.repository.SystemConfigRepository systemConfigRepository;
 
     public FeeServiceImpl(FeeRepository feeRepository, 
                           ApartmentRepository apartmentRepository,
-                          @Lazy InvoiceService invoiceService) {
+                          @Lazy InvoiceService invoiceService,
+                          com.bluemoon.repository.VehicleRepository vehicleRepository,
+                          com.bluemoon.repository.SystemConfigRepository systemConfigRepository) {
         this.feeRepository = feeRepository;
         this.apartmentRepository = apartmentRepository;
         this.invoiceService = invoiceService;
+        this.vehicleRepository = vehicleRepository;
+        this.systemConfigRepository = systemConfigRepository;
     }
 
     @Override
@@ -98,6 +104,7 @@ public class FeeServiceImpl implements FeeService {
 
         return feeRepository.saveAll(feesToSave);
     }
+
 
     private BigDecimal resolveAmount(Fee feeBaseOrFee, Apartment apartment) {
         if (feeBaseOrFee == null) return null;

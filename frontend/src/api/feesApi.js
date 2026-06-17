@@ -22,10 +22,10 @@ export async function createFeeForApartment(apartmentId, payload) {
   return data;
 }
 
-export async function createFeeForAllApartments(payload) {
-  const { data } = await apiClient.post('/fees/all-apartments', payload);
-  return data;
-}
+export const createFeeForAllApartments = async (feeData) => {
+  const response = await apiClient.post('/fees/all-apartments', feeData);
+  return response.data;
+};
 
 export async function updateFeePaidStatus(id, paid) {
   const { data } = await apiClient.patch(`/fees/${id}/status`, null, {

@@ -7,6 +7,7 @@ import {
 } from '../../api/apartmentsApi.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { isNonEmptyString } from '../../utils/validators.js';
+import ApartmentDetailModal from './ApartmentDetailModal.jsx';
 
 const STATUSES = ['VACANT', 'OCCUPIED'];
 
@@ -27,6 +28,8 @@ export default function ApartmentsPage() {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const [detailApartment, setDetailApartment] = useState(null);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [createTouched, setCreateTouched] = useState({});
@@ -330,6 +333,8 @@ export default function ApartmentsPage() {
                 <th className="px-5 py-3.5 text-left font-semibold text-slate-600">Tầng</th>
                 <th className="px-5 py-3.5 text-right font-semibold text-slate-600">Diện tích</th>
                 <th className="px-5 py-3.5 text-left font-semibold text-slate-600">Trạng thái</th>
+                <th className="px-5 py-3.5 text-center font-semibold text-slate-600">⚡ Điện (kWh)</th>
+                <th className="px-5 py-3.5 text-center font-semibold text-slate-600">💧 Nước (m³)</th>
                 {canWrite ? <th className="px-5 py-3.5 text-right font-semibold text-slate-600">Thao tác</th> : null}
               </tr>
             </thead>
@@ -350,9 +355,25 @@ export default function ApartmentsPage() {
                       {a.status === 'VACANT' ? 'Trống' : 'Đang ở'}
                     </span>
                   </td>
+                  <td className="px-5 py-3 text-center text-slate-600 font-medium">
+                    {a.soDienTieuThu != null ? Number(a.soDienTieuThu).toLocaleString('vi-VN') : '0'}
+                  </td>
+                  <td className="px-5 py-3 text-center text-slate-600 font-medium">
+                    {a.soNuocTieuThu != null ? Number(a.soNuocTieuThu).toLocaleString('vi-VN') : '0'}
+                  </td>
                   {canWrite ? (
                     <td className="px-5 py-3 text-right">
                       <div className="inline-flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          className="rounded p-1.5 text-slate-400 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          title="Chi tiết"
+                          onClick={() => setDetailApartment(a)}
+                        >
+                          <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        </button>
                         <button
                           className="rounded p-1.5 text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                           title="Sửa"
@@ -399,7 +420,7 @@ export default function ApartmentsPage() {
               ))}
               {!filtered.length ? (
                 <tr>
-                  <td className="px-5 py-10 text-center text-slate-500" colSpan={canWrite ? 6 : 5}>
+                  <td className="px-5 py-10 text-center text-slate-500" colSpan={canWrite ? 8 : 7}>
                     <div className="flex flex-col items-center justify-center">
                       <svg className="h-10 w-10 text-slate-300 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -578,6 +599,17 @@ export default function ApartmentsPage() {
           </div>
         </div>
       ) : null}
+
+      {/* Modal chi tiết căn hộ */}
+      <ApartmentDetailModal
+        apartment={detailApartment}
+        onClose={() => setDetailApartment(null)}
+        canEdit={canWrite || auth?.role === 'CASHIER'}
+        onUpdated={(updated) => {
+          setApartments((prev) => prev.map((x) => (x.id === updated.id ? updated : x)));
+          setDetailApartment(updated);
+        }}
+      />
     </div>
   );
 }

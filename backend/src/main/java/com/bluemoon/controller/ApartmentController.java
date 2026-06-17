@@ -34,7 +34,7 @@ public class ApartmentController {
     }
 
     @GetMapping
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RESIDENT')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<List<ApartmentResponseAdminDto>> getAll(Authentication auth) {
         List<Apartment> list = apartmentService.getAllApartments();
         if (residentAccessService.isResident(auth)) {
@@ -45,7 +45,7 @@ public class ApartmentController {
     }
 
     @GetMapping("/{id}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RESIDENT')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<ApartmentResponseAdminDto> getById(
             @PathVariable Long id,
             Authentication auth
@@ -89,5 +89,21 @@ public class ApartmentController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         apartmentService.deleteApartment(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Cập nhật số liệu tiêu thụ điện/nước cho 1 căn hộ
+     */
+    @PatchMapping("/{id}/consumption")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
+    public ResponseEntity<ApartmentResponseAdminDto> updateConsumption(
+            @PathVariable Long id,
+            @Valid @RequestBody com.bluemoon.dto.request.ConsumptionRequestDto dto
+    ) {
+        Apartment apartment = apartmentService.getApartmentById(id);
+        apartment.setSoDienTieuThu(dto.soDienTieuThu());
+        apartment.setSoNuocTieuThu(dto.soNuocTieuThu());
+        Apartment saved = apartmentService.updateApartment(id, apartment);
+        return ResponseEntity.ok(apartmentMapper.toAdminDto(saved));
     }
 }

@@ -8,6 +8,8 @@ import {
 } from '../../api/feesApi.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { isNonEmptyString, isValidISODate } from '../../utils/validators.js';
+import QrPaymentModal from '../../components/payment/QrPaymentModal.jsx';
+import AutoFeeModal from './AutoFeeModal.jsx';
 
 const FEE_TYPES = ['DIEN', 'NUOC', 'QUAN_LY', 'GUI_XE', 'KHAC'];
 
@@ -40,16 +42,19 @@ function getFeeTypeLabel(type) {
 
 export default function FeesPage() {
   const { auth } = useAuth();
-  const canCreate = auth?.role === 'ADMIN';
-  const canMarkPaid = auth?.role === 'ADMIN' || auth?.role === 'MANAGER';
-  const canActOnFees = canMarkPaid;
+  const canCreate = auth?.role === 'ADMIN' || auth?.role === 'CASHIER';
+  const canMarkPaid = auth?.role === 'ADMIN' || auth?.role === 'CASHIER';
+  const canActOnFees = canMarkPaid || auth?.role === 'RESIDENT';
 
   const [apartments, setApartments] = useState([]);
   const [selectedApartmentId, setSelectedApartmentId] = useState('');
   const [fees, setFees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedFeeForQR, setSelectedFeeForQR] = useState(null);
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAutoModalOpen, setIsAutoModalOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [createMode, setCreateMode] = useState('apartment');
   const [createTouched, setCreateTouched] = useState({});
@@ -58,7 +63,7 @@ export default function FeesPage() {
     name: '',
     description: '',
     amount: '',
-    type: 'QUAN_LY',
+    type: 'KHAC',
     dueDate: '',
   });
 
@@ -154,15 +159,23 @@ export default function FeesPage() {
             </select>
           </div>
           {canCreate ? (
-            <button
-              className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-95 sm:w-auto"
-              onClick={() => {
-                setCreateStatus({ submitting: false, error: '', success: '' });
-                setCreateOpen((v) => !v);
-              }}
-            >
-              Tạo khoản phí
-            </button>
+            <>
+              <button
+                className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2 active:scale-95 sm:w-auto"
+                onClick={() => setIsAutoModalOpen(true)}
+              >
+                ⚙️ Cấu hình phí hàng tháng
+              </button>
+              <button
+                className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-95 sm:w-auto"
+                onClick={() => {
+                  setCreateStatus({ submitting: false, error: '', success: '' });
+                  setCreateOpen((v) => !v);
+                }}
+              >
+                ➕ Tạo khoản phí phát sinh
+              </button>
+            </>
           ) : null}
         </div>
       </div>
@@ -171,8 +184,8 @@ export default function FeesPage() {
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-surface shadow-soft">
           <div className="flex flex-col justify-between gap-4 border-b border-slate-100 bg-slate-50/50 px-6 py-4 sm:flex-row sm:items-center">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Thêm khoản phí mới</h2>
-              <p className="mt-0.5 text-sm text-slate-500">Loại QUẢN_LÝ sẽ được backend tính theo diện tích nếu nhập đơn giá / m2.</p>
+              <h2 className="text-lg font-semibold text-slate-900">Thêm khoản phí phát sinh</h2>
+              <p className="mt-0.5 text-sm text-slate-500">Dùng cho các khoản phí phát sinh ngoài phí cố định hàng tháng.</p>
             </div>
             <button
               className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-700"
@@ -234,7 +247,7 @@ export default function FeesPage() {
                     name: createForm.name.trim(),
                     description: createForm.description.trim() || null,
                     amount: Number(createForm.amount),
-                    type: createForm.type || null,
+                    type: 'KHAC',
                     dueDate: createForm.dueDate ? createForm.dueDate.trim() : null,
                   };
 
@@ -254,7 +267,7 @@ export default function FeesPage() {
                     setCreateStatus({ submitting: false, error: '', success: 'Tạo phí hàng loạt thành công.' });
                   }
 
-                  setCreateForm({ name: '', description: '', amount: '', type: 'QUAN_LY', dueDate: '' });
+                  setCreateForm({ name: '', description: '', amount: '', type: 'KHAC', dueDate: '' });
                   setCreateTouched({});
                 } catch (err) {
                   const status = err?.response?.status;
@@ -266,7 +279,7 @@ export default function FeesPage() {
                 }
               }}
             >
-              <div className="space-y-1.5 lg:col-span-2">
+              <div className="space-y-1.5 lg:col-span-3">
                 <label className="text-sm font-medium text-slate-700">Tên phí <span className="text-red-500">*</span></label>
                 <input
                   className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all focus:ring-4 ${createTouched.name && createErrors.name ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10' : 'border-slate-200 focus:border-primary-500 focus:ring-primary-500/10'}`}
@@ -274,19 +287,6 @@ export default function FeesPage() {
                   onChange={(e) => setCreateForm((f) => ({ ...f, name: e.target.value }))}
                   onBlur={() => setCreateTouched((t) => ({ ...t, name: true }))}
                 />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">Loại phí</label>
-                <select
-                  className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
-                  value={createForm.type}
-                  onChange={(e) => setCreateForm((f) => ({ ...f, type: e.target.value }))}
-                >
-                  {FEE_TYPES.map((t) => (
-                    <option key={t} value={t}>{getFeeTypeLabel(t)}</option>
-                  ))}
-                </select>
               </div>
 
               <div className="space-y-1.5 lg:col-span-3">
@@ -324,7 +324,7 @@ export default function FeesPage() {
                   type="button"
                   className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-200"
                   onClick={() => {
-                    setCreateForm({ name: '', description: '', amount: '', type: 'QUAN_LY', dueDate: '' });
+                    setCreateForm({ name: '', description: '', amount: '', type: 'KHAC', dueDate: '' });
                     setCreateTouched({});
                     setCreateStatus({ submitting: false, error: '', success: '' });
                   }}
@@ -384,6 +384,11 @@ export default function FeesPage() {
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                         Đã thanh toán
                       </span>
+                    ) : f.paymentStatus === 'PENDING' ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20">
+                        <span className="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
+                        Chờ xác nhận
+                      </span>
                     ) : (
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">
                         <span className="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
@@ -416,6 +421,14 @@ export default function FeesPage() {
                             {f.paid ? 'Hủy nộp' : 'Thu tiền'}
                           </button>
                         ) : null}
+                        {auth?.role === 'RESIDENT' && !f.paid && f.paymentStatus !== 'PENDING' ? (
+                          <button
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 transition-all hover:bg-blue-100 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                            onClick={() => setSelectedFeeForQR(f)}
+                          >
+                            Thanh toán QR
+                          </button>
+                        ) : null}
                       </div>
                     </td>
                   ) : null}
@@ -435,6 +448,24 @@ export default function FeesPage() {
           </table>
         </div>
       </div>
+      
+      {selectedFeeForQR && (
+        <QrPaymentModal
+          fee={selectedFeeForQR}
+          onClose={() => setSelectedFeeForQR(null)}
+          onSuccess={() => {
+            setSelectedFeeForQR(null);
+            alert('Đã gửi yêu cầu xác nhận thanh toán cho thủ quỹ.');
+            reloadFees(selectedApartmentId);
+          }}
+        />
+      )}
+      {/* Modal Cấu hình phí */}
+      <AutoFeeModal
+        isOpen={isAutoModalOpen}
+        onClose={() => setIsAutoModalOpen(false)}
+      />
+
     </div>
   );
 }

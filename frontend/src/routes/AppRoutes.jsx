@@ -12,6 +12,7 @@ import InvoicesPage from '../pages/invoices/InvoicesPage.jsx';
 import ProfilePage from '../pages/profile/ProfilePage.jsx';
 import FeedbackPage from '../pages/feedback/FeedbackPage.jsx';
 import UsersPage from '../pages/users/UsersPage.jsx';
+import CashierDashboard from '../pages/cashier/CashierDashboard.jsx';
 
 function HomeRedirect() {
   const { auth } = useAuth();
@@ -30,6 +31,22 @@ function ResidentRestrictedRoute({ children }) {
 function AdminOnlyRoute({ children }) {
   const { auth } = useAuth();
   if (auth?.role !== 'ADMIN') {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return children;
+}
+
+function CashierOnlyRoute({ children }) {
+  const { auth } = useAuth();
+  if (auth?.role !== 'ADMIN' && auth?.role !== 'CASHIER') {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return children;
+}
+
+function ExcludeCashierRoute({ children }) {
+  const { auth } = useAuth();
+  if (auth?.role === 'CASHIER') {
     return <Navigate to="/dashboard" replace />;
   }
   return children;
@@ -56,12 +73,21 @@ export default function AppRoutes() {
             {
               path: '/residents',
               element: (
-                <ResidentRestrictedRoute>
-                  <ResidentsPage />
-                </ResidentRestrictedRoute>
+                <ExcludeCashierRoute>
+                  <ResidentRestrictedRoute>
+                    <ResidentsPage />
+                  </ResidentRestrictedRoute>
+                </ExcludeCashierRoute>
               ),
             },
-            { path: '/apartments', element: <ApartmentsPage /> },
+            {
+              path: '/apartments',
+              element: (
+                <ExcludeCashierRoute>
+                  <ApartmentsPage />
+                </ExcludeCashierRoute>
+              ),
+            },
             { path: '/fees', element: <FeesPage /> },
             { path: '/notifications', element: <NotificationsPage /> },
             { path: '/invoices', element: <InvoicesPage /> },
@@ -76,9 +102,11 @@ export default function AppRoutes() {
             {
               path: '/feedbacks',
               element: (
-                <ResidentRestrictedRoute>
-                  <FeedbackPage />
-                </ResidentRestrictedRoute>
+                <ExcludeCashierRoute>
+                  <ResidentRestrictedRoute>
+                    <FeedbackPage />
+                  </ResidentRestrictedRoute>
+                </ExcludeCashierRoute>
               ),
             },
             {
@@ -87,6 +115,14 @@ export default function AppRoutes() {
                 <ResidentRestrictedRoute>
                   <ProfilePage />
                 </ResidentRestrictedRoute>
+              ),
+            },
+            {
+              path: '/cashier',
+              element: (
+                <CashierOnlyRoute>
+                  <CashierDashboard />
+                </CashierOnlyRoute>
               ),
             },
           ],

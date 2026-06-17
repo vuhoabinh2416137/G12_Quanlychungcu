@@ -18,5 +18,4 @@ public interface FeeService {
     // Cập nhật trạng thái hóa đơn (khi kế toán đối soát thủ công)
     Fee updateFeeStatus(Long feeId, Boolean isPaid);
     List<Fee> createFeeForAllApartments(Fee feeBase);
-
 }

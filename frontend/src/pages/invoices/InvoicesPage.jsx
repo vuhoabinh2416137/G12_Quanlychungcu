@@ -5,7 +5,7 @@ import { getAllInvoices, getInvoicesByApartment } from '../../api/invoicesApi.js
 
 export default function InvoicesPage() {
   const { auth } = useAuth();
-  const isAdminOrManager = auth?.role === 'ADMIN' || auth?.role === 'MANAGER';
+  const isAdminOrManager = auth?.role === 'ADMIN' || auth?.role === 'CASHIER';
 
   const [apartments, setApartments] = useState([]);
   const [selectedApartmentId, setSelectedApartmentId] = useState('');

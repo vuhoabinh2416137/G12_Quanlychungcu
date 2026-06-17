@@ -2,9 +2,11 @@ package com.bluemoon.config;
 
 import com.bluemoon.model.Apartment;
 import com.bluemoon.model.Resident;
+import com.bluemoon.model.SystemConfig;
 import com.bluemoon.model.User;
 import com.bluemoon.repository.ApartmentRepository;
 import com.bluemoon.repository.ResidentRepository;
+import com.bluemoon.repository.SystemConfigRepository;
 import com.bluemoon.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -21,19 +23,21 @@ public class DatabaseSeedConfig {
             UserRepository userRepository,
             ApartmentRepository apartmentRepository,
             ResidentRepository residentRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            SystemConfigRepository systemConfigRepository
     ) {
         return args -> {
             seedUserIfMissing(userRepository, passwordEncoder, "admin", "admin123", "ADMIN", "Admin");
-            seedUserIfMissing(userRepository, passwordEncoder, "manager", "manager123", "MANAGER", "Manager");
-            User residentUser = seedUserIfMissing(userRepository, passwordEncoder, "resident", "resident123", "RESIDENT", "Resident");
-            User resident456User = seedUserIfMissing(userRepository, passwordEncoder, "resident456", "resident456", "RESIDENT", "Resident 456");
+            seedUserIfMissing(userRepository, passwordEncoder, "cashier", "cashier123", "CASHIER", "Cashier");
+            seedUserIfMissing(userRepository, passwordEncoder, "maintenance", "maintenance123", "MAINTENANCE", "Maintenance");
 
-            Apartment residentApartment = seedApartmentIfMissing(apartmentRepository, "A1001", "A", "10", "75.50");
-            Apartment resident456Apartment = seedApartmentIfMissing(apartmentRepository, "A1002", "A", "10", "82.00");
-
-            seedResidentProfile(residentRepository, residentUser, residentApartment, "Resident");
-            seedResidentProfile(residentRepository, resident456User, resident456Apartment, "Resident 456");
+            // Seed cấu hình phí cố định mặc định
+            seedConfigIfMissing(systemConfigRepository, "fee.management_per_sqm", "10000", "Đơn giá phí quản lý (VNĐ/m²)");
+            seedConfigIfMissing(systemConfigRepository, "fee.motorbike", "150000", "Đơn giá gửi xe máy (VNĐ/xe/tháng)");
+            seedConfigIfMissing(systemConfigRepository, "fee.car", "1000000", "Đơn giá gửi ô tô (VNĐ/xe/tháng)");
+            seedConfigIfMissing(systemConfigRepository, "fee.electricity_per_kwh", "3500", "Đơn giá điện (VNĐ/kWh)");
+            seedConfigIfMissing(systemConfigRepository, "fee.water_per_m3", "15000", "Đơn giá nước (VNĐ/m³)");
+            seedConfigIfMissing(systemConfigRepository, "fee.due_day_of_month", "15", "Ngày hạn nộp hàng tháng");
         };
     }
 
@@ -84,18 +88,28 @@ public class DatabaseSeedConfig {
 
     private static void seedResidentProfile(
             ResidentRepository residentRepository,
-            User user,
             Apartment apartment,
-            String fullName
+            String fullName,
+            String phone
     ) {
-        Resident residentProfile = residentRepository.findByUser_Username(user.getUsername())
+        Resident residentProfile = residentRepository.findByPhone(phone)
                 .orElseGet(Resident::new);
-        residentProfile.setUser(user);
         residentProfile.setApartment(apartment);
         residentProfile.setFullName(fullName);
         residentProfile.setRelationship("CHU_HO");
-        residentProfile.setEmail(user.getEmail());
-        residentProfile.setPhone(user.getPhone());
+        residentProfile.setPhone(phone);
         residentRepository.save(residentProfile);
+    }
+
+    private static void seedConfigIfMissing(
+            SystemConfigRepository systemConfigRepository,
+            String key,
+            String value,
+            String description
+    ) {
+        systemConfigRepository.findByConfigKey(key).orElseGet(() -> {
+            SystemConfig config = new SystemConfig(key, value, description);
+            return systemConfigRepository.save(config);
+        });
     }
 }

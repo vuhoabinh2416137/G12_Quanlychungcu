@@ -34,7 +34,7 @@ public class NotificationController {
     }
 
     @PostMapping
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<NotificationResponseAdminDto> createNotification(
             @Valid @RequestBody NotificationRequestDto requestDto,
             Authentication authentication
@@ -46,13 +46,13 @@ public class NotificationController {
     }
 
     @GetMapping
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<List<NotificationResponseAdminDto>> getAllNotifications() {
         return ResponseEntity.ok(notificationMapper.toAdminDtoList(notificationService.getAllNotifications()));
     }
 
     @GetMapping("/apartment/{apartmentId}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RESIDENT')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     public ResponseEntity<List<NotificationResponseUserDto>> getNotificationsForApartment(
             @PathVariable Long apartmentId,
             Authentication auth
@@ -62,13 +62,13 @@ public class NotificationController {
     }
 
     @GetMapping("/{id}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<NotificationResponseAdminDto> getNotificationById(@PathVariable Long id) {
         return ResponseEntity.ok(notificationMapper.toAdminDto(notificationService.getNotificationById(id)));
     }
 
     @DeleteMapping("/{id}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
         notificationService.deleteNotification(id);
         return ResponseEntity.noContent().build();

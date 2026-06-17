@@ -23,7 +23,7 @@ export default function FeedbackPage() {
   const [formError, setFormError] = useState('');
 
   const isResident = auth?.role === 'RESIDENT';
-  const canReply = auth?.role === 'ADMIN' || auth?.role === 'MANAGER';
+  const canReply = auth?.role === 'ADMIN' || auth?.role === 'CASHIER';
 
   useEffect(() => {
     loadInitialData();

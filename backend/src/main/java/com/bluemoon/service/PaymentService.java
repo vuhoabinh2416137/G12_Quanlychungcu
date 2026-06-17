@@ -7,6 +7,10 @@ public interface PaymentService {
     // Cư dân thực hiện thanh toán cho 1 hóa đơn
     Payment processPayment(Long feeId, Payment payment);
 
+    Payment confirmPayment(Long paymentId, java.math.BigDecimal actualAmount);
+
     // Xem lịch sử giao dịch của 1 hóa đơn
     List<Payment> getPaymentHistory(Long feeId);
+
+    List<Payment> getPendingPayments();
 }

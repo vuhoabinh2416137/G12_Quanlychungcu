@@ -40,7 +40,7 @@ public class PaymentController {
     }
 
     @GetMapping("/fee/{feeId}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     @Transactional(readOnly = true)
     public ResponseEntity<List<PaymentResponseAdminDto>> getHistoryForAdmin(@PathVariable Long feeId) {
         return ResponseEntity.ok(paymentMapper.toAdminDtoList(paymentService.getPaymentHistory(feeId)));
@@ -58,13 +58,16 @@ public class PaymentController {
     }
 
     @PostMapping("/fee/{feeId}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
     @Transactional
     public ResponseEntity<PaymentResponseAdminDto> process(
             @PathVariable Long feeId,
             @Valid @RequestBody PaymentRequestDto requestDto,
             Authentication auth
     ) {
+        if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_RESIDENT"))) {
+            residentAccessService.ensureResidentFeeAccess(auth, getFeeOrThrow(feeId));
+        }
         Payment payment = paymentMapper.toEntity(requestDto);
         Payment saved = paymentService.processPayment(feeId, payment);
         return ResponseEntity.status(HttpStatus.CREATED).body(paymentMapper.toAdminDto(saved));
