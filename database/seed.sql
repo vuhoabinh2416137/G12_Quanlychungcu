@@ -154,30 +154,30 @@ INSERT IGNORE INTO fees (id, invoice_id, apartment_id, name, description, amount
 
 -- PAYMENTS (20 entries - thanh toán phí)
 INSERT IGNORE INTO payments (id, fee_id, amount, payment_date, method, note) VALUES
-  (1, 2, 350000, '2026-05-03', 'CHUYEN_KHOAN', 'Thanh toán online'),
-  (2, 4, 280000, '2026-05-05', 'TIEN_MAT', 'Thanh toán tại quầy'),
-  (3, 5, 650000, '2026-05-02', 'MOMO', 'Thanh toán qua ứng dụng'),
-  (4, 7, 550000, '2026-05-04', 'CHUYEN_KHOAN', 'Chuyển khoản'),
-  (5, 9, 650000, '2026-05-06', 'TIEN_MAT', 'Thanh toán trực tiếp'),
-  (6, 11, 700000, '2026-05-01', 'CHUYEN_KHOAN', 'Chuyển khoản'),
-  (7, 13, 750000, '2026-05-03', 'MOMO', 'Thanh toán MoMo'),
-  (8, 15, 850000, '2026-05-05', 'CHUYEN_KHOAN', 'Chuyển khoản tự động'),
-  (9, 17, 500000, '2026-05-02', 'TIEN_MAT', 'Tiền mặt'),
-  (10, 19, 700000, '2026-05-04', 'CHUYEN_KHOAN', 'Thanh toán định kỳ'),
-  (11, 21, 150000, '2026-05-01', 'MOMO', 'Phí gửi xe'),
-  (12, 22, 150000, '2026-05-02', 'CHUYEN_KHOAN', 'Phí gửi xe'),
-  (13, 23, 150000, '2026-05-03', 'TIEN_MAT', 'Phí gửi xe'),
-  (14, 24, 100000, '2026-05-04', 'MOMO', 'Phí gửi xe'),
-  (15, 25, 200000, '2026-05-05', 'CHUYEN_KHOAN', 'Phí gửi xe'),
-  (16, 3, 650000, '2026-05-02', 'TIEN_MAT', 'Quản lý tháng 5'),
-  (17, 6, 650000, '2026-05-04', 'CHUYEN_KHOAN', 'Quản lý tháng 5'),
-  (18, 8, 550000, '2026-05-03', 'MOMO', 'Quản lý tháng 5'),
-  (19, 10, 650000, '2026-05-05', 'TIEN_MAT', 'Quản lý tháng 5'),
-  (20, 16, 500000, '2026-05-01', 'CHUYEN_KHOAN', 'Quản lý tháng 5');
+  (1, 2, 350000, '2026-05-03', 'QR', 'Thanh toán online'),
+  (2, 4, 280000, '2026-05-05', 'TRỰC TIẾP', 'Thanh toán tại quầy'),
+  (3, 5, 650000, '2026-05-02', 'QR', 'Thanh toán qua ứng dụng'),
+  (4, 7, 550000, '2026-05-04', 'QR', 'Chuyển khoản'),
+  (5, 9, 650000, '2026-05-06', 'TRỰC TIẾP', 'Thanh toán trực tiếp'),
+  (6, 11, 700000, '2026-05-01', 'QR', 'Chuyển khoản'),
+  (7, 13, 750000, '2026-05-03', 'QR', 'Thanh toán MoMo'),
+  (8, 15, 850000, '2026-05-05', 'QR', 'Chuyển khoản tự động'),
+  (9, 17, 500000, '2026-05-02', 'TRỰC TIẾP', 'Tiền mặt'),
+  (10, 19, 700000, '2026-05-04', 'QR', 'Thanh toán định kỳ'),
+  (11, 21, 150000, '2026-05-01', 'QR', 'Phí gửi xe'),
+  (12, 22, 150000, '2026-05-02', 'QR', 'Phí gửi xe'),
+  (13, 23, 150000, '2026-05-03', 'TRỰC TIẾP', 'Phí gửi xe'),
+  (14, 24, 100000, '2026-05-04', 'QR', 'Phí gửi xe'),
+  (15, 25, 200000, '2026-05-05', 'QR', 'Phí gửi xe'),
+  (16, 3, 650000, '2026-05-02', 'TRỰC TIẾP', 'Quản lý tháng 5'),
+  (17, 6, 650000, '2026-05-04', 'QR', 'Quản lý tháng 5'),
+  (18, 8, 550000, '2026-05-03', 'QR', 'Quản lý tháng 5'),
+  (19, 10, 650000, '2026-05-05', 'TRỰC TIẾP', 'Quản lý tháng 5'),
+  (20, 16, 500000, '2026-05-01', 'QR', 'Quản lý tháng 5');
 
 -- NOTIFICATIONS (20 entries - thông báo)
 INSERT IGNORE INTO notifications (id, sender_id, apartment_id, title, content, type, created_at) VALUES
-  (1, 1, NULL, 'Thông báo bảo trì hệ thống điện', 'Sẽ tiến hành bảo trì hệ thống điện từ 8h-12h ngày 10/5', 'THONG_BAO_CHUNG', NOW() - INTERVAL 5 DAY),
+  (1, 1, NULL, 'Thông báo kiểm tra hệ thống điện', 'Sẽ tiến hành kiểm tra hệ thống điện từ 8h-12h ngày 10/5', 'THONG_BAO_CHUNG', NOW() - INTERVAL 5 DAY),
   (2, 1, NULL, 'Lịch vệ sinh chung cư', 'Vệ sinh sảnh chính vào các ngày thứ 2, thứ 5 hàng tuần', 'THONG_BAO_CHUNG', NOW() - INTERVAL 4 DAY),
   (3, 1, NULL, 'Nhắc nhở thanh toán phí quản lý', 'Vui lòng thanh toán phí quản lý tháng 05 trước ngày 15/5', 'NHAC_NHO', NOW() - INTERVAL 3 DAY),
   (4, 1, 1, 'Sửa chữa đường ống nước', 'Căn hộ A101 cần sửa chữa đường ống nước, vui lòng liên hệ quản lý', 'CANH_BAO', NOW() - INTERVAL 2 DAY),
@@ -197,22 +197,4 @@ INSERT IGNORE INTO notifications (id, sender_id, apartment_id, title, content, t
   (18, 1, 20, 'Phục vụ bảo vệ đêm', 'Bảo vệ đêm sẽ tuần tra thêm vào các lối vào chính', 'NHAC_NHO', NOW() - INTERVAL 17 DAY),
   (19, 1, NULL, 'Lịch dọn dẻp chung cư', 'Chương trình dọn dẻp toàn diện sẽ bắt đầu từ tuần sau', 'THONG_BAO_CHUNG', NOW() - INTERVAL 18 DAY),
   (20, 1, NULL, 'Cuộc khảo sát hài lòng', 'Kính mời cư dân tham gia khảo sát hài lòng dịch vụ quản lý', 'NHAC_NHO', NOW() - INTERVAL 19 DAY);
-
--- INCIDENTS (15 entries - phản ánh sự cố)
-INSERT IGNORE INTO incidents (id, apartment_id, title, description, status, created_at) VALUES
-  (1, 1, 'Đèn hành lang bị hỏng', 'Đèn hành lang tầng 1 bị hỏng, cần thay thế', 'RESOLVED', NOW() - INTERVAL 5 DAY),
-  (2, 2, 'Rò rỉ nước ở bếp', 'Vòi nước ở bếp bị rò rỉ, cần sửa chữa', 'PROCESSING', NOW() - INTERVAL 4 DAY),
-  (3, 4, 'Cửa sổ bị hỏng', 'Cửa sổ phòng khách không đóng kín', 'PENDING', NOW() - INTERVAL 3 DAY),
-  (4, 5, 'Điều hòa không hoạt động', 'Máy điều hòa không phát lạnh', 'PROCESSING', NOW() - INTERVAL 2 DAY),
-  (5, 7, 'Mạng internet yếu', 'Tốc độ internet bị giảm đột ngột', 'RESOLVED', NOW() - INTERVAL 1 DAY),
-  (6, 8, 'Ống thoát nước bị tắc', 'Ống thoát nước ở nhà vệ sinh bị tắc', 'PENDING', NOW()),
-  (7, 10, 'Sơn tường bong tróc', 'Sơn tường ở phòng ngủ bong tróc', 'PENDING', NOW() - INTERVAL 6 DAY),
-  (8, 11, 'Khóa cửa bị kẹt', 'Khóa cửa chính không hoạt động', 'PROCESSING', NOW() - INTERVAL 7 DAY),
-  (9, 13, 'Đèn chùm rơi', 'Đèn chùm ở phòng khách bị lỏng', 'RESOLVED', NOW() - INTERVAL 8 DAY),
-  (10, 15, 'Nước nóng không có', 'Máy nước nóng bị hỏng hoàn toàn', 'PROCESSING', NOW() - INTERVAL 9 DAY),
-  (11, 16, 'Tiếng ồn từ trên', 'Tiếng ồn lớn từ căn hộ trên', 'PENDING', NOW() - INTERVAL 10 DAY),
-  (12, 17, 'Tủ lạnh chạy liên tục', 'Tủ lạnh không ngừng chạy', 'RESOLVED', NOW() - INTERVAL 11 DAY),
-  (13, 19, 'Rêm cửa hỏng', 'Rêm cửa không cuộn được', 'PENDING', NOW() - INTERVAL 12 DAY),
-  (14, 21, 'Nút chuông cửa hỏng', 'Chuông cửa không hoạt động', 'PROCESSING', NOW() - INTERVAL 13 DAY),
-  (15, 22, 'Gương phòng tắm vỡ', 'Gương phòng tắm bị nứt', 'RESOLVED', NOW() - INTERVAL 14 DAY);
 

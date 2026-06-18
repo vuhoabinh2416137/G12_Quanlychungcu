@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS payments (
     fee_id       BIGINT,
     amount       DECIMAL(15, 2) NOT NULL,
     payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    method       VARCHAR(50), -- TIEN_MAT, CHUYEN_KHOAN, MOMO
+    method       VARCHAR(50), -- TRUC_TIEP, QR
     status       VARCHAR(20) DEFAULT 'COMPLETED', -- PENDING, COMPLETED, REJECTED
     note         TEXT,
     FOREIGN KEY (fee_id) REFERENCES fees (id) ON DELETE CASCADE
@@ -93,16 +93,6 @@ CREATE TABLE IF NOT EXISTS notifications (
     FOREIGN KEY (apartment_id) REFERENCES apartments (id) ON DELETE CASCADE
 ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 8. Incidents table (Phản ánh sự cố kỹ thuật)
-CREATE TABLE IF NOT EXISTS incidents (
-    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
-    apartment_id BIGINT,
-    title        VARCHAR(200) NOT NULL,
-    description  TEXT         NOT NULL,
-    status       VARCHAR(50) DEFAULT 'PENDING', -- PENDING, PROCESSING, RESOLVED
-    created_at   TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (apartment_id) REFERENCES apartments (id) ON DELETE CASCADE
-) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 9. System Config table (Cấu hình hệ thống)
 CREATE TABLE IF NOT EXISTS system_config (

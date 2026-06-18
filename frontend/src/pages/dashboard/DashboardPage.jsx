@@ -151,7 +151,7 @@ export default function DashboardPage() {
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 border-b border-slate-100">
               <tr>
-                <th className="px-6 py-4 text-left font-semibold text-slate-600">ID Căn hộ</th>
+                <th className="px-6 py-4 text-left font-semibold text-slate-600">Mã căn hộ</th>
                 <th className="px-6 py-4 text-left font-semibold text-slate-600">Tên phí</th>
                 <th className="px-6 py-4 text-right font-semibold text-slate-600">Số tiền (VNĐ)</th>
                 <th className="px-6 py-4 text-left font-semibold text-slate-600">Hạn chót</th>
@@ -162,7 +162,7 @@ export default function DashboardPage() {
                 <tr key={fee.id} className="transition-colors hover:bg-slate-50/70 group">
                   <td className="px-6 py-4 font-medium text-slate-900">
                     <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10">
-                      {fee.apartmentId}
+                      {apartments.find(a => String(a.id) === String(fee.apartmentId))?.apartmentNumber || fee.apartmentId}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-slate-700">{fee.name}</td>

@@ -103,9 +103,7 @@ export default function AppRoutes() {
               path: '/feedbacks',
               element: (
                 <ExcludeCashierRoute>
-                  <ResidentRestrictedRoute>
-                    <FeedbackPage />
-                  </ResidentRestrictedRoute>
+                  <FeedbackPage />
                 </ExcludeCashierRoute>
               ),
             },

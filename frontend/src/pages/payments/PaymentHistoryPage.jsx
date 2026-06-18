@@ -30,10 +30,11 @@ export default function PaymentHistoryPage() {
     async function loadApts() {
       try {
         const data = await fetchApartments();
+        const occupiedApts = data.filter(a => a.status === 'OCCUPIED');
         if (!cancelled) {
-          setApartments(data);
-          if (data.length > 0) {
-            setSelectedApartmentId(String(data[0].id));
+          setApartments(occupiedApts);
+          if (occupiedApts.length > 0) {
+            setSelectedApartmentId(String(occupiedApts[0].id));
           } else {
             if (isResident) {
               setError('Bạn chưa được gán vào căn hộ nào.');

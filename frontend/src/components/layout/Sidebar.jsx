@@ -48,7 +48,7 @@ export default function Sidebar() {
         <SidebarLink to="/notifications">Thông báo</SidebarLink>
         <SidebarLink to="/payment-history">Lịch sử thanh toán</SidebarLink>
         {auth?.role === 'ADMIN' ? <SidebarLink to="/users">Quản lý tài khoản</SidebarLink> : null}
-        {!isResident && auth?.role !== 'CASHIER' ? <SidebarLink to="/feedbacks">Ý kiến đóng góp</SidebarLink> : null}
+        {auth?.role !== 'CASHIER' ? <SidebarLink to="/feedbacks">Ý kiến đóng góp</SidebarLink> : null}
         {!isResident ? <SidebarLink to="/profile">Tài khoản</SidebarLink> : null}
       </nav>
 

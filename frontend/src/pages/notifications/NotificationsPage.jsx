@@ -32,11 +32,12 @@ export default function NotificationsPage() {
     async function init() {
       try {
         const a = await fetchApartments();
+        const occupiedApts = a.filter(apt => apt.status === 'OCCUPIED');
         if (cancelled) return;
-        setApartments(a);
-        if (!isAdminOrManager && a.length > 0) {
+        setApartments(occupiedApts);
+        if (!isAdminOrManager && occupiedApts.length > 0) {
           // Resident mặc định lấy id đầu tiên
-          setSelectedApartmentId(String(a[0].id));
+          setSelectedApartmentId(String(occupiedApts[0].id));
         }
       } catch (err) {
         if (!cancelled) console.error("Không tải được apartments", err);
