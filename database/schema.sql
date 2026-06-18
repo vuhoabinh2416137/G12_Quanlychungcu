@@ -28,6 +28,8 @@ CREATE TABLE IF NOT EXISTS apartments (
     balance          DECIMAL(15, 2) DEFAULT 0.0,
     so_dien_tieu_thu DECIMAL(10, 2) DEFAULT 0,
     so_nuoc_tieu_thu DECIMAL(10, 2) DEFAULT 0,
+    motorbike_count  INT DEFAULT 0,
+    car_count        INT DEFAULT 0,
     status           VARCHAR(20) DEFAULT 'VACANT' -- VACANT, OCCUPIED
 ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

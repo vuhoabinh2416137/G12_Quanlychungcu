@@ -88,69 +88,50 @@ INSERT IGNORE INTO vehicles (id, apartment_id, license_plate, type, color) VALUE
   (19, 25, '51V-80808', 'XE_MAY', 'Đen'),
   (20, 2, '51W-90909', 'XE_DAP_DIEN', 'Vàng');
 
--- INVOICES (15 entries)
-INSERT IGNORE INTO invoices (id, apartment_id, invoice_number, total_amount, status, issued_date) VALUES
-  (1, 1, 'INV-2026-0001', 1000000, 'UNPAID', NOW()),
-  (2, 2, 'INV-2026-0002', 1080000, 'PAID', NOW()),
-  (3, 4, 'INV-2026-0003', 800000, 'UNPAID', NOW()),
-  (4, 5, 'INV-2026-0004', 650000, 'UNPAID', NOW()),
-  (5, 7, 'INV-2026-0005', 650000, 'PAID', NOW()),
-  (6, 8, 'INV-2026-0006', 550000, 'UNPAID', NOW()),
-  (7, 10, 'INV-2026-0007', 800000, 'UNPAID', NOW()),
-  (8, 11, 'INV-2026-0008', 650000, 'UNPAID', NOW()),
-  (9, 13, 'INV-2026-0009', 700000, 'PAID', NOW()),
-  (10, 15, 'INV-2026-0010', 950000, 'PAID', NOW()),
-  (11, 16, 'INV-2026-0011', 750000, 'PAID', NOW()),
-  (12, 17, 'INV-2026-0012', 800000, 'UNPAID', NOW()),
-  (13, 19, 'INV-2026-0013', 850000, 'PAID', NOW()),
-  (14, 21, 'INV-2026-0014', 500000, 'UNPAID', NOW()),
-  (15, 22, 'INV-2026-0015', 500000, 'PAID', NOW()),
-  (16, 24, 'INV-2026-0016', 600000, 'UNPAID', NOW()),
-  (17, 25, 'INV-2026-0017', 700000, 'PAID', NOW());
 
 -- FEES (25 entries - tháng 05/2026)
-INSERT IGNORE INTO fees (id, invoice_id, apartment_id, name, description, amount, type, due_date, paid) VALUES
-  (1, 1, 1, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 500000, 'QUAN_LY', '2026-05-15', FALSE),
-  (2, 1, 1, 'Phí điện tháng 05/2026', 'Tiêu thụ điện', 350000, 'DIEN', '2026-05-15', FALSE),
-  (20, 1, 1, 'Phí gửi xe tháng 05/2026', 'Gửi xe', 150000, 'GUI_XE', '2026-05-15', FALSE),
+INSERT IGNORE INTO fees (id, apartment_id, name, description, amount, type, due_date, paid) VALUES
+  (1, 1, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 500000, 'QUAN_LY', '2026-05-15', FALSE),
+  (2, 1, 'Phí điện tháng 05/2026', 'Tiêu thụ điện', 350000, 'DIEN', '2026-05-15', FALSE),
+  (20, 1, 'Phí gửi xe tháng 05/2026', 'Gửi xe', 150000, 'GUI_XE', '2026-05-15', FALSE),
 
-  (3, 2, 2, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 650000, 'QUAN_LY', '2026-05-15', TRUE),
-  (4, 2, 2, 'Phí nước tháng 05/2026', 'Tiêu thụ nước', 280000, 'NUOC', '2026-05-15', TRUE),
-  (21, 2, 2, 'Phí gửi xe tháng 05/2026', 'Gửi xe', 150000, 'GUI_XE', '2026-05-15', TRUE),
+  (3, 2, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 650000, 'QUAN_LY', '2026-05-15', TRUE),
+  (4, 2, 'Phí nước tháng 05/2026', 'Tiêu thụ nước', 280000, 'NUOC', '2026-05-15', TRUE),
+  (21, 2, 'Phí gửi xe tháng 05/2026', 'Gửi xe', 150000, 'GUI_XE', '2026-05-15', TRUE),
 
-  (5, 3, 4, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 650000, 'QUAN_LY', '2026-05-15', FALSE),
-  (22, 3, 4, 'Phí gửi xe tháng 05/2026', 'Gửi xe', 150000, 'GUI_XE', '2026-05-15', FALSE),
+  (5, 4, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 650000, 'QUAN_LY', '2026-05-15', FALSE),
+  (22, 4, 'Phí gửi xe tháng 05/2026', 'Gửi xe', 150000, 'GUI_XE', '2026-05-15', FALSE),
 
-  (6, 4, 5, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 650000, 'QUAN_LY', '2026-05-15', FALSE),
+  (6, 5, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 650000, 'QUAN_LY', '2026-05-15', FALSE),
 
-  (7, 5, 7, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 550000, 'QUAN_LY', '2026-05-15', TRUE),
-  (23, 5, 7, 'Phí gửi xe tháng 05/2026', 'Gửi xe', 100000, 'GUI_XE', '2026-05-15', TRUE),
+  (7, 7, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 550000, 'QUAN_LY', '2026-05-15', TRUE),
+  (23, 7, 'Phí gửi xe tháng 05/2026', 'Gửi xe', 100000, 'GUI_XE', '2026-05-15', TRUE),
 
-  (8, 6, 8, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 550000, 'QUAN_LY', '2026-05-15', FALSE),
+  (8, 8, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 550000, 'QUAN_LY', '2026-05-15', FALSE),
 
-  (9, 7, 10, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 650000, 'QUAN_LY', '2026-05-15', FALSE),
-  (24, 7, 10, 'Phí gửi xe tháng 05/2026', 'Gửi xe', 150000, 'GUI_XE', '2026-05-15', FALSE),
+  (9, 10, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 650000, 'QUAN_LY', '2026-05-15', FALSE),
+  (24, 10, 'Phí gửi xe tháng 05/2026', 'Gửi xe', 150000, 'GUI_XE', '2026-05-15', FALSE),
 
-  (10, 8, 11, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 650000, 'QUAN_LY', '2026-05-15', FALSE),
+  (10, 11, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 650000, 'QUAN_LY', '2026-05-15', FALSE),
 
-  (11, 9, 13, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 700000, 'QUAN_LY', '2026-05-15', TRUE),
+  (11, 13, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 700000, 'QUAN_LY', '2026-05-15', TRUE),
 
-  (12, 10, 15, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 750000, 'QUAN_LY', '2026-05-15', TRUE),
-  (25, 10, 15, 'Phí gửi xe tháng 05/2026', 'Gửi xe', 200000, 'GUI_XE', '2026-05-15', TRUE),
+  (12, 15, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 750000, 'QUAN_LY', '2026-05-15', TRUE),
+  (25, 15, 'Phí gửi xe tháng 05/2026', 'Gửi xe', 200000, 'GUI_XE', '2026-05-15', TRUE),
 
-  (13, 11, 16, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 750000, 'QUAN_LY', '2026-05-15', TRUE),
+  (13, 16, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 750000, 'QUAN_LY', '2026-05-15', TRUE),
 
-  (14, 12, 17, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 800000, 'QUAN_LY', '2026-05-15', FALSE),
+  (14, 17, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 800000, 'QUAN_LY', '2026-05-15', FALSE),
 
-  (15, 13, 19, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 850000, 'QUAN_LY', '2026-05-15', TRUE),
+  (15, 19, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 850000, 'QUAN_LY', '2026-05-15', TRUE),
 
-  (16, 14, 21, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 500000, 'QUAN_LY', '2026-05-15', FALSE),
+  (16, 21, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 500000, 'QUAN_LY', '2026-05-15', FALSE),
 
-  (17, 15, 22, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 500000, 'QUAN_LY', '2026-05-15', TRUE),
+  (17, 22, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 500000, 'QUAN_LY', '2026-05-15', TRUE),
 
-  (18, 16, 24, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 600000, 'QUAN_LY', '2026-05-15', FALSE),
+  (18, 24, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 600000, 'QUAN_LY', '2026-05-15', FALSE),
 
-  (19, 17, 25, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 700000, 'QUAN_LY', '2026-05-15', TRUE);
+  (19, 25, 'Phí quản lý tháng 05/2026', 'Quản lý chung cư', 700000, 'QUAN_LY', '2026-05-15', TRUE);
 
 -- PAYMENTS (20 entries - thanh toán phí)
 INSERT IGNORE INTO payments (id, fee_id, amount, payment_date, method, note) VALUES
@@ -198,3 +179,20 @@ INSERT IGNORE INTO notifications (id, sender_id, apartment_id, title, content, t
   (19, 1, NULL, 'Lịch dọn dẻp chung cư', 'Chương trình dọn dẻp toàn diện sẽ bắt đầu từ tuần sau', 'THONG_BAO_CHUNG', NOW() - INTERVAL 18 DAY),
   (20, 1, NULL, 'Cuộc khảo sát hài lòng', 'Kính mời cư dân tham gia khảo sát hài lòng dịch vụ quản lý', 'NHAC_NHO', NOW() - INTERVAL 19 DAY);
 
+-- =================================================================================
+-- TỰ ĐỘNG CẬP NHẬT SỐ LIỆU CHO BẢNG APARTMENTS ĐỂ DEMO
+-- =================================================================================
+
+-- 1. Cập nhật số lượng xe máy, ô tô tự động dựa trên bảng vehicles
+UPDATE apartments a
+SET 
+  motorbike_count = (SELECT COUNT(*) FROM vehicles v WHERE v.apartment_id = a.id AND v.type IN ('XE_MAY', 'XE_DAP_DIEN')),
+  car_count = (SELECT COUNT(*) FROM vehicles v WHERE v.apartment_id = a.id AND v.type = 'O_TO');
+
+-- 2. Tạo số liệu giả lập cho số Điện (50-250 kWh) và Nước (5-25 m³) 
+-- (Chỉ áp dụng cho các căn hộ đang có người ở)
+UPDATE apartments 
+SET 
+  so_dien_tieu_thu = FLOOR(RAND() * 200) + 50,
+  so_nuoc_tieu_thu = FLOOR(RAND() * 20) + 5
+WHERE status = 'OCCUPIED';

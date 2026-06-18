@@ -2,6 +2,7 @@ package com.bluemoon.controller;
 
 import com.bluemoon.dto.ApartmentResponseAdminDto;
 import com.bluemoon.dto.ApartmentResponseUserDto;
+import com.bluemoon.dto.VehicleDto;
 import com.bluemoon.dto.mapper.ApartmentMapper;
 import com.bluemoon.dto.request.ApartmentRequestDto;
 import com.bluemoon.dto.request.ConsumptionRequestDto;
@@ -16,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/apartments")
@@ -64,6 +66,20 @@ public class ApartmentController {
     ) {
         residentAccessService.ensureResidentApartmentAccess(auth, id);
         return ResponseEntity.ok(apartmentMapper.toUserDto(apartmentService.getApartmentById(id)));
+    }
+
+    @GetMapping("/{id}/vehicles")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
+    public ResponseEntity<List<VehicleDto>> getVehicles(
+            @PathVariable Long id,
+            Authentication auth
+    ) {
+        if (residentAccessService.isResident(auth)) {
+            residentAccessService.ensureResidentApartmentAccess(auth, id);
+        }
+        List<com.bluemoon.model.Vehicle> vehicles = apartmentService.getVehiclesByApartmentId(id);
+        List<VehicleDto> dtoList = vehicles.stream().map(VehicleDto::new).collect(Collectors.toList());
+        return ResponseEntity.ok(dtoList);
     }
 
     @PostMapping

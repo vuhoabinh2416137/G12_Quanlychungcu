@@ -23,3 +23,8 @@ export async function updateConsumption(id, payload) {
   const { data } = await apiClient.patch(`/apartments/${id}/consumption`, payload);
   return data;
 }
+
+export async function fetchApartmentVehicles(id) {
+  const { data } = await apiClient.get(`/apartments/${id}/vehicles`);
+  return data;
+}

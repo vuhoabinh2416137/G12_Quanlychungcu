@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 echo Đang đóng cổng 8080 (Backend)...
 FOR /F "tokens=5" %%a in ('netstat -aon ^| findstr ":8080"') do taskkill /F /PID %%a 2>nul
 

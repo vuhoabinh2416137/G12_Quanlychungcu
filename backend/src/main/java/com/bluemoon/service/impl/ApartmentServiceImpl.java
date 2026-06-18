@@ -6,6 +6,7 @@ import com.bluemoon.model.Apartment;
 import com.bluemoon.model.Resident;
 import com.bluemoon.repository.ApartmentRepository;
 import com.bluemoon.repository.ResidentRepository;
+import com.bluemoon.repository.VehicleRepository;
 import com.bluemoon.service.ApartmentService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,10 +18,12 @@ public class ApartmentServiceImpl implements ApartmentService {
 
     private final ApartmentRepository apartmentRepository;
     private final ResidentRepository residentRepository;
+    private final VehicleRepository vehicleRepository;
 
-    public ApartmentServiceImpl(ApartmentRepository apartmentRepository, ResidentRepository residentRepository) {
+    public ApartmentServiceImpl(ApartmentRepository apartmentRepository, ResidentRepository residentRepository, VehicleRepository vehicleRepository) {
         this.apartmentRepository = apartmentRepository;
         this.residentRepository = residentRepository;
+        this.vehicleRepository = vehicleRepository;
     }
 
     @Override
@@ -74,5 +77,11 @@ public class ApartmentServiceImpl implements ApartmentService {
         residentRepository.deleteAll(residents);
 
         apartmentRepository.delete(existingApartment);
+    }
+
+    @Override
+    public List<com.bluemoon.model.Vehicle> getVehiclesByApartmentId(Long id) {
+        getApartmentById(id); // Ensure apartment exists
+        return vehicleRepository.findByApartmentId(id);
     }
 }

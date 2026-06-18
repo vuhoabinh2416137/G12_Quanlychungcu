@@ -8,6 +8,7 @@ import {
 import { useAuth } from '../../hooks/useAuth.js';
 import { isNonEmptyString } from '../../utils/validators.js';
 import ApartmentDetailModal from './ApartmentDetailModal.jsx';
+import VehicleListModal from './VehicleListModal.jsx';
 
 const STATUSES = ['VACANT', 'OCCUPIED'];
 
@@ -30,6 +31,7 @@ export default function ApartmentsPage() {
   const [error, setError] = useState('');
 
   const [detailApartment, setDetailApartment] = useState(null);
+  const [vehicleModalApartment, setVehicleModalApartment] = useState(null);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [createTouched, setCreateTouched] = useState({});
@@ -380,10 +382,30 @@ export default function ApartmentsPage() {
                     {a.area == null ? '-' : `${Number(a.area).toLocaleString('vi-VN')} m²`}
                   </td>
                   <td className="px-5 py-3 text-center text-slate-600 font-medium">
-                    {a.motorbikeCount != null ? a.motorbikeCount : '0'}
+                    {a.motorbikeCount > 0 ? (
+                      <button
+                        onClick={() => setVehicleModalApartment(a)}
+                        className="inline-flex items-center justify-center min-w-[2rem] rounded bg-blue-50 px-2 py-1 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 hover:underline cursor-pointer"
+                        title="Xem chi tiết xe"
+                      >
+                        {a.motorbikeCount}
+                      </button>
+                    ) : (
+                      '0'
+                    )}
                   </td>
                   <td className="px-5 py-3 text-center text-slate-600 font-medium">
-                    {a.carCount != null ? a.carCount : '0'}
+                    {a.carCount > 0 ? (
+                      <button
+                        onClick={() => setVehicleModalApartment(a)}
+                        className="inline-flex items-center justify-center min-w-[2rem] rounded bg-indigo-50 px-2 py-1 text-sm font-semibold text-indigo-700 transition-colors hover:bg-indigo-100 hover:underline cursor-pointer"
+                        title="Xem chi tiết xe"
+                      >
+                        {a.carCount}
+                      </button>
+                    ) : (
+                      '0'
+                    )}
                   </td>
                   <td className="px-5 py-3">
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -674,6 +696,14 @@ export default function ApartmentsPage() {
           setDetailApartment(updated);
         }}
       />
+
+      {/* Modal chi tiết phương tiện */}
+      {vehicleModalApartment && (
+        <VehicleListModal
+          apartment={vehicleModalApartment}
+          onClose={() => setVehicleModalApartment(null)}
+        />
+      )}
     </div>
   );
 }

@@ -27,11 +27,12 @@ Hệ thống quản lý chung cư toàn diện, hỗ trợ Ban quản trị, Cư
 ### Phiên bản 1.0
 - **Quản lý cư dân & căn hộ** – Lưu trữ, tìm kiếm, cập nhật thông tin nhân khẩu và hộ gia đình
 - **Quản lý khoản thu & thu phí dịch vụ** – Tự động tính phí theo diện tích, quản lý phí bắt buộc và tự nguyện
-- **Thông báo & Hóa đơn** – Gửi thông báo đến cư dân, xuất hóa đơn thanh toán có biên lai
+- **Quản lý thanh toán & thu ngân** – Ghi nhận thanh toán và quy trình duyệt hóa đơn dành cho Thủ quỹ
+- **Thông báo & Ý kiến đóng góp** – Gửi thông báo đa luồng đến cư dân, hỗ trợ gửi và phản hồi ý kiến đóng góp, báo cáo sự cố
 - **Phân quyền người dùng** – Phân quyền riêng biệt cho Ban quản trị, Thủ quỹ và Cư dân
 - **Tra cứu & Tìm kiếm** – Tìm nhanh theo số căn hộ, tên cư dân, trạng thái đóng phí
+- **Cấu hình hệ thống** – Ban quản lý có thể điều chỉnh linh hoạt các tham số chung của toà nhà
 - **Giao diện hiện đại (Modern UI/UX)** – Nâng cấp trải nghiệm người dùng với thiết kế trực quan, hiệu ứng mượt mà và thân thiện
-- **Tích hợp Trợ lý ảo (AI Chatbot)** – Hỗ trợ người dùng thao tác và giải đáp các thắc mắc trực tiếp trên hệ thống
 
 ### Phiên bản 2.0 (Roadmap)
 - Hỗ trợ đa chung cư trên cùng hệ thống
@@ -112,8 +113,11 @@ bluemoon/
 │   │   │   │   │   ├── ApartmentController.java
 │   │   │   │   │   ├── FeeController.java
 │   │   │   │   │   ├── PaymentController.java
+│   │   │   │   │   ├── CashierController.java
 │   │   │   │   │   ├── NotificationController.java
 │   │   │   │   │   ├── FeedbackController.java
+│   │   │   │   │   ├── IncidentController.java
+│   │   │   │   │   ├── SystemConfigController.java
 │   │   │   │   │   └── UserController.java
 │   │   │   │   ├── service/       # Business Logic
 │   │   │   │   ├── repository/    # Spring Data JPA Repositories
@@ -143,75 +147,58 @@ bluemoon/
 
 ## 🚀 Cài đặt & Chạy
 
-### Chạy nhanh (Windows)
-Sử dụng script để tự động khởi động Database (Docker), Backend và Frontend:
+### Yêu cầu hệ thống
+- **Docker Desktop** (Để chạy cơ sở dữ liệu)
+- **Java (JDK) 17+**
+- **Node.js 18+**
+*(Lưu ý: Dự án đã tích hợp sẵn Maven Wrapper nên không cần cài đặt cấu hình Maven global)*
+
+### 1-Click Cài đặt cực nhanh (Windows)
+
+Thay vì phải chạy thủ công từng phần, dự án đã cung cấp sẵn script `run-all.bat` giúp bạn chạy ứng dụng cực kì nhanh gọn. Script này sẽ tự động:
+1. Bật **Docker Desktop** (Nếu chưa bật) và khởi tạo MySQL kèm dữ liệu mẫu.
+2. Mở một cửa sổ mới chạy **Spring Boot Backend**.
+3. Mở một cửa sổ mới tự động tải thư viện (npm install) và khởi chạy **React Frontend**.
+
+**Bước 1: Clone repository về máy**
+```bash
+git clone https://github.com/vuhoabinh2416137/G12_Quanlychungcu.git
+cd G12_Quanlychungcu
+```
+
+**Bước 2: Click đúp vào file hoặc chạy lệnh sau**
 ```cmd
 .\run-all.bat
 ```
-*(Yêu cầu đã cài đặt Docker Desktop)*
 
----
+🎉 **Vậy là xong! Bạn hãy đợi một chút cho Backend và Frontend khởi động, sau đó truy cập hệ thống tại: `http://localhost:5173`.**
 
-### Yêu cầu hệ thống
+<details>
+<summary><b>(Tùy chọn) Chạy thủ công trên Linux / macOS hoặc không dùng run-all.bat</b></summary>
 
-| Công cụ | Phiên bản tối thiểu |
-|---------|-------------------|
-| Java (JDK) | 17+ |
-| Node.js | 18+ |
-| MySQL | 8.0+ |
-| Maven | 3.8+ |
+Nếu bạn không sử dụng Windows hoặc muốn chạy từng thành phần độc lập:
 
-### 1. Clone repository
-
+**1. Khởi chạy Database bằng Docker:**
 ```bash
-git clone https://github.com/<your-org>/bluemoon.git
-cd bluemoon
+docker-compose up -d
 ```
 
-### 2. Cấu hình Database
-
-```bash
-# Tạo database
-mysql -u root -p < database/schema.sql
-mysql -u root -p bluemoon < database/seed.sql
-```
-
-Cập nhật `backend/src/main/resources/application.yml`:
-
-```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/bluemoon
-    username: your_username
-    password: your_password
-  jpa:
-    hibernate:
-      ddl-auto: validate
-
-jwt:
-  secret: your_jwt_secret_key
-  expiration: 86400000
-```
-
-### 3. Chạy Backend
-
+**2. Chạy Backend:**
 ```bash
 cd backend
-mvn clean install
-mvn spring-boot:run
+./mvnw clean install
+./mvnw spring-boot:run
 ```
+*(Backend khởi động tại: `http://localhost:8080`)*
 
-Backend khởi động tại: `http://localhost:8080`
-
-### 4. Chạy Frontend
-
+**3. Chạy Frontend:**
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-
-Frontend khởi động tại: `http://localhost:5173`
+*(Frontend khởi động tại: `http://localhost:5173`)*
+</details>
 
 ---
 
@@ -232,8 +219,11 @@ http://localhost:8080/swagger-ui/index.html
 | Apartments | `/api/apartments` | Quản lý căn hộ |
 | Fees | `/api/fees` | Quản lý khoản thu, phí dịch vụ |
 | Payments | `/api/payments` | Ghi nhận & theo dõi thanh toán |
+| Cashier | `/api/cashier` | Quản lý & duyệt thanh toán (Thủ quỹ) |
 | Notifications | `/api/notifications` | Gửi & quản lý thông báo |
 | Feedbacks | `/api/feedbacks` | Gửi & trả lời ý kiến đóng góp |
+| Incidents | `/api/incidents` | Báo cáo & quản lý sự cố chung cư |
+| System Config | `/api/system-config` | Cấu hình tham số hệ thống chung |
 | Users | `/api/users` | Quản lý tài khoản & phân quyền |
 
 ---
@@ -243,11 +233,9 @@ http://localhost:8080/swagger-ui/index.html
 ```bash
 # Chạy toàn bộ unit test (Backend)
 cd backend
-mvn test
+./mvnw test
 
-# Chạy test Frontend
-cd frontend
-npm run test
+# (Frontend hiện sử dụng Vite, cấu hình test đang được cập nhật)
 ```
 
 ---
