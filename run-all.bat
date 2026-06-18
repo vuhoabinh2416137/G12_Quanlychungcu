@@ -25,7 +25,7 @@ docker-compose up -d
 echo [2/3] Starting Spring Boot Backend...
 where java >nul 2>nul
 if %errorlevel% neq 0 (
-    echo [Loi] Khong tim thay 'java'. Ban can phai cai dat Java (JDK 17+) truoc khi chay he thong.
+    echo [Loi] Khong tim thay 'java'. Ban can phai cai dat Java - JDK 17 tro len truoc khi chay he thong.
     pause
     exit /b 1
 )
@@ -38,7 +38,7 @@ if %errorlevel% neq 0 (
     echo [LOI NGHIEM TRONG] KHONG TIM THAY 'npm' tren may tinh cua ban!
     echo He thong Frontend doi hoi phai co Node.js de chay.
     echo Ban vui long tai va cai dat Node.js ban moi nhat tai link sau:
-    echo https://nodejs.org/ (Tai ban LTS)
+    echo https://nodejs.org/ - Vui long tai ban LTS
     echo Sau khi cai dat xong, hay khoi dong lai file nay.
     echo ========================================================
     pause
@@ -46,7 +46,7 @@ if %errorlevel% neq 0 (
 )
 
 if not exist "frontend\node_modules\" (
-    echo [Thong bao] Dang tu dong tai cac thu vien Frontend (npm install) lan dau tien...
+    echo [Thong bao] Dang tu dong tai cac thu vien Frontend - npm install - lan dau tien...
     cmd /c "cd frontend && npm install"
 )
 
