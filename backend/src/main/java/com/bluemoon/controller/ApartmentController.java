@@ -4,11 +4,14 @@ import com.bluemoon.dto.ApartmentResponseAdminDto;
 import com.bluemoon.dto.ApartmentResponseUserDto;
 import com.bluemoon.dto.mapper.ApartmentMapper;
 import com.bluemoon.dto.request.ApartmentRequestDto;
+import com.bluemoon.dto.request.ConsumptionRequestDto;
 import com.bluemoon.model.Apartment;
+import com.bluemoon.security.ResidentAccessService;
 import com.bluemoon.service.ApartmentService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,35 +23,49 @@ public class ApartmentController {
 
     private final ApartmentService apartmentService;
     private final ApartmentMapper apartmentMapper;
+    private final ResidentAccessService residentAccessService;
 
-    public ApartmentController(ApartmentService apartmentService, ApartmentMapper apartmentMapper) {
+    public ApartmentController(
+            ApartmentService apartmentService,
+            ApartmentMapper apartmentMapper,
+            ResidentAccessService residentAccessService
+    ) {
         this.apartmentService = apartmentService;
         this.apartmentMapper = apartmentMapper;
+        this.residentAccessService = residentAccessService;
     }
 
-    // ADMIN + MANAGER: xem toàn bộ danh sách, đầy đủ thông tin
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    public ResponseEntity<List<ApartmentResponseAdminDto>> getAll() {
-        List<Apartment> apartments = apartmentService.getAllApartments();
-        return ResponseEntity.ok(apartmentMapper.toAdminDtoList(apartments));
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
+    public ResponseEntity<List<ApartmentResponseAdminDto>> getAll(Authentication auth) {
+        List<Apartment> list = apartmentService.getAllApartments();
+        if (residentAccessService.isResident(auth)) {
+            Long apartmentId = residentAccessService.getResidentApartmentId(auth);
+            list = list.stream().filter(a -> apartmentId.equals(a.getId())).toList();
+        }
+        return ResponseEntity.ok(apartmentMapper.toAdminDtoList(list));
     }
 
-    // ADMIN + MANAGER: xem chi tiết 1 căn hộ
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    public ResponseEntity<ApartmentResponseAdminDto> getById(@PathVariable Long id) {
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RESIDENT')")
+    public ResponseEntity<ApartmentResponseAdminDto> getById(
+            @PathVariable Long id,
+            Authentication auth
+    ) {
+        residentAccessService.ensureResidentApartmentAccess(auth, id);
         return ResponseEntity.ok(apartmentMapper.toAdminDto(apartmentService.getApartmentById(id)));
     }
 
-    // RESIDENT: xem thông tin căn hộ của mình (ít field hơn)
     @GetMapping("/{id}/info")
     @PreAuthorize("hasRole('RESIDENT')")
-    public ResponseEntity<ApartmentResponseUserDto> getInfoForResident(@PathVariable Long id) {
+    public ResponseEntity<ApartmentResponseUserDto> getInfoForResident(
+            @PathVariable Long id,
+            Authentication auth
+    ) {
+        residentAccessService.ensureResidentApartmentAccess(auth, id);
         return ResponseEntity.ok(apartmentMapper.toUserDto(apartmentService.getApartmentById(id)));
     }
 
-    // ADMIN: tạo căn hộ mới
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApartmentResponseAdminDto> create(@Valid @RequestBody ApartmentRequestDto requestDto) {
@@ -57,23 +74,38 @@ public class ApartmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(apartmentMapper.toAdminDto(saved));
     }
 
-    // ADMIN: cập nhật căn hộ
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApartmentResponseAdminDto> update(
             @PathVariable Long id,
-            @Valid @RequestBody ApartmentRequestDto requestDto) {
+            @Valid @RequestBody ApartmentRequestDto requestDto
+    ) {
         Apartment existing = apartmentService.getApartmentById(id);
-        apartmentMapper.updateEntityFromDto(requestDto, existing); // mapper ghi đè, giữ apartmentNumber
+        apartmentMapper.updateEntityFromDto(requestDto, existing);
         Apartment updated = apartmentService.updateApartment(id, existing);
         return ResponseEntity.ok(apartmentMapper.toAdminDto(updated));
     }
 
-    // ADMIN: xóa căn hộ
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         apartmentService.deleteApartment(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Cập nhật số liệu tiêu thụ điện/nước cho 1 căn hộ
+     */
+    @PatchMapping("/{id}/consumption")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
+    public ResponseEntity<ApartmentResponseAdminDto> updateConsumption(
+            @PathVariable Long id,
+            @Valid @RequestBody ConsumptionRequestDto dto
+    ) {
+        Apartment apartment = apartmentService.getApartmentById(id);
+        apartment.setSoDienTieuThu(dto.soDienTieuThu());
+        apartment.setSoNuocTieuThu(dto.soNuocTieuThu());
+        Apartment saved = apartmentService.updateApartment(id, apartment);
+        return ResponseEntity.ok(apartmentMapper.toAdminDto(saved));
     }
 }

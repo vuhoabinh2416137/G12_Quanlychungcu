@@ -21,6 +21,10 @@ public class Resident {
     @JoinColumn(name = "apartment_id")
     private Apartment apartment;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", unique = true)
+    private User user;
+
     @Size(max = 100)
     @NotNull
     @Column(name = "full_name", nullable = false, length = 100)
@@ -63,6 +67,14 @@ public class Resident {
 
     public void setApartment(Apartment apartment) {
         this.apartment = apartment;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getFullName() {

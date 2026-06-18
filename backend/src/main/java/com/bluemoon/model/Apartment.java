@@ -41,6 +41,10 @@ public class Apartment {
     @Column(name = "status", length = 20)
     private String status;
 
+    @Column(name = "balance", precision = 15, scale = 2)
+    @ColumnDefault("0.0")
+    private BigDecimal balance;
+
     public Long getId() {
         return id;
     }
@@ -87,6 +91,62 @@ public class Apartment {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public BigDecimal getBalance() {
+        return balance;
+    }
+
+    public void setBalance(BigDecimal balance) {
+        this.balance = balance;
+    }
+
+    @Column(name = "so_dien_tieu_thu", precision = 10, scale = 2)
+    @ColumnDefault("0")
+    private BigDecimal soDienTieuThu = BigDecimal.ZERO;
+
+    @Column(name = "so_nuoc_tieu_thu", precision = 10, scale = 2)
+    @ColumnDefault("0")
+    private BigDecimal soNuocTieuThu = BigDecimal.ZERO;
+
+    public BigDecimal getSoDienTieuThu() {
+        return soDienTieuThu;
+    }
+
+    public void setSoDienTieuThu(BigDecimal soDienTieuThu) {
+        this.soDienTieuThu = soDienTieuThu;
+    }
+
+    public BigDecimal getSoNuocTieuThu() {
+        return soNuocTieuThu;
+    }
+
+    public void setSoNuocTieuThu(BigDecimal soNuocTieuThu) {
+        this.soNuocTieuThu = soNuocTieuThu;
+    }
+
+    @Column(name = "motorbike_count")
+    @ColumnDefault("0")
+    private Integer motorbikeCount = 0;
+
+    @Column(name = "car_count")
+    @ColumnDefault("0")
+    private Integer carCount = 0;
+
+    public Integer getMotorbikeCount() {
+        return motorbikeCount;
+    }
+
+    public void setMotorbikeCount(Integer motorbikeCount) {
+        this.motorbikeCount = motorbikeCount;
+    }
+
+    public Integer getCarCount() {
+        return carCount;
+    }
+
+    public void setCarCount(Integer carCount) {
+        this.carCount = carCount;
     }
 
 }

@@ -10,6 +10,19 @@ import java.time.Instant;
 /**
  * DTO for {@link com.bluemoon.model.Payment}
  */
-public record PaymentResponseUserDto(Long id,  BigDecimal amount, Instant paymentDate,
-                                      String method) implements Serializable {
-}
+public record PaymentResponseUserDto(
+        Long id,  
+        Long feeId,
+        String feeName,
+        BigDecimal amount, 
+        Instant paymentDate,
+        Instant transferTime,
+        String method, 
+        String status,
+        String receiptNumber,
+        BigDecimal refundAmount,
+        String refundBank,
+        String refundAccountNumber,
+        String refundAccountName,
+        String refundStatus
+) implements Serializable {}

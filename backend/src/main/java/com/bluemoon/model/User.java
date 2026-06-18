@@ -28,7 +28,7 @@ public class User {
 
     @Size(max = 20)
     @Pattern(
-            regexp = "ADMIN|MANAGER|RESIDENT",
+            regexp = "ADMIN|CASHIER|MAINTENANCE|RESIDENT",
             message = "role không hợp lệ"
     )
     @NotNull
@@ -52,7 +52,7 @@ public class User {
     @Column(name = "active")
     private Boolean active;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
+    @ColumnDefault("CURRENT_TIMESTAMP(6)")
     @Column(name = "created_at")
     private Instant createdAt;
 

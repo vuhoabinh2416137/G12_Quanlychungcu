@@ -10,4 +10,8 @@ public interface ResidentRepository extends JpaRepository<Resident, Long> {
     List<Resident> findByApartment_Id(Long apartmentId);
 
     Optional<Resident> findByIdCard(String idCard);
+
+    Optional<Resident> findByUser_Username(String username);
+
+    Optional<Resident> findByPhone(String phone);
 }

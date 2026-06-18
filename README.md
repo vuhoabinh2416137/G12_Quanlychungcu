@@ -6,7 +6,7 @@
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?logo=mysql)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-Hệ thống quản lý chung cư toàn diện, hỗ trợ Ban quản trị, Cư dân, Thủ quỹ và Nhân viên bảo trì trong việc quản lý thông tin dân cư, thu phí dịch vụ, gửi thông báo và xuất hóa đơn.
+Hệ thống quản lý chung cư toàn diện, hỗ trợ Ban quản trị, Cư dân và Thủ quỹ trong việc quản lý thông tin dân cư, thu phí dịch vụ, gửi thông báo và xuất hóa đơn.
 
 ---
 
@@ -28,8 +28,10 @@ Hệ thống quản lý chung cư toàn diện, hỗ trợ Ban quản trị, Cư
 - **Quản lý cư dân & căn hộ** – Lưu trữ, tìm kiếm, cập nhật thông tin nhân khẩu và hộ gia đình
 - **Quản lý khoản thu & thu phí dịch vụ** – Tự động tính phí theo diện tích, quản lý phí bắt buộc và tự nguyện
 - **Thông báo & Hóa đơn** – Gửi thông báo đến cư dân, xuất hóa đơn thanh toán có biên lai
-- **Phân quyền người dùng** – Phân quyền riêng biệt cho Ban quản trị, Thủ quỹ, Cư dân, Nhân viên bảo trì
+- **Phân quyền người dùng** – Phân quyền riêng biệt cho Ban quản trị, Thủ quỹ và Cư dân
 - **Tra cứu & Tìm kiếm** – Tìm nhanh theo số căn hộ, tên cư dân, trạng thái đóng phí
+- **Giao diện hiện đại (Modern UI/UX)** – Nâng cấp trải nghiệm người dùng với thiết kế trực quan, hiệu ứng mượt mà và thân thiện
+- **Tích hợp Trợ lý ảo (AI Chatbot)** – Hỗ trợ người dùng thao tác và giải đáp các thắc mắc trực tiếp trên hệ thống
 
 ### Phiên bản 2.0 (Roadmap)
 - Hỗ trợ đa chung cư trên cùng hệ thống
@@ -69,6 +71,7 @@ bluemoon/
 ├── 📄 README.md
 ├── 📄 .gitignore
 ├── 📄 docker-compose.yml          # (tuỳ chọn) chạy local với Docker
+├── 📄 run-all.bat                 # Script chạy nhanh dự án (Docker DB, Backend, Frontend)
 │
 ├── 📁 frontend/                   # React.js Application
 │   ├── public/
@@ -84,8 +87,11 @@ bluemoon/
 │   │   │   ├── dashboard/         # Trang tổng quan
 │   │   │   ├── residents/         # Quản lý cư dân & căn hộ
 │   │   │   ├── fees/              # Quản lý khoản thu & phí
+│   │   │   ├── payments/          # Lịch sử thanh toán
 │   │   │   ├── notifications/     # Thông báo
-│   │   │   ├── invoices/          # Hóa đơn & biên lai
+│   │   │   ├── feedback/          # Ý kiến đóng góp
+│   │   │   ├── users/             # Quản lý tài khoản
+│   │   │   ├── cashier/           # Duyệt thanh toán
 │   │   │   └── profile/           # Thông tin cá nhân
 │   │   ├── hooks/                 # Custom React Hooks
 │   │   ├── store/                 # State management (Redux / Zustand)
@@ -105,20 +111,20 @@ bluemoon/
 │   │   │   │   │   ├── ResidentController.java
 │   │   │   │   │   ├── ApartmentController.java
 │   │   │   │   │   ├── FeeController.java
+│   │   │   │   │   ├── PaymentController.java
 │   │   │   │   │   ├── NotificationController.java
-│   │   │   │   │   └── InvoiceController.java
+│   │   │   │   │   ├── FeedbackController.java
+│   │   │   │   │   └── UserController.java
 │   │   │   │   ├── service/       # Business Logic
 │   │   │   │   ├── repository/    # Spring Data JPA Repositories
 │   │   │   │   ├── model/         # JPA Entity classes
-│   │   │   │   │   ├── User.java
-│   │   │   │   │   ├── Resident.java
-│   │   │   │   │   ├── Apartment.java
-│   │   │   │   │   ├── Fee.java
-│   │   │   │   │   ├── Payment.java
-│   │   │   │   │   └── Notification.java
+│   │   │   │   │   ├── User.java, Resident.java, Apartment.java...
+│   │   │   │   │   └── enums/     # Enum classes (PaymentStatus, FeeType...)
 │   │   │   │   ├── dto/           # Data Transfer Objects
-│   │   │   │   ├── exception/     # Custom exceptions & handlers
-│   │   │   │   └── util/          # JWT Util, Mapper, ...
+│   │   │   │   │   └── mapper/    # DTO Mappers
+│   │   │   │   ├── exception/     # Custom exceptions & GlobalExceptionHandler
+│   │   │   │   ├── scheduler/     # Scheduled tasks (FeeScheduler)
+│   │   │   │   └── util/          # JWT Util, helpers...
 │   │   │   └── resources/
 │   │   │       ├── application.yml
 │   │   │       └── application-prod.yml
@@ -131,18 +137,20 @@ bluemoon/
 │   ├── schema.sql                 # DDL – Tạo bảng
 │   ├── seed.sql                   # Dữ liệu mẫu
 │   └── migrations/                # Các file migration theo phiên bản
-│
-└── 📁 docs/
-    ├── ProjectCharter_v1.0.docx
-    ├── WBS_v1.0.docx
-    ├── Epic_UserStory.xlsx
-    ├── API.md                     # Tài liệu API chi tiết
-    └── ERD.png                    # Entity Relationship Diagram
 ```
 
 ---
 
 ## 🚀 Cài đặt & Chạy
+
+### Chạy nhanh (Windows)
+Sử dụng script để tự động khởi động Database (Docker), Backend và Frontend:
+```cmd
+.\run-all.bat
+```
+*(Yêu cầu đã cài đặt Docker Desktop)*
+
+---
 
 ### Yêu cầu hệ thống
 
@@ -225,7 +233,7 @@ http://localhost:8080/swagger-ui/index.html
 | Fees | `/api/fees` | Quản lý khoản thu, phí dịch vụ |
 | Payments | `/api/payments` | Ghi nhận & theo dõi thanh toán |
 | Notifications | `/api/notifications` | Gửi & quản lý thông báo |
-| Invoices | `/api/invoices` | Xuất hóa đơn, biên lai |
+| Feedbacks | `/api/feedbacks` | Gửi & trả lời ý kiến đóng góp |
 | Users | `/api/users` | Quản lý tài khoản & phân quyền |
 
 ---
