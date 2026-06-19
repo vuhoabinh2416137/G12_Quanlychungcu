@@ -304,6 +304,7 @@ export default function UsersPage() {
                     phone: createForm.phone.trim() || null,
                   }
                 });
+                setCreateStatus({ submitting: false, error: '', success: '' });
                 return; // Wait for modal confirmation
               }
 

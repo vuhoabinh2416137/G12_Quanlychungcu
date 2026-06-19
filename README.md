@@ -82,6 +82,7 @@ bluemoon/
 │   │   ├── components/            # UI Components dùng chung
 │   │   │   ├── common/            # Button, Modal, Table, Input...
 │   │   │   ├── layout/            # Sidebar, Header, Footer
+│   │   │   ├── payment/           # Component thanh toán
 │   │   │   └── charts/            # Biểu đồ thống kê
 │   │   ├── pages/                 # Các trang chính
 │   │   │   ├── auth/              # Đăng nhập, Đổi mật khẩu
@@ -106,7 +107,8 @@ bluemoon/
 │   ├── src/
 │   │   ├── main/
 │   │   │   ├── java/com/bluemoon/
-│   │   │   │   ├── config/        # Security, CORS, JWT config
+│   │   │   │   ├── config/        # CORS, Database Seed config
+│   │   │   │   ├── security/      # Security, JWT config
 │   │   │   │   ├── controller/    # REST Controllers
 │   │   │   │   │   ├── AuthController.java
 │   │   │   │   │   ├── ResidentController.java
@@ -130,17 +132,13 @@ bluemoon/
 │   │   │   │   ├── scheduler/     # Scheduled tasks (FeeScheduler)
 │   │   │   │   └── util/          # JWT Util, helpers...
 │   │   │   └── resources/
-│   │   │       ├── application.yml
-│   │   │       └── application-prod.yml
-│   │   └── test/
-│   │       └── java/com/bluemoon/  # JUnit Test classes
+│   │   │       ├── application.properties
+│   │   │       └── schema.sql
 │   ├── pom.xml
-│   └── Dockerfile
 │
 ├── 📁 database/
 │   ├── schema.sql                 # DDL – Tạo bảng
-│   ├── seed.sql                   # Dữ liệu mẫu
-│   └── migrations/                # Các file migration theo phiên bản
+│   └── seed.sql                   # Dữ liệu mẫu
 ```
 
 ---

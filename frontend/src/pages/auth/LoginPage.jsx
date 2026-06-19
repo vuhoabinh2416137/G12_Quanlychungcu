@@ -4,6 +4,7 @@ import { isMockApi } from '../../api/apiBaseUrl.js';
 import { loginWithJwt, registerUser, checkResidentForAuth } from '../../api/authApi.js';
 import { getResidentByPhone } from '../../api/residentsApi.js';
 import { useAuth } from '../../hooks/useAuth.js';
+import Modal from '../../components/common/Modal.jsx';
 import { isNonEmptyString, isValidVietnamPhone } from '../../utils/validators.js';
 
 const ROLES = ['ADMIN', 'CASHIER', 'RESIDENT'];
@@ -28,6 +29,12 @@ export default function LoginPage() {
   const [touched, setTouched] = useState({ username: false, password: false, phone: false, fullName: false });
   const [formError, setFormError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    fullName: '',
+    pendingPayload: null,
+  });
 
   const errors = useMemo(() => {
     const next = {};
@@ -105,25 +112,19 @@ export default function LoginPage() {
                    
                    // Nếu hệ thống trả về thông tin (fullName) và hasAccount = false
                    // Hỏi người dùng xác nhận
-                   const isConfirmed = window.confirm(`Hệ thống tìm thấy tên bạn là: ${resData.fullName}. Bạn có muốn tạo tài khoản không?`);
-                   if (!isConfirmed) {
-                       return;
-                   }
-                   
-                   await registerUser({
-                     username: trimmedUsername,
-                     password: trimmedPassword,
-                     role: 'RESIDENT',
+                   setConfirmModal({
+                     isOpen: true,
                      fullName: resData.fullName,
-                     phone: regPhone.trim(),
+                     pendingPayload: {
+                       username: trimmedUsername,
+                       password: trimmedPassword,
+                       role: 'RESIDENT',
+                       fullName: resData.fullName,
+                       phone: regPhone.trim(),
+                     }
                    });
-                   
-                   const response = await loginWithJwt({
-                     username: trimmedUsername,
-                     password: trimmedPassword,
-                   });
-                   login(response);
-                   navigate('/apartments', { replace: true });
+                   setSubmitting(false);
+                   return;
 
                 } catch(err) {
                    const msg = err?.response?.data?.message || err.message || 'Lỗi kiểm tra cư dân.';
@@ -237,13 +238,63 @@ export default function LoginPage() {
           </div>
         </form>
 
-        <div className="mt-8 border-t border-slate-100 pt-6 text-center text-xs text-slate-500">
-          Kết nối API:{' '}
-          <span className="rounded bg-slate-100 px-2 py-1 font-mono text-slate-600">
-            {isMockApi() ? 'http://localhost:3001' : 'http://localhost:8080/api'}
-          </span>
-        </div>
+
       </div>
+
+      <Modal 
+        isOpen={confirmModal.isOpen} 
+        onClose={() => {
+          setConfirmModal({ isOpen: false, fullName: '', pendingPayload: null });
+        }} 
+        title="Xác nhận tạo tài khoản"
+      >
+        <div className="space-y-4">
+          <div className="rounded-lg bg-indigo-50 p-4 border border-indigo-100">
+            <p className="text-sm text-indigo-900">
+              Hệ thống tìm thấy tên bạn là: <span className="font-bold text-indigo-700">{confirmModal.fullName}</span>. Bạn có muốn tạo tài khoản không?
+            </p>
+          </div>
+          
+          <div className="flex items-center justify-end gap-3 pt-3">
+            <button
+              type="button"
+              className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+              onClick={() => {
+                setConfirmModal({ isOpen: false, fullName: '', pendingPayload: null });
+              }}
+            >
+              Hủy
+            </button>
+            <button
+              type="button"
+              disabled={submitting}
+              className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-primary-700 disabled:pointer-events-none disabled:opacity-70"
+              onClick={async () => {
+                setSubmitting(true);
+                setFormError('');
+                try {
+                  await registerUser(confirmModal.pendingPayload);
+                  
+                  const response = await loginWithJwt({
+                    username: confirmModal.pendingPayload.username,
+                    password: confirmModal.pendingPayload.password,
+                  });
+                  login(response);
+                  navigate('/apartments', { replace: true });
+                } catch (err) {
+                  const msg = err?.response?.data?.message || err.message || 'Lỗi tạo tài khoản.';
+                  setFormError(msg);
+                } finally {
+                  setSubmitting(false);
+                  setConfirmModal({ isOpen: false, fullName: '', pendingPayload: null });
+                }
+              }}
+            >
+              {submitting ? 'Đang tạo...' : 'Xác nhận'}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

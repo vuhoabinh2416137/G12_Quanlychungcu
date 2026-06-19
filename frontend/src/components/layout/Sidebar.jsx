@@ -1,5 +1,4 @@
 import { NavLink } from 'react-router-dom';
-import { getApiBaseUrl, isMockApi } from '../../api/apiBaseUrl.js';
 import { useAuth } from '../../hooks/useAuth.js';
 
 const linkBase =
@@ -24,8 +23,6 @@ function SidebarLink({ to, children, end = false }) {
 
 export default function Sidebar() {
   const { auth } = useAuth();
-  const apiBaseUrl = getApiBaseUrl();
-  const mock = isMockApi(apiBaseUrl);
   const isResident = auth?.role === 'RESIDENT';
 
   return (
@@ -52,9 +49,6 @@ export default function Sidebar() {
         {!isResident ? <SidebarLink to="/profile">Tài khoản</SidebarLink> : null}
       </nav>
 
-      <div className="border-t border-white/10 p-3 text-xs text-blue-100/70">
-        API: <span className="font-mono">{apiBaseUrl}</span> ({mock ? 'mock' : 'backend'})
-      </div>
     </aside>
   );
 }
