@@ -239,30 +239,6 @@ export default function ApartmentsPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">Trạng thái <span className="text-red-500">*</span></label>
-                <div className="relative">
-                  <select
-                    className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
-                    value={createForm.status}
-                    onChange={(e) => setCreateForm((f) => ({ ...f, status: e.target.value }))}
-                    onBlur={() => setCreateTouched((t) => ({ ...t, status: true }))}
-                  >
-                    {STATUSES.map((s) => (
-                      <option key={s} value={s}>
-                        {s === 'VACANT' ? 'Trống' : 'Đang ở'} ({s})
-                      </option>
-                    ))}
-                  </select>
-                  <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                {createTouched.status && createErrors.status ? (
-                  <div className="text-xs text-red-500">{createErrors.status}</div>
-                ) : null}
-              </div>
-
-              <div className="space-y-1.5">
                 <label className="text-sm font-medium text-slate-700">Tòa</label>
                 <input
                   className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
@@ -341,6 +317,7 @@ export default function ApartmentsPage() {
                 <th className="px-5 py-3.5 text-left font-semibold text-slate-600">Tòa</th>
                 <th className="px-5 py-3.5 text-left font-semibold text-slate-600">Tầng</th>
                 <th className="px-5 py-3.5 text-right font-semibold text-slate-600">Diện tích</th>
+                <th className="px-5 py-3.5 text-center font-semibold text-slate-600">Số người</th>
                 <th className="px-5 py-3.5 text-center font-semibold text-slate-600">Xe máy</th>
                 <th className="px-5 py-3.5 text-center font-semibold text-slate-600">Ô tô</th>
                 <th className="px-5 py-3.5 text-left font-semibold text-slate-600">Trạng thái</th>
@@ -357,6 +334,9 @@ export default function ApartmentsPage() {
                   <td className="px-5 py-3 text-slate-600">{a.floor || '-'}</td>
                   <td className="px-5 py-3 text-right text-slate-600">
                     {a.area == null ? '-' : `${Number(a.area).toLocaleString('vi-VN')} m²`}
+                  </td>
+                  <td className="px-5 py-3 text-center text-slate-600 font-medium">
+                    {a.residentCount != null ? a.residentCount : 0}
                   </td>
                   <td className="px-5 py-3 text-center text-slate-600 font-medium">
                     {a.motorbikeCount}
@@ -424,7 +404,7 @@ export default function ApartmentsPage() {
                             } catch (err) {
                               const status = err?.response?.status;
                               if (status === 401 || status === 403) alert('Không có quyền (cần ADMIN).');
-                              else alert('Không xóa được. Có thể đang có dữ liệu liên quan.');
+                              else alert(err?.response?.data?.message || 'Không xóa được. Có thể đang có dữ liệu liên quan.');
                             }
                           }}
                         >
@@ -439,7 +419,7 @@ export default function ApartmentsPage() {
               ))}
               {!filtered.length ? (
                 <tr>
-                  <td className="px-5 py-10 text-center text-slate-500" colSpan={canWrite ? 8 : 7}>
+                  <td className="px-5 py-10 text-center text-slate-500" colSpan={canWrite ? 9 : 8}>
                     <div className="flex flex-col items-center justify-center">
                       <svg className="h-10 w-10 text-slate-300 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />

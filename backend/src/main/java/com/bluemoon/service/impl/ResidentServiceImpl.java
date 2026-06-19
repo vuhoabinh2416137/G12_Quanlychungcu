@@ -56,7 +56,13 @@ public class ResidentServiceImpl implements ResidentService {
         }
 
         resident.setApartment(apartment);
-        return residentRepository.save(resident);
+        Resident saved = residentRepository.save(resident);
+
+        apartment.setResidentCount((apartment.getResidentCount() != null ? apartment.getResidentCount() : 0) + 1);
+        apartment.setStatus("OCCUPIED");
+        apartmentRepository.save(apartment);
+
+        return saved;
     }
 
     @Override
@@ -78,7 +84,17 @@ public class ResidentServiceImpl implements ResidentService {
     @Transactional
     public void deleteResident(Long id) {
         Resident existingResident = getResidentById(id);
+        Apartment apartment = existingResident.getApartment();
+        
         residentRepository.delete(existingResident);
+
+        int newCount = (apartment.getResidentCount() != null ? apartment.getResidentCount() : 1) - 1;
+        if (newCount < 0) newCount = 0;
+        apartment.setResidentCount(newCount);
+        if (newCount == 0) {
+            apartment.setStatus("VACANT");
+        }
+        apartmentRepository.save(apartment);
     }
 }
 

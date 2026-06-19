@@ -16,5 +16,6 @@ public record ApartmentResponseUserDto(
         String floor, 
         BigDecimal area,
         Integer motorbikeCount,
-        Integer carCount
+        Integer carCount,
+        Integer residentCount
 ) implements Serializable {}

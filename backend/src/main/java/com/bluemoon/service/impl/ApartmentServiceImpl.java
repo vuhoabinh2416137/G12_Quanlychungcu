@@ -28,19 +28,27 @@ public class ApartmentServiceImpl implements ApartmentService {
 
     @Override
     public List<Apartment> getAllApartments() {
-        return apartmentRepository.findAll();
+        List<Apartment> apartments = apartmentRepository.findAll();
+        for (Apartment apt : apartments) {
+            apt.setStatus(apt.getResidentCount() != null && apt.getResidentCount() > 0 ? "OCCUPIED" : "VACANT");
+        }
+        return apartments;
     }
 
     @Override
     public Apartment getApartmentById(Long id) {
-        return apartmentRepository.findById(id)
+        Apartment apt = apartmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy căn hộ với ID: " + id));
+        apt.setStatus(apt.getResidentCount() != null && apt.getResidentCount() > 0 ? "OCCUPIED" : "VACANT");
+        return apt;
     }
 
     @Override
     public Apartment getApartmentByNumber(String apartmentNumber) {
-        return apartmentRepository.findByApartmentNumber(apartmentNumber)
+        Apartment apt = apartmentRepository.findByApartmentNumber(apartmentNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy căn hộ số: " + apartmentNumber));
+        apt.setStatus(apt.getResidentCount() != null && apt.getResidentCount() > 0 ? "OCCUPIED" : "VACANT");
+        return apt;
     }
 
     @Override
@@ -60,7 +68,6 @@ public class ApartmentServiceImpl implements ApartmentService {
         existingApartment.setBuilding(apartmentDetails.getBuilding());
         existingApartment.setFloor(apartmentDetails.getFloor());
         existingApartment.setArea(apartmentDetails.getArea());
-        existingApartment.setStatus(apartmentDetails.getStatus());
         existingApartment.setSoDienTieuThu(apartmentDetails.getSoDienTieuThu());
         existingApartment.setSoNuocTieuThu(apartmentDetails.getSoNuocTieuThu());
 
@@ -72,9 +79,9 @@ public class ApartmentServiceImpl implements ApartmentService {
     public void deleteApartment(Long id) {
         Apartment existingApartment = getApartmentById(id);
 
-        // Xóa tất cả cư dân đang ở trong căn hộ này trước khi xóa căn hộ
-        List<Resident> residents = residentRepository.findByApartment_Id(id);
-        residentRepository.deleteAll(residents);
+        if (existingApartment.getResidentCount() != null && existingApartment.getResidentCount() > 0) {
+            throw new IllegalArgumentException("Không thể xóa căn hộ đang có người ở. Vui lòng chuyển cư dân đi nơi khác hoặc xóa cư dân trước.");
+        }
 
         apartmentRepository.delete(existingApartment);
     }

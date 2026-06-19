@@ -20,5 +20,6 @@ public record ApartmentResponseAdminDto(
         BigDecimal soDienTieuThu,
         BigDecimal soNuocTieuThu,
         Integer motorbikeCount,
-        Integer carCount
+        Integer carCount,
+        Integer residentCount
 ) implements Serializable {}

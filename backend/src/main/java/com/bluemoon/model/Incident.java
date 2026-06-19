@@ -42,7 +42,7 @@ public class Incident {
     @Column(name = "status", length = 50)
     private String status;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
+    @ColumnDefault("CURRENT_TIMESTAMP(6)")
     @Column(name = "created_at")
     private Instant createdAt;
 

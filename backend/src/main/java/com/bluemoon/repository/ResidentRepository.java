@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface ResidentRepository extends JpaRepository<Resident, Long> {
     List<Resident> findByApartment_Id(Long apartmentId);
+    
+    long countByApartment_Id(Long apartmentId);
 
     Optional<Resident> findByIdCard(String idCard);
 

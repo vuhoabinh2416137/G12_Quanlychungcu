@@ -23,6 +23,7 @@ public interface ApartmentMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "motorbikeCount", ignore = true)
     @Mapping(target = "carCount", ignore = true)
+    @Mapping(target = "residentCount", ignore = true)
     Apartment toEntity(ApartmentRequestDto requestDto);
 
     // Request DTO → Entity có sẵn (PUT)
@@ -31,5 +32,6 @@ public interface ApartmentMapper {
     @Mapping(target = "apartmentNumber", ignore = true)
     @Mapping(target = "motorbikeCount",  ignore = true)
     @Mapping(target = "carCount",        ignore = true)
+    @Mapping(target = "residentCount",   ignore = true)
     void updateEntityFromDto(ApartmentRequestDto requestDto, @MappingTarget Apartment apartment);
 }

@@ -20,6 +20,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     public static final String KEY_CAR_FEE = "fee.car";
     public static final String KEY_ELECTRICITY_FEE_PER_KWH = "fee.electricity_per_kwh";
     public static final String KEY_WATER_FEE_PER_M3 = "fee.water_per_m3";
+    public static final String KEY_SERVICE_FEE_PER_PERSON = "fee.service_per_person";
     public static final String KEY_DUE_DAY_OF_MONTH = "fee.due_day_of_month";
 
     private final SystemConfigRepository systemConfigRepository;
@@ -85,6 +86,8 @@ public class SystemConfigServiceImpl implements SystemConfigService {
                 getDecimalValue(KEY_ELECTRICITY_FEE_PER_KWH, new BigDecimal("3500")).toPlainString());
         map.put(KEY_WATER_FEE_PER_M3,
                 getDecimalValue(KEY_WATER_FEE_PER_M3, new BigDecimal("15000")).toPlainString());
+        map.put(KEY_SERVICE_FEE_PER_PERSON,
+                getDecimalValue(KEY_SERVICE_FEE_PER_PERSON, new BigDecimal("100000")).toPlainString());
         map.put(KEY_DUE_DAY_OF_MONTH,
                 getDecimalValue(KEY_DUE_DAY_OF_MONTH, new BigDecimal("15")).toPlainString());
         return map;
@@ -112,6 +115,10 @@ public class SystemConfigServiceImpl implements SystemConfigService {
         if (configs.containsKey(KEY_WATER_FEE_PER_M3)) {
             upsert(KEY_WATER_FEE_PER_M3, configs.get(KEY_WATER_FEE_PER_M3),
                     "Đơn giá nước (VNĐ/m³)");
+        }
+        if (configs.containsKey(KEY_SERVICE_FEE_PER_PERSON)) {
+            upsert(KEY_SERVICE_FEE_PER_PERSON, configs.get(KEY_SERVICE_FEE_PER_PERSON),
+                    "Phí dịch vụ (VNĐ/người/tháng)");
         }
         if (configs.containsKey(KEY_DUE_DAY_OF_MONTH)) {
             upsert(KEY_DUE_DAY_OF_MONTH, configs.get(KEY_DUE_DAY_OF_MONTH),

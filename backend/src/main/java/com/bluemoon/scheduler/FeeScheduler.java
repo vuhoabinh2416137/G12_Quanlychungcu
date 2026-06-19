@@ -71,6 +71,8 @@ public class FeeScheduler {
                 SystemConfigServiceImpl.KEY_ELECTRICITY_FEE_PER_KWH, new BigDecimal("3500"));
         BigDecimal waterFeePerM3 = systemConfigService.getDecimalValue(
                 SystemConfigServiceImpl.KEY_WATER_FEE_PER_M3, new BigDecimal("15000"));
+        BigDecimal serviceFeePerPerson = systemConfigService.getDecimalValue(
+                SystemConfigServiceImpl.KEY_SERVICE_FEE_PER_PERSON, new BigDecimal("100000"));
         int dueDayOfMonth = systemConfigService.getDecimalValue(
                 SystemConfigServiceImpl.KEY_DUE_DAY_OF_MONTH, new BigDecimal("15")).intValue();
 
@@ -158,6 +160,21 @@ public class FeeScheduler {
                 waterFee.setDueDate(dueDate);
                 waterFee.setPaid(false);
                 feesToSave.add(waterFee);
+            }
+
+            // 5. Phí Dịch vụ (serviceFeePerPerson × residentCount)
+            int residentCount = apartment.getResidentCount() != null ? apartment.getResidentCount() : 0;
+            if (residentCount > 0 && serviceFeePerPerson.compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal amount = serviceFeePerPerson.multiply(new BigDecimal(residentCount)).setScale(2, RoundingMode.HALF_UP);
+                Fee serviceFee = new Fee();
+                serviceFee.setApartment(apartment);
+                serviceFee.setName("Phí dịch vụ tháng " + monthYear);
+                serviceFee.setDescription(residentCount + " người × " + serviceFeePerPerson + " VNĐ/người");
+                serviceFee.setAmount(amount);
+                serviceFee.setType("DICH_VU");
+                serviceFee.setDueDate(dueDate);
+                serviceFee.setPaid(false);
+                feesToSave.add(serviceFee);
             }
 
             // Reset số liệu tiêu thụ cho tháng mới

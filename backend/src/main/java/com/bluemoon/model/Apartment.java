@@ -149,4 +149,15 @@ public class Apartment {
         this.carCount = carCount;
     }
 
+    @Column(name = "resident_count")
+    @ColumnDefault("0")
+    private Integer residentCount = 0;
+
+    public Integer getResidentCount() {
+        return residentCount;
+    }
+
+    public void setResidentCount(Integer residentCount) {
+        this.residentCount = residentCount;
+    }
 }

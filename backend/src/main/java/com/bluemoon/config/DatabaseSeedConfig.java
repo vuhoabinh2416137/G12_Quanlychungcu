@@ -33,12 +33,25 @@ public class DatabaseSeedConfig {
             }
 
             // Seed cấu hình phí cố định mặc định
-            seedConfigIfMissing(systemConfigRepository, "fee.management_per_sqm", "10000", "Đơn giá phí quản lý (VNĐ/m²)");
-            seedConfigIfMissing(systemConfigRepository, "fee.motorbike", "150000", "Đơn giá gửi xe máy (VNĐ/xe/tháng)");
-            seedConfigIfMissing(systemConfigRepository, "fee.car", "1000000", "Đơn giá gửi ô tô (VNĐ/xe/tháng)");
-            seedConfigIfMissing(systemConfigRepository, "fee.electricity_per_kwh", "3500", "Đơn giá điện (VNĐ/kWh)");
-            seedConfigIfMissing(systemConfigRepository, "fee.water_per_m3", "15000", "Đơn giá nước (VNĐ/m³)");
-            seedConfigIfMissing(systemConfigRepository, "fee.due_day_of_month", "15", "Ngày hạn nộp hàng tháng");
+            if (systemConfigRepository.count() == 0) {
+                systemConfigRepository.save(new SystemConfig("fee.management_per_sqm", "10000", "Phí quản lý (VNĐ/m2)"));
+                systemConfigRepository.save(new SystemConfig("fee.motorbike", "150000", "Phí gửi xe máy (VNĐ/xe)"));
+                systemConfigRepository.save(new SystemConfig("fee.car", "1000000", "Phí gửi ô tô (VNĐ/xe)"));
+                systemConfigRepository.save(new SystemConfig("fee.electricity_per_kwh", "3500", "Phí điện (VNĐ/kWh)"));
+                systemConfigRepository.save(new SystemConfig("fee.water_per_m3", "15000", "Phí nước (VNĐ/m3)"));
+                systemConfigRepository.save(new SystemConfig("fee.service_per_person", "100000", "Phí dịch vụ (VNĐ/người/tháng)"));
+                systemConfigRepository.save(new SystemConfig("fee.due_day_of_month", "15", "Hạn nộp phí hàng tháng (ngày)"));
+            }
+
+            // Sync resident count for existing apartments
+            for (Apartment apt : apartmentRepository.findAll()) {
+                long actualCount = residentRepository.countByApartment_Id(apt.getId());
+                if (apt.getResidentCount() == null || apt.getResidentCount() != actualCount) {
+                    apt.setResidentCount((int) actualCount);
+                    apt.setStatus(actualCount > 0 ? "OCCUPIED" : "VACANT");
+                    apartmentRepository.save(apt);
+                }
+            }
         };
     }
 

@@ -9,6 +9,7 @@ export default function AutoFeeModal({ isOpen, onClose }) {
     'fee.management_per_sqm': '10000',
     'fee.electricity_per_kwh': '3500',
     'fee.water_per_m3': '15000',
+    'fee.service_per_person': '100000',
     'fee.motorbike': '150000',
     'fee.car': '1000000',
     'fee.due_day_of_month': '15',
@@ -56,6 +57,7 @@ export default function AutoFeeModal({ isOpen, onClose }) {
     { key: 'fee.management_per_sqm', label: 'Phí quản lý', unit: 'VNĐ / m²', icon: '🏢' },
     { key: 'fee.electricity_per_kwh', label: 'Phí điện', unit: 'VNĐ / kWh', icon: '⚡' },
     { key: 'fee.water_per_m3', label: 'Phí nước', unit: 'VNĐ / m³', icon: '💧' },
+    { key: 'fee.service_per_person', label: 'Phí dịch vụ', unit: 'VNĐ / người', icon: '👥' },
     { key: 'fee.motorbike', label: 'Phí gửi xe máy', unit: 'VNĐ / xe', icon: '🏍️' },
     { key: 'fee.car', label: 'Phí gửi ô tô', unit: 'VNĐ / xe', icon: '🚗' },
   ];

@@ -90,6 +90,10 @@ export default function ResidentsPage() {
     relationship: 'CHU_HO',
   });
 
+  const [reassignHeadModal, setReassignHeadModal] = useState({ open: false, oldResident: null, otherResidents: [] });
+  const [selectedNewHeadId, setSelectedNewHeadId] = useState('');
+  const [reassignStatus, setReassignStatus] = useState({ submitting: false, error: '' });
+
   useEffect(() => {
     let cancelled = false;
     async function load() {
@@ -522,6 +526,14 @@ export default function ResidentsPage() {
                           className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors"
                           title="Xóa"
                           onClick={async () => {
+                            if (r.relationship === 'CHU_HO') {
+                              const otherResidents = residents.filter(x => x.apartmentId === r.apartmentId && x.id !== r.id);
+                              if (otherResidents.length > 0) {
+                                setReassignHeadModal({ open: true, oldResident: r, otherResidents });
+                                setSelectedNewHeadId(String(otherResidents[0].id));
+                                return;
+                              }
+                            }
                             if (!window.confirm(`Bạn có chắc chắn muốn xóa cư dân: ${r.fullName}?`)) return;
                             try {
                               await deleteResident(r.id);
@@ -774,6 +786,111 @@ export default function ResidentsPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {reassignHeadModal.open && canWrite ? (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm animate-fade-in-up">
+          <div className="w-full max-w-md rounded-2xl bg-surface p-0 shadow-2xl">
+            <div className="border-b border-slate-100 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-slate-900">Chọn chủ hộ mới</h2>
+              <button
+                className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                onClick={() => {
+                  setReassignHeadModal({ open: false, oldResident: null, otherResidents: [] });
+                  setReassignStatus({ submitting: false, error: '' });
+                }}
+              >
+                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="mb-4 text-sm text-slate-600">
+                Căn hộ đang còn người ở. Bạn phải chọn một người khác làm chủ hộ trước khi xóa chủ hộ hiện tại (<span className="font-semibold">{reassignHeadModal.oldResident?.fullName}</span>).
+              </p>
+              {reassignStatus.error && (
+                <div className="mb-4 text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200 flex items-start gap-2">
+                  <svg className="h-5 w-5 shrink-0 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                  <span>{reassignStatus.error}</span>
+                </div>
+              )}
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-700">Người được chọn làm chủ hộ mới</label>
+                <div className="relative">
+                  <select
+                    className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
+                    value={selectedNewHeadId}
+                    onChange={(e) => setSelectedNewHeadId(e.target.value)}
+                  >
+                    {reassignHeadModal.otherResidents.map((other) => (
+                      <option key={other.id} value={String(other.id)}>
+                        {other.fullName} ({other.relationship === 'VO_CHONG' ? 'Vợ/Chồng' : other.relationship === 'CON_CAI' ? 'Con cái' : 'Khách thuê'})
+                      </option>
+                    ))}
+                  </select>
+                  <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+              <div className="mt-6 flex justify-end gap-3 pt-5 border-t border-slate-100">
+                <button
+                  className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                  onClick={() => {
+                    setReassignHeadModal({ open: false, oldResident: null, otherResidents: [] });
+                    setReassignStatus({ submitting: false, error: '' });
+                  }}
+                >
+                  Hủy
+                </button>
+                <button
+                  disabled={reassignStatus.submitting}
+                  className="relative inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 active:scale-95 disabled:pointer-events-none disabled:opacity-70"
+                  onClick={async () => {
+                    setReassignStatus({ submitting: true, error: '' });
+                    try {
+                      // Update new head
+                      const newHead = reassignHeadModal.otherResidents.find(x => String(x.id) === selectedNewHeadId);
+                      const payload = toResidentForm(newHead);
+                      payload.relationship = 'CHU_HO';
+                      
+                      // Using the current component state to make sequential API calls
+                      const updated = await updateResident(newHead.id, payload);
+                      await deleteResident(reassignHeadModal.oldResident.id);
+
+                      setResidents(prev => prev
+                        .map(x => x.id === newHead.id ? updated : x)
+                        .filter(x => x.id !== reassignHeadModal.oldResident.id)
+                      );
+
+                      setReassignHeadModal({ open: false, oldResident: null, otherResidents: [] });
+                      setReassignStatus({ submitting: false, error: '' });
+                    } catch (err) {
+                      const status = err?.response?.status;
+                      if (status === 401 || status === 403) setReassignStatus({ submitting: false, error: 'Không có quyền (cần ADMIN).' });
+                      else setReassignStatus({ submitting: false, error: 'Có lỗi xảy ra. Kiểm tra backend/log.' });
+                    }
+                  }}
+                >
+                  {reassignStatus.submitting ? (
+                    <>
+                      <svg className="h-4 w-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Đang xử lý...
+                    </>
+                  ) : (
+                    'Xác nhận xóa'
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
