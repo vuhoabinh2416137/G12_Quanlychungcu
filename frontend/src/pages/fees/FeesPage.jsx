@@ -5,6 +5,7 @@ import {
   createFeeForAllApartments,
   createFeeForApartment,
   fetchFeesByApartment,
+  fetchFees,
   updateFeePaidStatus,
 } from '../../api/feesApi.js';
 import { createPayment } from '../../api/paymentsApi.js';
@@ -54,6 +55,7 @@ export default function FeesPage() {
   const [fees, setFees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [query, setQuery] = useState('');
   const [selectedFeeForQR, setSelectedFeeForQR] = useState(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -72,7 +74,12 @@ export default function FeesPage() {
 
   async function reloadFees(apartmentId) {
     if (!apartmentId) return;
-    const data = await fetchFeesByApartment(Number(apartmentId));
+    let data;
+    if (apartmentId === 'ALL') {
+      data = await fetchFees();
+    } else {
+      data = await fetchFeesByApartment(Number(apartmentId));
+    }
     setFees(data);
   }
 
@@ -88,7 +95,7 @@ export default function FeesPage() {
         if (cancelled) return;
         setApartments(occupiedApts);
         if (occupiedApts.length > 0) {
-          setSelectedApartmentId(String(occupiedApts[0].id));
+          setSelectedApartmentId('ALL');
         }
       } catch (e) {
         if (cancelled) return;
@@ -115,7 +122,12 @@ export default function FeesPage() {
       setLoading(true);
       setError('');
       try {
-        const data = await fetchFeesByApartment(Number(selectedApartmentId));
+        let data;
+        if (selectedApartmentId === 'ALL') {
+          data = await fetchFees();
+        } else {
+          data = await fetchFeesByApartment(Number(selectedApartmentId));
+        }
         if (!cancelled) setFees(data);
       } catch (e) {
         if (cancelled) return;
@@ -137,6 +149,17 @@ export default function FeesPage() {
   const createErrors = useMemo(() => validateFee(createForm), [createForm]);
   const canSubmitCreate = useMemo(() => Object.keys(createErrors).length === 0, [createErrors]);
 
+  const filteredFees = useMemo(() => {
+    const normalize = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const q = normalize(query.trim());
+    if (!q) return fees;
+    return fees.filter((f) => {
+      const typeLabel = getFeeTypeLabel(f.type);
+      const searchStr = `${f.name || ''} ${f.apartmentNumber || ''} ${formatMoney(f.amount)} ${typeLabel}`.toLowerCase();
+      return normalize(searchStr).includes(q);
+    });
+  }, [query, fees]);
+
   if (loading && !apartments.length) return <div className="text-slate-600">Đang tải khoản phí...</div>;
   if (error) return <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">{error}</div>;
 
@@ -148,19 +171,32 @@ export default function FeesPage() {
           <p className="mt-1 text-sm text-slate-500">Hiển thị các khoản phí và trạng thái đã hoặc chưa thanh toán của từng căn hộ.</p>
         </div>
         <div className="flex flex-col items-center gap-3 sm:flex-row">
-          <div className="relative w-full sm:w-72">
-            <select
-              className="w-full appearance-none rounded-lg border border-slate-200 bg-surface py-2 pl-4 pr-10 text-sm font-medium text-slate-800 shadow-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
-              value={selectedApartmentId}
-              onChange={(e) => setSelectedApartmentId(e.target.value)}
-            >
-              <option value="" disabled>-- Chọn căn hộ --</option>
-              {apartments.map((a) => (
-                <option key={a.id} value={a.id}>
-                  P.{a.apartmentNumber} - {a.status === 'OCCUPIED' ? 'Đang ở' : 'Trống'} {a.building ? `(${a.building})` : ''}
-                </option>
-              ))}
-            </select>
+          {!auth?.role?.includes('RESIDENT') && apartments.length > 0 && (
+            <div className="relative w-full sm:w-64">
+              <select
+                className="w-full appearance-none rounded-lg border border-slate-200 bg-surface py-2 pl-4 pr-10 text-sm font-medium text-slate-800 shadow-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
+                value={selectedApartmentId}
+                onChange={(e) => setSelectedApartmentId(e.target.value)}
+              >
+                <option value="ALL">Tất cả chung cư</option>
+                {apartments.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    P.{a.apartmentNumber} - {a.status === 'OCCUPIED' ? 'Đang ở' : 'Trống'} {a.building ? `(${a.building})` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <div className="relative w-full sm:w-64">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              className="w-full rounded-lg border border-slate-200 bg-surface pl-10 pr-4 py-2 text-sm text-slate-800 outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 shadow-sm"
+              placeholder="Tìm tên phí, loại, mã căn..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
           </div>
           {canCreate ? (
             <>
@@ -353,6 +389,7 @@ export default function FeesPage() {
           <table className="min-w-full text-sm">
             <thead className="border-b border-slate-100 bg-slate-50">
               <tr>
+                <th className="px-6 py-4 text-left font-semibold text-slate-600">Căn hộ</th>
                 <th className="px-6 py-4 text-left font-semibold text-slate-600">Tên phí</th>
                 <th className="px-6 py-4 text-left font-semibold text-slate-600">Loại</th>
                 <th className="px-6 py-4 text-right font-semibold text-slate-600">Số tiền (VND)</th>
@@ -362,8 +399,11 @@ export default function FeesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {fees.filter(f => !f.paid).map((f) => (
+              {filteredFees.filter(f => !f.paid).map((f) => (
                 <tr key={f.id} className="group transition-colors hover:bg-slate-50/70">
+                  <td className="px-6 py-4">
+                    <span className="font-medium text-slate-900">{f.apartmentNumber || '-'}</span>
+                  </td>
                   <td className="px-6 py-4">
                     <span className="font-medium text-slate-900">{f.name}</span>
                   </td>
@@ -443,9 +483,9 @@ export default function FeesPage() {
                   ) : null}
                 </tr>
               ))}
-              {fees.filter(f => !f.paid).length === 0 && !loading ? (
+              {filteredFees.filter(f => !f.paid).length === 0 && !loading ? (
                 <tr>
-                  <td className="px-6 py-12 text-center text-slate-500" colSpan={canActOnFees ? 6 : 5}>
+                  <td className="px-6 py-12 text-center text-slate-500" colSpan={canActOnFees ? 7 : 6}>
                     <div className="flex flex-col items-center justify-center">
                       <p className="text-sm font-medium text-slate-900">Chưa có khoản phí nào</p>
                       <p className="mt-1 text-xs text-slate-500">Căn hộ này hiện không có khoản nợ/phí nào cần thanh toán.</p>

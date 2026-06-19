@@ -15,7 +15,7 @@ import {
 const GENDERS = ['Nam', 'Nữ', 'Khác'];
 const RELATIONSHIPS = ['CHU_HO', 'VO_CHONG', 'CON_CAI', 'KHACH_THUE'];
 
-function validateResident(form, existingResidents, { isEdit = false } = {}) {
+function validateResident(form, existingResidents, { isEdit = false, editId = null } = {}) {
   const errors = {};
 
   if (!isPositiveInteger(form.apartmentId)) errors.apartmentId = 'Apartment ID phải là số nguyên dương.';
@@ -27,13 +27,25 @@ function validateResident(form, existingResidents, { isEdit = false } = {}) {
   if (!GENDERS.includes(form.gender)) errors.gender = 'Giới tính không hợp lệ.';
   if (!isValidIdCard(form.idCard)) errors.idCard = 'CCCD/CMND phải là 9–12 chữ số.';
   if (!isValidVietnamPhone(form.phone)) errors.phone = 'SĐT phải gồm 10 chữ số, bắt đầu bằng 0.';
-  if (!isValidEmail(form.email)) errors.email = 'Email không đúng định dạng.';
+  if (form.email && !isValidEmail(form.email)) errors.email = 'Email không đúng định dạng.';
   if (!RELATIONSHIPS.includes(form.relationship)) errors.relationship = 'Quan hệ không hợp lệ.';
 
   const idCardNormalized = String(form.idCard || '').trim();
-  if (idCardNormalized && !isEdit) {
-    const existed = existingResidents.some((r) => String(r?.idCard || '').trim() === idCardNormalized);
+  if (idCardNormalized) {
+    const existed = existingResidents.some((r) => String(r?.idCard || '').trim() === idCardNormalized && r.id !== editId);
     if (existed) errors.idCard = 'CCCD/CMND đã tồn tại.';
+  }
+
+  const phoneNormalized = String(form.phone || '').trim();
+  if (phoneNormalized) {
+    const existed = existingResidents.some((r) => String(r?.phone || '').trim() === phoneNormalized && r.id !== editId);
+    if (existed) errors.phone = 'Số điện thoại đã tồn tại.';
+  }
+
+  const emailNormalized = String(form.email || '').trim().toLowerCase();
+  if (emailNormalized) {
+    const existed = existingResidents.some((r) => String(r?.email || '').trim().toLowerCase() === emailNormalized && r.id !== editId);
+    if (existed) errors.email = 'Email đã tồn tại.';
   }
 
   return errors;
@@ -94,6 +106,15 @@ export default function ResidentsPage() {
   const [selectedNewHeadId, setSelectedNewHeadId] = useState('');
   const [reassignStatus, setReassignStatus] = useState({ submitting: false, error: '' });
 
+  const [swapHeadModal, setSwapHeadModal] = useState({ open: false, oldHeadId: null, newRelationshipForOldHead: '', otherResidents: [] });
+  const [selectedNewHeadIdSwap, setSelectedNewHeadIdSwap] = useState('');
+  
+  const [reassignOldHeadModal, setReassignOldHeadModal] = useState({ open: false, newHeadId: null, oldHeadId: null, oldHeadName: '' });
+  const [selectedOldHeadNewRole, setSelectedOldHeadNewRole] = useState('VO_CHONG');
+
+  const [reassignOldHeadModalCreate, setReassignOldHeadModalCreate] = useState({ open: false, oldHeadId: null, oldHeadName: '' });
+  const [selectedOldHeadNewRoleCreate, setSelectedOldHeadNewRoleCreate] = useState('VO_CHONG');
+
   useEffect(() => {
     let cancelled = false;
     async function load() {
@@ -121,26 +142,33 @@ export default function ResidentsPage() {
     };
   }, []);
 
-  const createErrors = useMemo(() => validateResident(createForm, residents, { isEdit: false }), [createForm, residents]);
+  const createErrors = useMemo(() => validateResident(createForm, residents, { isEdit: false, editId: null }), [createForm, residents]);
   const canSubmitCreate = useMemo(() => Object.keys(createErrors).length === 0, [createErrors]);
 
-  const editErrors = useMemo(() => validateResident(editForm, residents, { isEdit: true }), [editForm, residents]);
+  const editErrors = useMemo(() => validateResident(editForm, residents, { isEdit: true, editId }), [editForm, residents, editId]);
   const canSubmitEdit = useMemo(() => Object.keys(editErrors).length === 0, [editErrors]);
 
   const filtered = useMemo(() => {
     const normalize = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
     const q = normalize(query.trim());
-    if (!q) return residents;
-    return residents.filter((r) => {
-      const fields = [
-        r.fullName,
-        r.phone,
-        r.email,
-        r.idCard,
-        String(r.apartmentId),
-        r.apartmentNumber,
-      ];
-      return fields.some((f) => normalize(f).includes(q));
+    let result = residents;
+    if (q) {
+      result = residents.filter((r) => {
+        const fields = [
+          r.fullName,
+          r.phone,
+          r.email,
+          r.idCard,
+          String(r.apartmentId),
+          r.apartmentNumber,
+        ];
+        return fields.some((f) => normalize(f).includes(q));
+      });
+    }
+    return [...result].sort((a, b) => {
+      const aptA = String(a.apartmentNumber || a.apartmentId || '');
+      const aptB = String(b.apartmentNumber || b.apartmentId || '');
+      return aptA.localeCompare(aptB, undefined, { numeric: true, sensitivity: 'base' });
     });
   }, [query, residents]);
 
@@ -240,9 +268,24 @@ export default function ResidentsPage() {
                   return;
                 }
 
+                const apartmentId = Number(createForm.apartmentId);
+                const aptResidents = residents.filter(r => String(r.apartmentId) === String(apartmentId));
+                
+                if (createForm.relationship === 'CHU_HO') {
+                  const existingHead = aptResidents.find(r => r.relationship === 'CHU_HO');
+                  if (existingHead) {
+                    setReassignOldHeadModalCreate({
+                      open: true,
+                      oldHeadId: existingHead.id,
+                      oldHeadName: existingHead.fullName,
+                    });
+                    setSelectedOldHeadNewRoleCreate('VO_CHONG');
+                    return; // Prevent immediate submission
+                  }
+                }
+
                 setCreateStatus({ submitting: true, error: '', success: '' });
                 try {
-                  const apartmentId = Number(createForm.apartmentId);
                   const payload = {
                     fullName: createForm.fullName.trim(),
                     dateOfBirth: createForm.dateOfBirth.trim(),
@@ -396,7 +439,7 @@ export default function ResidentsPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">Email <span className="text-red-500">*</span></label>
+                <label className="text-sm font-medium text-slate-700">Email</label>
                 <input
                   className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all focus:ring-4 ${createTouched.email && createErrors.email ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10' : 'border-slate-200 focus:border-primary-500 focus:ring-primary-500/10'}`}
                   value={createForm.email}
@@ -643,6 +686,41 @@ export default function ResidentsPage() {
                     return;
                   }
 
+                  const editingResident = residents.find(r => r.id === editId);
+                  const oldRelationship = editingResident?.relationship;
+                  const newRelationship = editForm.relationship;
+                  const aptResidents = residents.filter(r => String(r.apartmentId) === String(editingResident?.apartmentId));
+
+                  if (oldRelationship === 'CHU_HO' && newRelationship !== 'CHU_HO') {
+                    const otherResidents = aptResidents.filter(r => r.id !== editId);
+                    if (otherResidents.length === 0) {
+                      setEditStatus({ submitting: false, error: 'Căn hộ chỉ có 1 người, quan hệ phải là Chủ hộ.' });
+                      return;
+                    }
+                    setSwapHeadModal({
+                      open: true,
+                      oldHeadId: editId,
+                      newRelationshipForOldHead: newRelationship,
+                      otherResidents
+                    });
+                    setSelectedNewHeadIdSwap(String(otherResidents[0].id));
+                    return; // Prevent immediate submission
+                  }
+
+                  if (oldRelationship !== 'CHU_HO' && newRelationship === 'CHU_HO') {
+                    const existingHead = aptResidents.find(r => r.relationship === 'CHU_HO' && r.id !== editId);
+                    if (existingHead) {
+                      setReassignOldHeadModal({
+                        open: true,
+                        newHeadId: editId,
+                        oldHeadId: existingHead.id,
+                        oldHeadName: existingHead.fullName,
+                      });
+                      setSelectedOldHeadNewRole('VO_CHONG');
+                      return; // Prevent immediate submission
+                    }
+                  }
+
                   setEditStatus({ submitting: true, error: '' });
                   try {
                     const payload = {
@@ -749,7 +827,7 @@ export default function ResidentsPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700">Email <span className="text-red-500">*</span></label>
+                  <label className="text-sm font-medium text-slate-700">Email</label>
                   <input
                     className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all focus:ring-4 ${editTouched.email && editErrors.email ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10' : 'border-slate-200 focus:border-primary-500 focus:ring-primary-500/10'}`}
                     value={editForm.email}
@@ -765,9 +843,20 @@ export default function ResidentsPage() {
                   <label className="text-sm font-medium text-slate-700">Quan hệ <span className="text-red-500">*</span></label>
                   <div className="relative">
                     <select
-                      className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
+                      className={`w-full appearance-none rounded-lg border bg-white px-3 py-2 pr-10 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 ${
+                        (() => {
+                          const aptResidents = residents.filter(r => String(r.apartmentId) === String(editForm.apartmentId));
+                          const editingResident = residents.find(r => r.id === editId);
+                          return editingResident?.relationship === 'CHU_HO' && aptResidents.length <= 1 ? 'bg-slate-50 cursor-not-allowed' : 'border-slate-200';
+                        })()
+                      }`}
                       value={editForm.relationship}
                       onChange={(e) => setEditForm((f) => ({ ...f, relationship: e.target.value }))}
+                      disabled={(() => {
+                        const aptResidents = residents.filter(r => String(r.apartmentId) === String(editForm.apartmentId));
+                        const editingResident = residents.find(r => r.id === editId);
+                        return editingResident?.relationship === 'CHU_HO' && aptResidents.length <= 1;
+                      })()}
                     >
                       {RELATIONSHIPS.map((r) => (
                         <option key={r} value={r}>
@@ -914,6 +1003,297 @@ export default function ResidentsPage() {
                   ) : (
                     'Xác nhận xóa'
                   )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Modal for changing CHU_HO to non-CHU_HO */}
+      {swapHeadModal.open && canWrite ? (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm animate-fade-in-up">
+          <div className="w-full max-w-md rounded-2xl bg-surface p-0 shadow-2xl">
+            <div className="border-b border-slate-100 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-slate-900">Chọn chủ hộ mới</h2>
+              <button
+                className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                onClick={() => {
+                  setSwapHeadModal({ open: false, oldHeadId: null, newRelationshipForOldHead: '', otherResidents: [] });
+                  setEditStatus({ submitting: false, error: '' });
+                }}
+              >
+                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="mb-4 text-sm text-slate-600">
+                Bạn đang chuyển Chủ hộ thành <span className="font-semibold">{swapHeadModal.newRelationshipForOldHead === 'VO_CHONG' ? 'Vợ/Chồng' : swapHeadModal.newRelationshipForOldHead === 'CON_CAI' ? 'Con cái' : 'Khách thuê'}</span>. Vui lòng chọn một cư dân khác làm Chủ hộ mới.
+              </p>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-700">Chủ hộ mới</label>
+                <div className="relative">
+                  <select
+                    className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
+                    value={selectedNewHeadIdSwap}
+                    onChange={(e) => setSelectedNewHeadIdSwap(e.target.value)}
+                  >
+                    {swapHeadModal.otherResidents.map((other) => (
+                      <option key={other.id} value={String(other.id)}>
+                        {other.fullName} ({other.relationship === 'VO_CHONG' ? 'Vợ/Chồng' : other.relationship === 'CON_CAI' ? 'Con cái' : 'Khách thuê'})
+                      </option>
+                    ))}
+                  </select>
+                  <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+              <div className="mt-6 flex justify-end gap-3 pt-5 border-t border-slate-100">
+                <button
+                  className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                  onClick={() => {
+                    setSwapHeadModal({ open: false, oldHeadId: null, newRelationshipForOldHead: '', otherResidents: [] });
+                    setEditStatus({ submitting: false, error: '' });
+                  }}
+                >
+                  Hủy
+                </button>
+                <button
+                  disabled={editStatus.submitting}
+                  className="relative inline-flex items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-95 disabled:pointer-events-none disabled:opacity-70"
+                  onClick={async () => {
+                    setEditStatus({ submitting: true, error: '' });
+                    try {
+                      const newHead = residents.find(x => String(x.id) === selectedNewHeadIdSwap);
+                      const newHeadPayload = toResidentForm(newHead);
+                      newHeadPayload.relationship = 'CHU_HO';
+                      
+                      const oldHeadPayload = {
+                        fullName: editForm.fullName.trim(),
+                        dateOfBirth: editForm.dateOfBirth.trim(),
+                        gender: editForm.gender,
+                        idCard: String(editForm.idCard).trim(),
+                        phone: String(editForm.phone).trim(),
+                        email: editForm.email.trim(),
+                        relationship: swapHeadModal.newRelationshipForOldHead,
+                      };
+
+                      const updatedNewHead = await updateResident(newHead.id, newHeadPayload);
+                      const updatedOldHead = await updateResident(swapHeadModal.oldHeadId, oldHeadPayload);
+
+                      setResidents(prev => prev.map(x => 
+                        x.id === updatedNewHead.id ? updatedNewHead : 
+                        x.id === updatedOldHead.id ? updatedOldHead : x
+                      ));
+
+                      setSwapHeadModal({ open: false, oldHeadId: null, newRelationshipForOldHead: '', otherResidents: [] });
+                      setEditId(null);
+                    } catch (err) {
+                      setEditStatus({ submitting: false, error: 'Có lỗi xảy ra khi đổi chủ hộ. Cần tải lại trang.' });
+                    }
+                  }}
+                >
+                  {editStatus.submitting ? 'Đang xử lý...' : 'Xác nhận'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Modal for changing non-CHU_HO to CHU_HO */}
+      {reassignOldHeadModal.open && canWrite ? (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm animate-fade-in-up">
+          <div className="w-full max-w-md rounded-2xl bg-surface p-0 shadow-2xl">
+            <div className="border-b border-slate-100 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-slate-900">Xác nhận chuyển đổi Chủ hộ</h2>
+              <button
+                className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                onClick={() => {
+                  setReassignOldHeadModal({ open: false, newHeadId: null, oldHeadId: null, oldHeadName: '' });
+                  setEditStatus({ submitting: false, error: '' });
+                }}
+              >
+                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="mb-4 text-sm text-slate-600">
+                Căn hộ đã có chủ hộ là <span className="font-semibold">{reassignOldHeadModal.oldHeadName}</span>. Việc đưa người khác lên làm Chủ hộ yêu cầu bạn phải chọn lại quan hệ mới cho chủ hộ cũ.
+              </p>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-700">Quan hệ mới của {reassignOldHeadModal.oldHeadName}</label>
+                <div className="relative">
+                  <select
+                    className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
+                    value={selectedOldHeadNewRole}
+                    onChange={(e) => setSelectedOldHeadNewRole(e.target.value)}
+                  >
+                    <option value="VO_CHONG">Vợ/Chồng</option>
+                    <option value="CON_CAI">Con cái</option>
+                    <option value="KHACH_THUE">Khách thuê</option>
+                  </select>
+                  <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+              <div className="mt-6 flex justify-end gap-3 pt-5 border-t border-slate-100">
+                <button
+                  className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                  onClick={() => {
+                    setReassignOldHeadModal({ open: false, newHeadId: null, oldHeadId: null, oldHeadName: '' });
+                    setEditStatus({ submitting: false, error: '' });
+                  }}
+                >
+                  Hủy
+                </button>
+                <button
+                  disabled={editStatus.submitting}
+                  className="relative inline-flex items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-95 disabled:pointer-events-none disabled:opacity-70"
+                  onClick={async () => {
+                    setEditStatus({ submitting: true, error: '' });
+                    try {
+                      // Cập nhật người mới lên Chủ hộ (thực chất là editForm đang thao tác)
+                      const newHeadPayload = {
+                        fullName: editForm.fullName.trim(),
+                        dateOfBirth: editForm.dateOfBirth.trim(),
+                        gender: editForm.gender,
+                        idCard: String(editForm.idCard).trim(),
+                        phone: String(editForm.phone).trim(),
+                        email: editForm.email.trim(),
+                        relationship: 'CHU_HO',
+                      };
+
+                      // Lấy dữ liệu chủ hộ cũ để tạo payload
+                      const oldHead = residents.find(x => x.id === reassignOldHeadModal.oldHeadId);
+                      const oldHeadPayload = toResidentForm(oldHead);
+                      oldHeadPayload.relationship = selectedOldHeadNewRole;
+
+                      // Thực hiện gán tuần tự, gán mới trước cho an toàn
+                      const updatedNewHead = await updateResident(reassignOldHeadModal.newHeadId, newHeadPayload);
+                      const updatedOldHead = await updateResident(reassignOldHeadModal.oldHeadId, oldHeadPayload);
+
+                      setResidents(prev => prev.map(x => 
+                        x.id === updatedNewHead.id ? updatedNewHead : 
+                        x.id === updatedOldHead.id ? updatedOldHead : x
+                      ));
+
+                      setReassignOldHeadModal({ open: false, newHeadId: null, oldHeadId: null, oldHeadName: '' });
+                      setEditId(null);
+                    } catch (err) {
+                      setEditStatus({ submitting: false, error: 'Có lỗi xảy ra khi đổi chủ hộ. Cần tải lại trang.' });
+                    }
+                  }}
+                >
+                  {editStatus.submitting ? 'Đang xử lý...' : 'Xác nhận'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+      {/* Modal for creating a new CHU_HO when one already exists */}
+      {reassignOldHeadModalCreate.open && canWrite ? (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm animate-fade-in-up">
+          <div className="w-full max-w-md rounded-2xl bg-surface p-0 shadow-2xl">
+            <div className="border-b border-slate-100 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-slate-900">Xác nhận chuyển đổi Chủ hộ</h2>
+              <button
+                className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                onClick={() => {
+                  setReassignOldHeadModalCreate({ open: false, oldHeadId: null, oldHeadName: '' });
+                  setCreateStatus({ submitting: false, error: '', success: '' });
+                }}
+              >
+                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="mb-4 text-sm text-slate-600">
+                Căn hộ đã có chủ hộ là <span className="font-semibold">{reassignOldHeadModalCreate.oldHeadName}</span>. Việc thêm người mới làm Chủ hộ yêu cầu bạn phải chọn lại quan hệ mới cho chủ hộ cũ.
+              </p>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-700">Quan hệ mới của {reassignOldHeadModalCreate.oldHeadName}</label>
+                <div className="relative">
+                  <select
+                    className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
+                    value={selectedOldHeadNewRoleCreate}
+                    onChange={(e) => setSelectedOldHeadNewRoleCreate(e.target.value)}
+                  >
+                    <option value="VO_CHONG">Vợ/Chồng</option>
+                    <option value="CON_CAI">Con cái</option>
+                    <option value="KHACH_THUE">Khách thuê</option>
+                  </select>
+                  <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+              <div className="mt-6 flex justify-end gap-3 pt-5 border-t border-slate-100">
+                <button
+                  className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                  onClick={() => {
+                    setReassignOldHeadModalCreate({ open: false, oldHeadId: null, oldHeadName: '' });
+                    setCreateStatus({ submitting: false, error: '', success: '' });
+                  }}
+                >
+                  Hủy
+                </button>
+                <button
+                  disabled={createStatus.submitting}
+                  className="relative inline-flex items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-95 disabled:pointer-events-none disabled:opacity-70"
+                  onClick={async () => {
+                    setCreateStatus({ submitting: true, error: '', success: '' });
+                    try {
+                      // Tạo resident mới là CHU_HO
+                      const apartmentId = Number(createForm.apartmentId);
+                      const payload = {
+                        fullName: createForm.fullName.trim(),
+                        dateOfBirth: createForm.dateOfBirth.trim(),
+                        gender: createForm.gender,
+                        idCard: String(createForm.idCard).trim(),
+                        phone: String(createForm.phone).trim(),
+                        email: createForm.email.trim(),
+                        relationship: 'CHU_HO',
+                      };
+
+                      // Update old head
+                      const oldHead = residents.find(x => x.id === reassignOldHeadModalCreate.oldHeadId);
+                      const oldHeadPayload = toResidentForm(oldHead);
+                      oldHeadPayload.relationship = selectedOldHeadNewRoleCreate;
+
+                      const updatedOldHead = await updateResident(reassignOldHeadModalCreate.oldHeadId, oldHeadPayload);
+                      const created = await createResident(apartmentId, payload);
+
+                      setResidents(prev => [created, ...prev.map(x => x.id === updatedOldHead.id ? updatedOldHead : x)]);
+
+                      setReassignOldHeadModalCreate({ open: false, oldHeadId: null, oldHeadName: '' });
+                      setCreateStatus({ submitting: false, error: '', success: 'Tạo cư dân thành công.' });
+                      setCreateForm({
+                        apartmentId: '',
+                        fullName: '',
+                        dateOfBirth: '',
+                        gender: 'Nam',
+                        idCard: '',
+                        phone: '',
+                        email: '',
+                        relationship: 'CHU_HO',
+                      });
+                      setCreateTouched({});
+                    } catch (err) {
+                      setCreateStatus({ submitting: false, error: 'Có lỗi xảy ra. Kiểm tra backend/log.', success: '' });
+                    }
+                  }}
+                >
+                  {createStatus.submitting ? 'Đang xử lý...' : 'Xác nhận'}
                 </button>
               </div>
             </div>

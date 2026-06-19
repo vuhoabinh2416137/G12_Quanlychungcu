@@ -26,7 +26,22 @@ export async function updateConsumption(id, payload) {
 
 export async function fetchApartmentVehicles(id) {
   const { data } = await apiClient.get(`/apartments/${id}/vehicles`);
-  return data;
+  return data.map(v => ({ ...v, apartmentId: id })); // Include apartmentId for cross-apartment display
+}
+
+export async function fetchAllVehicles() {
+  const apartments = await fetchApartments();
+  const results = await Promise.allSettled(
+    apartments.map((a) => fetchApartmentVehicles(a.id))
+  );
+  
+  return results
+    .filter((r) => r.status === 'fulfilled')
+    .flatMap((r) => r.value)
+    .map(v => {
+      const apt = apartments.find(a => a.id === v.apartmentId);
+      return { ...v, apartmentNumber: apt?.apartmentNumber };
+    });
 }
 
 export async function addApartmentVehicle(id, payload) {

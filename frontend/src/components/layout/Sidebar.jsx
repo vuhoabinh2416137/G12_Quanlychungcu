@@ -40,6 +40,7 @@ export default function Sidebar() {
         ) : null}
         {!isResident && auth?.role !== 'CASHIER' ? <SidebarLink to="/residents">Cư dân</SidebarLink> : null}
         {auth?.role !== 'CASHIER' ? <SidebarLink to="/apartments">Căn hộ</SidebarLink> : null}
+        {auth?.role !== 'CASHIER' ? <SidebarLink to="/vehicles">Phương tiện</SidebarLink> : null}
         <SidebarLink to="/fees">Khoản phí</SidebarLink>
         {auth?.role === 'ADMIN' || auth?.role === 'CASHIER' ? <SidebarLink to="/cashier">Duyệt thanh toán</SidebarLink> : null}
         {auth?.role !== 'CASHIER' ? <SidebarLink to="/notifications">Thông báo</SidebarLink> : null}

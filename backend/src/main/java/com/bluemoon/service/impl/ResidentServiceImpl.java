@@ -51,8 +51,18 @@ public class ResidentServiceImpl implements ResidentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy căn hộ với ID: " + apartmentId));
 
         String idCard = resident.getIdCard();
-        if (idCard != null && residentRepository.findByIdCard(idCard).isPresent()) {
+        if (idCard != null && !idCard.trim().isEmpty() && residentRepository.findByIdCard(idCard).isPresent()) {
             throw new DuplicateResourceException("CCCD/CMND này đã được đăng ký trong hệ thống!");
+        }
+
+        String phone = resident.getPhone();
+        if (phone != null && !phone.trim().isEmpty() && residentRepository.findByPhone(phone).isPresent()) {
+            throw new DuplicateResourceException("Số điện thoại này đã được đăng ký trong hệ thống!");
+        }
+
+        String email = resident.getEmail();
+        if (email != null && !email.trim().isEmpty() && residentRepository.findByEmail(email).isPresent()) {
+            throw new DuplicateResourceException("Email này đã được đăng ký trong hệ thống!");
         }
 
         if (apartment.getResidentCount() == null || apartment.getResidentCount() == 0) {
@@ -76,12 +86,28 @@ public class ResidentServiceImpl implements ResidentService {
     public Resident updateResident(Long id, Resident residentDetails) {
         Resident existingResident = getResidentById(id);
 
+        String idCard = residentDetails.getIdCard();
+        if (idCard != null && !idCard.trim().isEmpty() && !idCard.equals(existingResident.getIdCard()) && residentRepository.findByIdCard(idCard).isPresent()) {
+            throw new DuplicateResourceException("CCCD/CMND này đã được đăng ký trong hệ thống!");
+        }
+
+        String phone = residentDetails.getPhone();
+        if (phone != null && !phone.trim().isEmpty() && !phone.equals(existingResident.getPhone()) && residentRepository.findByPhone(phone).isPresent()) {
+            throw new DuplicateResourceException("Số điện thoại này đã được đăng ký trong hệ thống!");
+        }
+
+        String email = residentDetails.getEmail();
+        if (email != null && !email.trim().isEmpty() && !email.equals(existingResident.getEmail()) && residentRepository.findByEmail(email).isPresent()) {
+            throw new DuplicateResourceException("Email này đã được đăng ký trong hệ thống!");
+        }
+
         existingResident.setFullName(residentDetails.getFullName());
         existingResident.setDateOfBirth(residentDetails.getDateOfBirth());
         existingResident.setGender(residentDetails.getGender());
         existingResident.setPhone(residentDetails.getPhone());
         existingResident.setEmail(residentDetails.getEmail());
         existingResident.setRelationship(residentDetails.getRelationship());
+        existingResident.setIdCard(residentDetails.getIdCard());
 
         return residentRepository.save(existingResident);
     }

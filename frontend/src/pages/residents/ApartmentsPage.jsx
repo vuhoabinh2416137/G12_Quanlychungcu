@@ -8,7 +8,6 @@ import {
 import { useAuth } from '../../hooks/useAuth.js';
 import { isNonEmptyString } from '../../utils/validators.js';
 import ApartmentDetailModal from './ApartmentDetailModal.jsx';
-import VehicleManager from './VehicleManager.jsx';
 
 const STATUSES = ['VACANT', 'OCCUPIED'];
 
@@ -84,11 +83,18 @@ export default function ApartmentsPage() {
   const filtered = useMemo(() => {
     const normalize = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
     const q = normalize(query.trim());
-    if (!q) return apartments;
-    return apartments.filter((a) => {
-      const statusText = a.status === 'VACANT' ? 'trống' : 'đang ở';
-      const fields = [a.apartmentNumber, a.floor, statusText];
-      return fields.some((f) => normalize(f).includes(q));
+    let result = apartments;
+    if (q) {
+      result = apartments.filter((a) => {
+        const statusText = a.status === 'VACANT' ? 'trống' : 'đang ở';
+        const fields = [a.apartmentNumber, a.floor, statusText];
+        return fields.some((f) => normalize(f).includes(q));
+      });
+    }
+    return [...result].sort((a, b) => {
+      const aptA = String(a.apartmentNumber || '');
+      const aptB = String(b.apartmentNumber || '');
+      return aptA.localeCompare(aptB, undefined, { numeric: true, sensitivity: 'base' });
     });
   }, [apartments, query]);
 
@@ -568,14 +574,6 @@ export default function ApartmentsPage() {
                     <div className="text-xs text-red-500">{editErrors.area}</div>
                   ) : null}
                 </div>
-
-                <VehicleManager 
-                  apartmentId={editId} 
-                  onVehicleChanged={() => {
-                     // Lấy lại danh sách apartment để cập nhật số lượng xe trên bảng chính
-                     fetchApartments().then(data => setApartments(data)).catch(() => {});
-                  }} 
-                />
 
                 <div className="md:col-span-2 mt-4 flex items-center justify-end gap-3 pt-5 border-t border-slate-100">
                   <button

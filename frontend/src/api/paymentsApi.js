@@ -39,6 +39,17 @@ export async function fetchPaymentHistoryByApartment(apartmentId, isResident = f
   return response.data;
 }
 
+export async function fetchPaymentHistoryForAll() {
+  const { fetchApartments } = await import('./apartmentsApi.js');
+  const apartments = await fetchApartments();
+  const results = await Promise.allSettled(
+    apartments.map((a) => fetchPaymentHistoryByApartment(a.id, false)),
+  );
+  return results
+    .filter((r) => r.status === 'fulfilled')
+    .flatMap((r) => r.value);
+}
+
 export async function submitRefundInfo(paymentId, bankName, accountNumber, accountName) {
   if (isMockApi()) {
     console.log('[MOCK] submitRefundInfo', paymentId, bankName, accountNumber, accountName);

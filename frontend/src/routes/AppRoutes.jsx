@@ -6,6 +6,7 @@ import LoginPage from '../pages/auth/LoginPage.jsx';
 import DashboardPage from '../pages/dashboard/DashboardPage.jsx';
 import ResidentsPage from '../pages/residents/ResidentsPage.jsx';
 import ApartmentsPage from '../pages/residents/ApartmentsPage.jsx';
+import VehiclesPage from '../pages/residents/VehiclesPage.jsx';
 import FeesPage from '../pages/fees/FeesPage.jsx';
 import NotificationsPage from '../pages/notifications/NotificationsPage.jsx';
 import PaymentHistoryPage from '../pages/payments/PaymentHistoryPage.jsx';
@@ -85,6 +86,14 @@ export default function AppRoutes() {
               element: (
                 <ExcludeCashierRoute>
                   <ApartmentsPage />
+                </ExcludeCashierRoute>
+              ),
+            },
+            {
+              path: '/vehicles',
+              element: (
+                <ExcludeCashierRoute>
+                  <VehiclesPage />
                 </ExcludeCashierRoute>
               ),
             },

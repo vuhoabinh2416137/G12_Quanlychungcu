@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth.js';
-import { fetchPaymentHistoryByApartment } from '../../api/paymentsApi.js';
+import { fetchPaymentHistoryByApartment, fetchPaymentHistoryForAll } from '../../api/paymentsApi.js';
 import { fetchApartments } from '../../api/apartmentsApi.js';
 
 function formatCurrency(val) {
@@ -34,7 +34,7 @@ export default function PaymentHistoryPage() {
         if (!cancelled) {
           setApartments(occupiedApts);
           if (occupiedApts.length > 0) {
-            setSelectedApartmentId(String(occupiedApts[0].id));
+            setSelectedApartmentId('ALL');
           } else {
             if (isResident) {
               setError('Bạn chưa được gán vào căn hộ nào.');
@@ -64,8 +64,17 @@ export default function PaymentHistoryPage() {
       setLoading(true);
       setError('');
       try {
-        const data = await fetchPaymentHistoryByApartment(selectedApartmentId, isResident);
-        if (!cancelled) setHistory(data);
+        let data;
+        if (selectedApartmentId === 'ALL') {
+          data = await fetchPaymentHistoryForAll();
+        } else {
+          data = await fetchPaymentHistoryByApartment(selectedApartmentId, isResident);
+        }
+        if (!cancelled) {
+          // Sort by date descending
+          data.sort((a, b) => new Date(b.paymentDate || b.transferTime) - new Date(a.paymentDate || a.transferTime));
+          setHistory(data);
+        }
       } catch (err) {
         if (!cancelled) setError('Không tải được lịch sử thanh toán.');
       } finally {
@@ -101,6 +110,7 @@ export default function PaymentHistoryPage() {
               value={selectedApartmentId}
               onChange={(e) => setSelectedApartmentId(e.target.value)}
             >
+              <option value="ALL">Tất cả chung cư</option>
               {apartments.map((a) => (
                 <option key={a.id} value={a.id}>Căn hộ {a.apartmentNumber}</option>
               ))}
@@ -130,6 +140,7 @@ export default function PaymentHistoryPage() {
             <table className="min-w-full text-sm">
               <thead className="border-b border-slate-100 bg-slate-50">
                 <tr>
+                  <th className="px-5 py-4 text-left font-semibold text-slate-600">Căn hộ</th>
                   <th className="px-5 py-4 text-left font-semibold text-slate-600">Mã Biên Lai</th>
                   <th className="px-5 py-4 text-left font-semibold text-slate-600">Tên Phí</th>
                   <th className="px-5 py-4 text-right font-semibold text-slate-600">Số Tiền</th>
@@ -140,6 +151,7 @@ export default function PaymentHistoryPage() {
               <tbody className="divide-y divide-slate-100">
                 {filtered.map((item) => (
                   <tr key={item.id} className="transition-colors hover:bg-slate-50/70">
+                    <td className="px-5 py-4 font-medium text-slate-900">{item.apartmentNumber || '-'}</td>
                     <td className="px-5 py-4 font-medium text-slate-900">{item.receiptNumber || `PAY-${item.id}`}</td>
                     <td className="px-5 py-4 text-slate-600">{item.feeName || 'Phí chung cư'}</td>
                     <td className="px-5 py-4 text-right font-semibold text-primary-600">{formatCurrency(item.amount)}</td>
@@ -153,7 +165,7 @@ export default function PaymentHistoryPage() {
                 ))}
                 {filtered.length === 0 ? (
                   <tr>
-                    <td className="px-5 py-10 text-center text-slate-500" colSpan={5}>
+                    <td className="px-5 py-10 text-center text-slate-500" colSpan={6}>
                       <div className="flex flex-col items-center justify-center">
                         <svg className="mb-2 h-10 w-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
