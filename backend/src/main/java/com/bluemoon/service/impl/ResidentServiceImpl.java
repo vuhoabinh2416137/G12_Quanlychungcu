@@ -55,6 +55,12 @@ public class ResidentServiceImpl implements ResidentService {
             throw new DuplicateResourceException("CCCD/CMND này đã được đăng ký trong hệ thống!");
         }
 
+        if (apartment.getResidentCount() == null || apartment.getResidentCount() == 0) {
+            if (!"CHU_HO".equals(resident.getRelationship())) {
+                throw new IllegalArgumentException("Người đầu tiên vào ở căn hộ phải là Chủ hộ.");
+            }
+        }
+
         resident.setApartment(apartment);
         Resident saved = residentRepository.save(resident);
 

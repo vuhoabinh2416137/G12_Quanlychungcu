@@ -283,7 +283,19 @@ export default function ResidentsPage() {
                   <select
                     className={`w-full appearance-none rounded-lg border bg-white px-3 py-2 pr-10 text-sm outline-none transition-all focus:ring-4 ${createTouched.apartmentId && createErrors.apartmentId ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10' : 'border-slate-200 focus:border-primary-500 focus:ring-primary-500/10'}`}
                     value={createForm.apartmentId}
-                    onChange={(e) => setCreateForm((f) => ({ ...f, apartmentId: e.target.value }))}
+                    onChange={(e) => {
+                      const aptId = e.target.value;
+                      setCreateForm((f) => {
+                        const updated = { ...f, apartmentId: aptId };
+                        if (aptId) {
+                          const apt = apartments.find(a => String(a.id) === aptId);
+                          if (apt && (!apt.residentCount || apt.residentCount === 0)) {
+                            updated.relationship = 'CHU_HO';
+                          }
+                        }
+                        return updated;
+                      });
+                    }}
                     onBlur={() => setCreateTouched((t) => ({ ...t, apartmentId: true }))}
                   >
                     <option value="">-- Chọn căn hộ --</option>
@@ -402,15 +414,28 @@ export default function ResidentsPage() {
                 <label className="text-sm font-medium text-slate-700">Quan hệ <span className="text-red-500">*</span></label>
                 <div className="relative">
                   <select
-                    className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
+                    className={`w-full appearance-none rounded-lg border bg-white px-3 py-2 pr-10 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 ${
+                      (() => {
+                        const apt = apartments.find(a => String(a.id) === createForm.apartmentId);
+                        return apt && (!apt.residentCount || apt.residentCount === 0) ? 'bg-slate-50 cursor-not-allowed' : 'border-slate-200';
+                      })()
+                    }`}
                     value={createForm.relationship}
                     onChange={(e) => setCreateForm((f) => ({ ...f, relationship: e.target.value }))}
+                    disabled={(() => {
+                      const apt = apartments.find(a => String(a.id) === createForm.apartmentId);
+                      return apt && (!apt.residentCount || apt.residentCount === 0);
+                    })()}
                   >
-                    {RELATIONSHIPS.map((r) => (
-                      <option key={r} value={r}>
-                        {r === 'CHU_HO' ? 'Chủ hộ' : r === 'VO_CHONG' ? 'Vợ/Chồng' : r === 'CON_CAI' ? 'Con cái' : 'Khách thuê'}
-                      </option>
-                    ))}
+                    {RELATIONSHIPS.map((r) => {
+                      const apt = apartments.find(a => String(a.id) === createForm.apartmentId);
+                      const isVacant = apt && (!apt.residentCount || apt.residentCount === 0);
+                      return (
+                        <option key={r} value={r} disabled={isVacant && r !== 'CHU_HO'}>
+                          {r === 'CHU_HO' ? 'Chủ hộ' : r === 'VO_CHONG' ? 'Vợ/Chồng' : r === 'CON_CAI' ? 'Con cái' : 'Khách thuê'}
+                        </option>
+                      );
+                    })}
                   </select>
                   <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
