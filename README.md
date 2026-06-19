@@ -46,8 +46,9 @@ Hệ thống quản lý chung cư toàn diện, hỗ trợ Ban quản trị, Cư
 ```
 ┌─────────────────────┐        ┌─────────────────────┐
 │     Frontend        │  HTTP  │      Backend        │
-│    React.js 18      │◄──────►│  Spring Boot 3.x    │
-│    Tailwind CSS     │  REST  │  Spring Security    │
+│    Vite             │◄──────►│  Maven              │
+│    React.js 18      │  REST  │  Spring Boot 3.x    │
+│    Tailwind CSS     │        │  Spring Security    │
 │                     │        │  Spring Data JPA    │
 └─────────────────────┘        └──────────┬──────────┘
                                           │
