@@ -109,11 +109,7 @@ export default function AppRoutes() {
             },
             {
               path: '/profile',
-              element: (
-                <ResidentRestrictedRoute>
-                  <ProfilePage />
-                </ResidentRestrictedRoute>
-              ),
+              element: <ProfilePage />,
             },
             {
               path: '/cashier',
