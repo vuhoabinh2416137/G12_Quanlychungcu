@@ -42,7 +42,7 @@ public class NotificationController {
     ) {
         String username = authentication.getName();
         Notification notification = notificationMapper.toEntity(requestDto);
-        List<Notification> savedList = notificationService.createNotifications(username, notification, requestDto.getApartmentIds());
+        List<Notification> savedList = notificationService.createNotifications(username, notification, requestDto.getApartmentIds(), requestDto.getRefundAmount());
         return ResponseEntity.status(HttpStatus.CREATED).body(notificationMapper.toAdminDtoList(savedList));
     }
 

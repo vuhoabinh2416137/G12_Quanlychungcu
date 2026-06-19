@@ -5,23 +5,16 @@ export default function QrPaymentModal({ fee, onClose, onSuccess }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   
-  // Format current time for datetime-local input: YYYY-MM-DDThh:mm
-  const now = new Date();
-  const tzOffset = now.getTimezoneOffset() * 60000; // offset in milliseconds
-  const localISOTime = (new Date(now - tzOffset)).toISOString().slice(0, 16);
-  
-  const [transferTime, setTransferTime] = useState(localISOTime);
 
   const handleConfirm = async () => {
     setSubmitting(true);
     setError('');
     try {
-      const transferTimeISO = transferTime ? new Date(transferTime).toISOString() : new Date().toISOString();
       await createPayment(fee.id, {
         amount: fee.amount,
         method: 'QR',
         note: 'Đã thanh toán qua QR',
-        transferTime: transferTimeISO
+        transferTime: new Date().toISOString()
       });
       onSuccess();
     } catch (err) {
@@ -58,15 +51,6 @@ export default function QrPaymentModal({ fee, onClose, onSuccess }) {
           </div>
         </div>
 
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-slate-700 mb-1">Thời gian bạn đã chuyển khoản</label>
-          <input
-            type="datetime-local"
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-            value={transferTime}
-            onChange={(e) => setTransferTime(e.target.value)}
-          />
-        </div>
 
         {error && <div className="mb-4 text-center text-sm text-red-600">{error}</div>}
 

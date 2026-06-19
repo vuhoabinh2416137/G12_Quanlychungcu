@@ -69,3 +69,22 @@ export async function confirmRefund(paymentId) {
   const response = await axiosInstance.post(`/payments/${paymentId}/confirm-refund`);
   return response.data;
 }
+
+export async function reRequestRefundInfo(paymentId) {
+  if (isMockApi()) {
+    console.log('[MOCK] reRequestRefundInfo', paymentId);
+    return { id: paymentId, refundStatus: 'PENDING_INFO' };
+  }
+  const response = await axiosInstance.post(`/payments/${paymentId}/re-request-refund`);
+  return response.data;
+}
+
+export async function fetchLastRefundInfo(paymentId) {
+  if (isMockApi()) {
+    console.log('[MOCK] fetchLastRefundInfo', paymentId);
+    return null;
+  }
+  const response = await axiosInstance.get(`/payments/${paymentId}/last-refund-info`);
+  if (response.status === 204) return null;
+  return response.data;
+}

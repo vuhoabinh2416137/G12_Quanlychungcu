@@ -82,6 +82,26 @@ public class ApartmentController {
         return ResponseEntity.ok(dtoList);
     }
 
+    @PostMapping("/{id}/vehicles")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<VehicleDto> addVehicle(
+            @PathVariable Long id,
+            @Valid @RequestBody com.bluemoon.dto.request.VehicleRequestDto requestDto
+    ) {
+        com.bluemoon.model.Vehicle saved = apartmentService.addVehicleToApartment(id, requestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new VehicleDto(saved));
+    }
+
+    @DeleteMapping("/{id}/vehicles/{vehicleId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteVehicle(
+            @PathVariable Long id,
+            @PathVariable Long vehicleId
+    ) {
+        apartmentService.deleteVehicle(id, vehicleId);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApartmentResponseAdminDto> create(@Valid @RequestBody ApartmentRequestDto requestDto) {

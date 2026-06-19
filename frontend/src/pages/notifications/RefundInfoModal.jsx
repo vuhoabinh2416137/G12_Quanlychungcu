@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { submitRefundInfo } from '../../api/paymentsApi.js';
+import React, { useState, useEffect } from 'react';
+import { submitRefundInfo, fetchLastRefundInfo } from '../../api/paymentsApi.js';
 
 export default function RefundInfoModal({ isOpen, onClose, paymentId, onSuccess }) {
   const [bankName, setBankName] = useState('');
@@ -7,6 +7,23 @@ export default function RefundInfoModal({ isOpen, onClose, paymentId, onSuccess 
   const [accountName, setAccountName] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [lastInfo, setLastInfo] = useState(null);
+
+  useEffect(() => {
+    if (isOpen && paymentId) {
+      setBankName('');
+      setAccountNumber('');
+      setAccountName('');
+      setError('');
+      setLastInfo(null);
+      
+      fetchLastRefundInfo(paymentId)
+        .then(data => {
+          if (data) setLastInfo(data);
+        })
+        .catch(err => console.error("Could not fetch last refund info:", err));
+    }
+  }, [isOpen, paymentId]);
 
   if (!isOpen) return null;
 
@@ -48,6 +65,26 @@ export default function RefundInfoModal({ isOpen, onClose, paymentId, onSuccess 
         
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && <div className="p-3 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
+
+          {lastInfo && (
+            <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-4">
+              <p className="text-sm text-blue-800 font-medium mb-2">Đã từng dùng tài khoản:</p>
+              <p className="text-sm text-blue-900 mb-3">
+                <span className="font-semibold">{lastInfo.accountName}</span> - {lastInfo.bankName} - {lastInfo.accountNumber}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setBankName(lastInfo.bankName);
+                  setAccountNumber(lastInfo.accountNumber);
+                  setAccountName(lastInfo.accountName);
+                }}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-blue-100 px-3 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-200"
+              >
+                Sử dụng tài khoản cũ này
+              </button>
+            </div>
+          )}
           
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Tên Ngân hàng</label>

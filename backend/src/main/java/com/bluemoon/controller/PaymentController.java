@@ -112,11 +112,33 @@ public class PaymentController {
         return ResponseEntity.ok(paymentMapper.toUserDto(saved));
     }
 
+    @GetMapping("/{id}/last-refund-info")
+    @PreAuthorize("hasRole('RESIDENT')")
+    public ResponseEntity<?> getLastRefundInfo(@PathVariable("id") Long paymentId) {
+        Payment p = paymentService.getLastRefundInfo(paymentId);
+        if (p == null || p.getRefundAccountName() == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(Map.of(
+            "bankName", p.getRefundBank(),
+            "accountNumber", p.getRefundAccountNumber(),
+            "accountName", p.getRefundAccountName()
+        ));
+    }
+
     @PostMapping("/{id}/confirm-refund")
     @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     @Transactional
     public ResponseEntity<PaymentResponseAdminDto> confirmRefund(@PathVariable Long id) {
         Payment saved = paymentService.confirmRefund(id);
+        return ResponseEntity.ok(paymentMapper.toAdminDto(saved));
+    }
+
+    @PostMapping("/{id}/re-request-refund")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
+    @Transactional
+    public ResponseEntity<PaymentResponseAdminDto> reRequestRefundInfo(@PathVariable Long id) {
+        Payment saved = paymentService.reRequestRefundInfo(id);
         return ResponseEntity.ok(paymentMapper.toAdminDto(saved));
     }
 

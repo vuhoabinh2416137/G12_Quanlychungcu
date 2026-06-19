@@ -16,8 +16,13 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+import java.text.Normalizer;
+import java.util.regex.Pattern;
+
 import com.bluemoon.repository.NotificationRepository;
+import com.bluemoon.repository.ResidentRepository;
 import com.bluemoon.model.Notification;
+import com.bluemoon.model.Resident;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -27,19 +32,29 @@ public class PaymentServiceImpl implements PaymentService {
     private final ApartmentRepository apartmentRepository;
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
+    private final ResidentRepository residentRepository;
 
     public PaymentServiceImpl(
             PaymentRepository paymentRepository,
             FeeRepository feeRepository,
             ApartmentRepository apartmentRepository,
             NotificationRepository notificationRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            ResidentRepository residentRepository
     ) {
         this.paymentRepository = paymentRepository;
         this.feeRepository = feeRepository;
         this.apartmentRepository = apartmentRepository;
         this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
+        this.residentRepository = residentRepository;
+    }
+
+    private String normalizeName(String s) {
+        if (s == null) return null;
+        String temp = Normalizer.normalize(s, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        return pattern.matcher(temp).replaceAll("").replace("đ", "d").replace("Đ", "D").toUpperCase().trim();
     }
 
     @Override
@@ -97,46 +112,33 @@ public class PaymentServiceImpl implements PaymentService {
         Apartment apartment = fee.getApartment();
         if (actualAmount.compareTo(fee.getAmount()) >= 0) {
             BigDecimal diff = actualAmount.subtract(fee.getAmount());
-            if (apartment != null && diff.compareTo(BigDecimal.ZERO) > 0) {
-                // Yêu cầu hoàn tiền
-                payment.setRefundAmount(diff);
-                
-                boolean infoAutoFilled = false;
-                User payer = payment.getPayer();
-                if (payer != null && "RESIDENT".equals(payer.getRole())) {
-                    Payment previousRefund = paymentRepository.findFirstByPayerAndRefundBankIsNotNullOrderByIdDesc(payer);
-                    if (previousRefund != null) {
-                        payment.setRefundBank(previousRefund.getRefundBank());
-                        payment.setRefundAccountNumber(previousRefund.getRefundAccountNumber());
-                        payment.setRefundAccountName(previousRefund.getRefundAccountName());
-                        payment.setRefundStatus("PENDING_REFUND");
-                        infoAutoFilled = true;
-                    }
-                }
-                
-                if (!infoAutoFilled) {
+            if (diff.compareTo(BigDecimal.ZERO) > 0) {
+                payment.setAmount(fee.getAmount());
+                if (apartment != null) {
+                    payment.setRefundAmount(diff);
                     payment.setRefundStatus("PENDING_INFO");
                     paymentRepository.save(payment);
-                    
-                    Notification notif = new Notification();
-                    notif.setApartment(apartment);
-                    notif.setTitle("Yêu cầu thông tin hoàn tiền");
-                    notif.setContent("Khoản phí " + fee.getName() + " được thanh toán thừa. Vui lòng cung cấp thông tin tài khoản để ban quản lý hoàn trả số tiền thừa.");
-                    notif.setType("REFUND_REQUEST");
-                    notif.setReferenceId(payment.getId());
-                    notif.setCreatedAt(java.time.Instant.now());
-                    notificationRepository.save(notif);
-                } else {
-                    paymentRepository.save(payment);
-                }
+                
+                Notification notif = new Notification();
+                notif.setApartment(apartment);
+                notif.setTitle("Yêu cầu thông tin hoàn tiền");
+                notif.setContent("Khoản phí " + fee.getName() + " được thanh toán thừa. Vui lòng cung cấp thông tin tài khoản để ban quản lý hoàn trả số tiền thừa.");
+                notif.setType("REFUND_REQUEST");
+                notif.setReferenceId(payment.getId());
+                notif.setCreatedAt(java.time.Instant.now());
+                notificationRepository.save(notif);
+                } // This closes if (apartment != null)
+            } else {
+                payment.setAmount(actualAmount);
             }
             fee.setPaid(true);
         } else {
+            payment.setAmount(actualAmount);
             BigDecimal remaining = fee.getAmount().subtract(actualAmount);
             fee.setAmount(remaining);
             fee.setPaid(false);
         }
-
+        paymentRepository.save(payment);
         feeRepository.save(fee);
     }
 
@@ -170,6 +172,8 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setRefundAccountName(accountName.toUpperCase());
         payment.setRefundStatus("PENDING_REFUND");
         
+        notificationRepository.deleteByTypeAndReferenceId("REFUND_REQUEST", paymentId);
+        
         return paymentRepository.save(payment);
     }
 
@@ -186,6 +190,44 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setRefundStatus("COMPLETED");
         
         return paymentRepository.save(payment);
+    }
+
+    @Override
+    @Transactional
+    public Payment reRequestRefundInfo(Long paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Giao dịch không tồn tại"));
+
+        if (!"COMPLETED".equals(payment.getStatus())) {
+            throw new RuntimeException("Chỉ yêu cầu nhập lại cho giao dịch đã hoàn tất");
+        }
+
+        payment.setRefundStatus("PENDING_INFO");
+        payment.setRefundBank(null);
+        payment.setRefundAccountNumber(null);
+        payment.setRefundAccountName(null);
+
+        Notification notif = new Notification();
+        notif.setApartment(payment.getFee().getApartment());
+        notif.setTitle("Yêu cầu nhập lại thông tin hoàn tiền");
+        notif.setContent("Thông tin hoàn tiền cho khoản phí " + payment.getFee().getName() + " không hợp lệ. Vui lòng cập nhật lại.");
+        notif.setType("REFUND_REQUEST");
+        notif.setReferenceId(payment.getId());
+        notif.setCreatedAt(java.time.Instant.now());
+        notificationRepository.save(notif);
+
+        return paymentRepository.save(payment);
+    }
+
+    @Override
+    public Payment getLastRefundInfo(Long paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Giao dịch không tồn tại"));
+        if (payment.getFee() == null || payment.getFee().getApartment() == null) {
+            return null;
+        }
+        return paymentRepository.findFirstByFee_Apartment_IdAndRefundStatusOrderByIdDesc(
+                payment.getFee().getApartment().getId(), "COMPLETED");
     }
 
     @Override

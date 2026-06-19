@@ -20,5 +20,9 @@ public interface PaymentService {
 
     Payment confirmRefund(Long paymentId);
 
+    Payment reRequestRefundInfo(Long paymentId);
+
+    Payment getLastRefundInfo(Long paymentId);
+
     List<Payment> getRefundPayments();
 }

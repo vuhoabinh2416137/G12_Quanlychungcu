@@ -10,8 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.bluemoon.model.Notification;
+import com.bluemoon.repository.NotificationRepository;
 
 @Service
 public class FeeServiceImpl implements FeeService {
@@ -20,15 +24,18 @@ public class FeeServiceImpl implements FeeService {
     private final ApartmentRepository apartmentRepository;
     private final com.bluemoon.repository.VehicleRepository vehicleRepository;
     private final com.bluemoon.repository.SystemConfigRepository systemConfigRepository;
+    private final NotificationRepository notificationRepository;
 
     public FeeServiceImpl(FeeRepository feeRepository, 
                           ApartmentRepository apartmentRepository,
                           com.bluemoon.repository.VehicleRepository vehicleRepository,
-                          com.bluemoon.repository.SystemConfigRepository systemConfigRepository) {
+                          com.bluemoon.repository.SystemConfigRepository systemConfigRepository,
+                          NotificationRepository notificationRepository) {
         this.feeRepository = feeRepository;
         this.apartmentRepository = apartmentRepository;
         this.vehicleRepository = vehicleRepository;
         this.systemConfigRepository = systemConfigRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     @Override
@@ -45,7 +52,19 @@ public class FeeServiceImpl implements FeeService {
         fee.setAmount(resolveAmount(fee, apartment));
         fee.setPaid(false); // mặc định khi tạo mới là chưa thanh toán
 
-        return feeRepository.save(fee);
+        Fee savedFee = feeRepository.save(fee);
+
+        // Tạo thông báo
+        Notification notification = new Notification();
+        notification.setTitle("Thông báo đóng phí: " + savedFee.getName());
+        notification.setContent("Căn hộ " + apartment.getApartmentNumber() + " có một khoản phí mới cần thanh toán: " + savedFee.getName() + " với số tiền là " + savedFee.getAmount() + " VNĐ. " + (savedFee.getDescription() != null ? savedFee.getDescription() : ""));
+        notification.setType("FEE_NOTICE");
+        notification.setApartment(apartment);
+        notification.setReferenceId(savedFee.getId());
+        notification.setCreatedAt(Instant.now());
+        notificationRepository.save(notification);
+
+        return savedFee;
     }
 
     @Override
@@ -95,7 +114,22 @@ public class FeeServiceImpl implements FeeService {
             feesToSave.add(newFee);
         }
 
-        return feeRepository.saveAll(feesToSave);
+        List<Fee> savedFees = feeRepository.saveAll(feesToSave);
+
+        List<Notification> notificationsToSave = new ArrayList<>();
+        for (Fee savedFee : savedFees) {
+            Notification notification = new Notification();
+            notification.setTitle("Thông báo đóng phí: " + savedFee.getName());
+            notification.setContent("Căn hộ " + savedFee.getApartment().getApartmentNumber() + " có một khoản phí mới cần thanh toán: " + savedFee.getName() + " với số tiền là " + savedFee.getAmount() + " VNĐ. " + (savedFee.getDescription() != null ? savedFee.getDescription() : ""));
+            notification.setType("FEE_NOTICE");
+            notification.setApartment(savedFee.getApartment());
+            notification.setReferenceId(savedFee.getId());
+            notification.setCreatedAt(Instant.now());
+            notificationsToSave.add(notification);
+        }
+        notificationRepository.saveAll(notificationsToSave);
+
+        return savedFees;
     }
 
 

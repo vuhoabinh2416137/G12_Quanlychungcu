@@ -25,6 +25,7 @@ export default function NotificationsPage() {
   const [createStatus, setCreateStatus] = useState({ submitting: false, error: '', success: '' });
 
   const [selectedRefundPaymentId, setSelectedRefundPaymentId] = useState(null);
+  const [submittedRefunds, setSubmittedRefunds] = useState(new Set());
 
   // 1. Tải danh sách căn hộ (để filter hoặc để admin chọn khi tạo mới)
   useEffect(() => {
@@ -132,7 +133,7 @@ export default function NotificationsPage() {
             </select>
           )}
 
-          {isAdminOrManager && (
+          {auth?.role === 'ADMIN' && (
             <button
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95"
               onClick={() => {
@@ -146,7 +147,7 @@ export default function NotificationsPage() {
         </div>
       </div>
 
-      {createOpen && isAdminOrManager && (
+      {createOpen && auth?.role === 'ADMIN' && (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden animate-fade-in-up p-6">
           <h2 className="text-lg font-semibold text-slate-900 mb-4">Soạn thông báo mới</h2>
           
@@ -174,7 +175,6 @@ export default function NotificationsPage() {
                   <option value="INFO">Thông tin (Info)</option>
                   <option value="WARNING">Cảnh báo (Warning)</option>
                   <option value="URGENT">Khẩn cấp (Urgent)</option>
-                  <option value="REFUND_REQUEST">Yêu cầu hoàn tiền</option>
                 </select>
               </div>
             </div>
@@ -275,12 +275,12 @@ export default function NotificationsPage() {
                 `}>
                   {n.type === 'URGENT' ? 'Khẩn cấp' : n.type === 'WARNING' ? 'Cảnh báo' : n.type === 'REFUND_REQUEST' ? 'Yêu cầu hoàn trả' : 'Thông tin'}
                 </span>
-                {n.apartmentId && (
+                {n.apartmentId && isAdminOrManager && (
                   <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
                     Gửi riêng: P.{n.apartmentNumber}
                   </span>
                 )}
-                {!n.apartmentId && (
+                {!n.apartmentId && isAdminOrManager && (
                   <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
                     Thông báo chung
                   </span>
@@ -292,7 +292,7 @@ export default function NotificationsPage() {
               </p>
               <div className="text-sm text-slate-700 whitespace-pre-wrap">{n.content}</div>
               
-              {n.type === 'REFUND_REQUEST' && !isAdminOrManager && (
+              {n.type === 'REFUND_REQUEST' && !isAdminOrManager && n.referenceId && !submittedRefunds.has(n.referenceId) && (
                 <div className="mt-4 pt-4 border-t border-slate-100">
                   <button 
                     onClick={() => setSelectedRefundPaymentId(n.referenceId)}
@@ -305,6 +305,16 @@ export default function NotificationsPage() {
                   </button>
                 </div>
               )}
+              {n.type === 'REFUND_REQUEST' && !isAdminOrManager && n.referenceId && submittedRefunds.has(n.referenceId) && (
+                <div className="mt-4 pt-4 border-t border-slate-100">
+                  <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-600">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Đã nhập thông tin
+                  </span>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -315,6 +325,7 @@ export default function NotificationsPage() {
         paymentId={selectedRefundPaymentId} 
         onClose={() => setSelectedRefundPaymentId(null)} 
         onSuccess={() => {
+          setSubmittedRefunds(prev => new Set(prev).add(selectedRefundPaymentId));
           setSelectedRefundPaymentId(null);
           alert('Đã gửi thông tin hoàn tiền thành công!');
         }} 

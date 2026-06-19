@@ -27,6 +27,9 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     /** Tìm giao dịch hoàn tiền gần nhất của user */
     Payment findFirstByPayerAndRefundBankIsNotNullOrderByIdDesc(User payer);
 
+    /** Tìm giao dịch hoàn tiền gần nhất của căn hộ đã hoàn tất */
+    Payment findFirstByFee_Apartment_IdAndRefundStatusOrderByIdDesc(Long apartmentId, String refundStatus);
+
     @Modifying
     @Query("UPDATE Payment p SET p.payer = null WHERE p.payer = :payer")
     void unlinkPayer(@Param("payer") User payer);

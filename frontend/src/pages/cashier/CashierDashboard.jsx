@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchPendingPayments, confirmPayment, fetchRefunds, confirmRefund } from '../../api/paymentsApi.js';
+import { fetchPendingPayments, confirmPayment, fetchRefunds, confirmRefund, reRequestRefundInfo } from '../../api/paymentsApi.js';
 
 export default function CashierDashboard() {
   const [activeTab, setActiveTab] = useState('PENDING_PAYMENTS');
@@ -55,6 +55,17 @@ export default function CashierDashboard() {
       loadData();
     } catch (err) {
       alert('Lỗi khi xác nhận hoàn tiền.');
+    }
+  };
+
+  const handleReRequestClick = async (paymentId) => {
+    if (!window.confirm("Gửi lại yêu cầu nhập thông tin ngân hàng cho cư dân?")) return;
+    try {
+      await reRequestRefundInfo(paymentId);
+      alert('Đã gửi yêu cầu nhập lại thông tin!');
+      loadData();
+    } catch (err) {
+      alert('Lỗi khi gửi yêu cầu.');
     }
   };
 
@@ -191,12 +202,20 @@ export default function CashierDashboard() {
                   </td>
                   <td className="px-6 py-4 text-center">
                     {r.refundStatus === 'PENDING_REFUND' && (
-                      <button
-                        className="rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-indigo-700"
-                        onClick={() => handleConfirmRefundClick(r.id)}
-                      >
-                        Xác nhận hoàn trả
-                      </button>
+                      <div className="flex flex-col gap-2 items-center justify-center">
+                        <button
+                          className="rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 w-full"
+                          onClick={() => handleConfirmRefundClick(r.id)}
+                        >
+                          Xác nhận hoàn trả
+                        </button>
+                        <button
+                          className="rounded-lg bg-amber-500 px-4 py-1.5 text-sm font-medium text-white hover:bg-amber-600 w-full"
+                          onClick={() => handleReRequestClick(r.id)}
+                        >
+                          Yêu cầu nhập lại
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>

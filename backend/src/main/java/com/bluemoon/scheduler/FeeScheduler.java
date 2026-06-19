@@ -20,6 +20,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.Instant;
+import com.bluemoon.model.Notification;
+import com.bluemoon.repository.NotificationRepository;
 
 @Component
 public class FeeScheduler {
@@ -30,17 +33,20 @@ public class FeeScheduler {
     private final FeeRepository feeRepository;
     private final VehicleRepository vehicleRepository;
     private final SystemConfigService systemConfigService;
+    private final NotificationRepository notificationRepository;
 
     public FeeScheduler(
             ApartmentRepository apartmentRepository,
             FeeRepository feeRepository,
             VehicleRepository vehicleRepository,
-            SystemConfigService systemConfigService
+            SystemConfigService systemConfigService,
+            NotificationRepository notificationRepository
     ) {
         this.apartmentRepository = apartmentRepository;
         this.feeRepository = feeRepository;
         this.vehicleRepository = vehicleRepository;
         this.systemConfigService = systemConfigService;
+        this.notificationRepository = notificationRepository;
     }
 
     /**
@@ -160,8 +166,22 @@ public class FeeScheduler {
             apartmentRepository.save(apartment);
         }
 
-        feeRepository.saveAll(feesToSave);
-        log.info("=== HOÀN TẤT: Đã phát {} khoản phí cho {} căn hộ. Đã reset số điện/nước về 0. ===",
-                feesToSave.size(), apartments.size());
+        List<Fee> savedFees = feeRepository.saveAll(feesToSave);
+        
+        List<Notification> notificationsToSave = new ArrayList<>();
+        for (Fee savedFee : savedFees) {
+            Notification notification = new Notification();
+            notification.setTitle("Thông báo đóng phí: " + savedFee.getName());
+            notification.setContent("Căn hộ " + savedFee.getApartment().getApartmentNumber() + " có một khoản phí mới cần thanh toán: " + savedFee.getName() + " với số tiền là " + savedFee.getAmount() + " VNĐ. " + (savedFee.getDescription() != null ? savedFee.getDescription() : ""));
+            notification.setType("FEE_NOTICE");
+            notification.setApartment(savedFee.getApartment());
+            notification.setReferenceId(savedFee.getId());
+            notification.setCreatedAt(Instant.now());
+            notificationsToSave.add(notification);
+        }
+        notificationRepository.saveAll(notificationsToSave);
+
+        log.info("=== HOÀN TẤT: Đã phát {} khoản phí và gửi {} thông báo cho {} căn hộ. Đã reset số điện/nước về 0. ===",
+                savedFees.size(), notificationsToSave.size(), apartments.size());
     }
 }

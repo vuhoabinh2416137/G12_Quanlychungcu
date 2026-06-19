@@ -3,6 +3,7 @@ package com.bluemoon.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.util.List;
+import java.math.BigDecimal;
 
 public class NotificationRequestDto {
 
@@ -17,6 +18,8 @@ public class NotificationRequestDto {
 
     @Size(max = 50, message = "Loại thông báo không được vượt quá 50 ký tự")
     private String type;
+
+    private BigDecimal refundAmount;
 
     public List<Long> getApartmentIds() {
         return apartmentIds;
@@ -48,5 +51,13 @@ public class NotificationRequestDto {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public BigDecimal getRefundAmount() {
+        return refundAmount;
+    }
+
+    public void setRefundAmount(BigDecimal refundAmount) {
+        this.refundAmount = refundAmount;
     }
 }

@@ -19,7 +19,9 @@ public interface PaymentMapper {
     PaymentResponseAdminDto toAdminDto(Payment payment);
     List<PaymentResponseAdminDto> toAdminDtoList(List<Payment> payments);
 
-    // Entity → User DTO (ẩn note, feeName, apartmentNumber)
+    // Entity → User DTO (hiển thị feeName, feeId, ẩn note, apartmentNumber)
+    @Mapping(target = "feeId",   source = "fee.id")
+    @Mapping(target = "feeName", source = "fee.name")
     PaymentResponseUserDto toUserDto(Payment payment);
     List<PaymentResponseUserDto> toUserDtoList(List<Payment> payments);
 

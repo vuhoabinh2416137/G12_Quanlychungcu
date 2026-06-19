@@ -21,11 +21,15 @@ public interface ApartmentMapper {
 
     // Request DTO → Entity (POST)
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "motorbikeCount", ignore = true)
+    @Mapping(target = "carCount", ignore = true)
     Apartment toEntity(ApartmentRequestDto requestDto);
 
     // Request DTO → Entity có sẵn (PUT)
     // apartmentNumber không cho đổi sau khi tạo
     @Mapping(target = "id",              ignore = true)
     @Mapping(target = "apartmentNumber", ignore = true)
+    @Mapping(target = "motorbikeCount",  ignore = true)
+    @Mapping(target = "carCount",        ignore = true)
     void updateEntityFromDto(ApartmentRequestDto requestDto, @MappingTarget Apartment apartment);
 }

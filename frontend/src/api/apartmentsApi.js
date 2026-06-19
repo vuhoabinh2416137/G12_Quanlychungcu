@@ -28,3 +28,12 @@ export async function fetchApartmentVehicles(id) {
   const { data } = await apiClient.get(`/apartments/${id}/vehicles`);
   return data;
 }
+
+export async function addApartmentVehicle(id, payload) {
+  const { data } = await apiClient.post(`/apartments/${id}/vehicles`, payload);
+  return data;
+}
+
+export async function deleteApartmentVehicle(id, vehicleId) {
+  await apiClient.delete(`/apartments/${id}/vehicles/${vehicleId}`);
+}

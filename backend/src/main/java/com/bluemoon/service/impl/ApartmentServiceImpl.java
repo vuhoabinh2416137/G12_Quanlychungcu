@@ -84,4 +84,47 @@ public class ApartmentServiceImpl implements ApartmentService {
         getApartmentById(id); // Ensure apartment exists
         return vehicleRepository.findByApartmentId(id);
     }
+
+    @Override
+    @Transactional
+    public com.bluemoon.model.Vehicle addVehicleToApartment(Long apartmentId, com.bluemoon.dto.request.VehicleRequestDto dto) {
+        Apartment apartment = getApartmentById(apartmentId);
+        com.bluemoon.model.Vehicle vehicle = new com.bluemoon.model.Vehicle();
+        vehicle.setApartment(apartment);
+        vehicle.setLicensePlate(dto.getLicensePlate());
+        vehicle.setType(dto.getType());
+        vehicle.setColor(dto.getColor());
+        com.bluemoon.model.Vehicle saved = vehicleRepository.save(vehicle);
+        
+        if ("O_TO".equalsIgnoreCase(saved.getType())) {
+            apartment.setCarCount((apartment.getCarCount() == null ? 0 : apartment.getCarCount()) + 1);
+        } else {
+            apartment.setMotorbikeCount((apartment.getMotorbikeCount() == null ? 0 : apartment.getMotorbikeCount()) + 1);
+        }
+        apartmentRepository.save(apartment);
+        
+        return saved;
+    }
+
+    @Override
+    @Transactional
+    public void deleteVehicle(Long apartmentId, Long vehicleId) {
+        Apartment apartment = getApartmentById(apartmentId);
+        com.bluemoon.model.Vehicle vehicle = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phương tiện với ID: " + vehicleId));
+        if (!vehicle.getApartment().getId().equals(apartmentId)) {
+            throw new IllegalArgumentException("Phương tiện không thuộc căn hộ này");
+        }
+        
+        if ("O_TO".equalsIgnoreCase(vehicle.getType())) {
+            int current = apartment.getCarCount() == null ? 0 : apartment.getCarCount();
+            apartment.setCarCount(Math.max(0, current - 1));
+        } else {
+            int current = apartment.getMotorbikeCount() == null ? 0 : apartment.getMotorbikeCount();
+            apartment.setMotorbikeCount(Math.max(0, current - 1));
+        }
+        apartmentRepository.save(apartment);
+        
+        vehicleRepository.delete(vehicle);
+    }
 }

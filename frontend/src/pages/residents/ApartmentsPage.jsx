@@ -8,7 +8,7 @@ import {
 import { useAuth } from '../../hooks/useAuth.js';
 import { isNonEmptyString } from '../../utils/validators.js';
 import ApartmentDetailModal from './ApartmentDetailModal.jsx';
-import VehicleListModal from './VehicleListModal.jsx';
+import VehicleManager from './VehicleManager.jsx';
 
 const STATUSES = ['VACANT', 'OCCUPIED'];
 
@@ -31,7 +31,6 @@ export default function ApartmentsPage() {
   const [error, setError] = useState('');
 
   const [detailApartment, setDetailApartment] = useState(null);
-  const [vehicleModalApartment, setVehicleModalApartment] = useState(null);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [createTouched, setCreateTouched] = useState({});
@@ -298,28 +297,6 @@ export default function ApartmentsPage() {
                 ) : null}
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">Số xe máy</label>
-                <input
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
-                  value={createForm.motorbikeCount}
-                  onChange={(e) => setCreateForm((f) => ({ ...f, motorbikeCount: e.target.value }))}
-                  placeholder="VD: 2"
-                  inputMode="numeric"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">Số ô tô</label>
-                <input
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
-                  value={createForm.carCount}
-                  onChange={(e) => setCreateForm((f) => ({ ...f, carCount: e.target.value }))}
-                  placeholder="VD: 1"
-                  inputMode="numeric"
-                />
-              </div>
-
               <div className="md:col-span-2 mt-2 flex items-center justify-end gap-3 pt-5 border-t border-slate-100">
                 <button
                   type="button"
@@ -382,30 +359,10 @@ export default function ApartmentsPage() {
                     {a.area == null ? '-' : `${Number(a.area).toLocaleString('vi-VN')} m²`}
                   </td>
                   <td className="px-5 py-3 text-center text-slate-600 font-medium">
-                    {a.motorbikeCount > 0 ? (
-                      <button
-                        onClick={() => setVehicleModalApartment(a)}
-                        className="inline-flex items-center justify-center min-w-[2rem] rounded bg-blue-50 px-2 py-1 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 hover:underline cursor-pointer"
-                        title="Xem chi tiết xe"
-                      >
-                        {a.motorbikeCount}
-                      </button>
-                    ) : (
-                      '0'
-                    )}
+                    {a.motorbikeCount}
                   </td>
                   <td className="px-5 py-3 text-center text-slate-600 font-medium">
-                    {a.carCount > 0 ? (
-                      <button
-                        onClick={() => setVehicleModalApartment(a)}
-                        className="inline-flex items-center justify-center min-w-[2rem] rounded bg-indigo-50 px-2 py-1 text-sm font-semibold text-indigo-700 transition-colors hover:bg-indigo-100 hover:underline cursor-pointer"
-                        title="Xem chi tiết xe"
-                      >
-                        {a.carCount}
-                      </button>
-                    ) : (
-                      '0'
-                    )}
+                    {a.carCount}
                   </td>
                   <td className="px-5 py-3">
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -632,27 +589,13 @@ export default function ApartmentsPage() {
                   ) : null}
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700">Số xe máy</label>
-                  <input
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
-                    value={editForm.motorbikeCount}
-                    onChange={(e) => setEditForm((f) => ({ ...f, motorbikeCount: e.target.value }))}
-                    placeholder="VD: 2"
-                    inputMode="numeric"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700">Số ô tô</label>
-                  <input
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
-                    value={editForm.carCount}
-                    onChange={(e) => setEditForm((f) => ({ ...f, carCount: e.target.value }))}
-                    placeholder="VD: 1"
-                    inputMode="numeric"
-                  />
-                </div>
+                <VehicleManager 
+                  apartmentId={editId} 
+                  onVehicleChanged={() => {
+                     // Lấy lại danh sách apartment để cập nhật số lượng xe trên bảng chính
+                     fetchApartments().then(data => setApartments(data)).catch(() => {});
+                  }} 
+                />
 
                 <div className="md:col-span-2 mt-4 flex items-center justify-end gap-3 pt-5 border-t border-slate-100">
                   <button
@@ -687,24 +630,17 @@ export default function ApartmentsPage() {
       ) : null}
 
       {/* Modal chi tiết căn hộ */}
-      <ApartmentDetailModal
-        apartment={detailApartment}
-        onClose={() => setDetailApartment(null)}
-        canEdit={canWrite || auth?.role === 'CASHIER'}
-        onUpdated={(updated) => {
-          setApartments((prev) => prev.map((x) => (x.id === updated.id ? updated : x)));
-          setDetailApartment(updated);
-        }}
-      />
-
-      {/* Modal chi tiết phương tiện */}
-      {vehicleModalApartment && (
-        <VehicleListModal
-          apartment={vehicleModalApartment}
-          onClose={() => setVehicleModalApartment(null)}
+      {detailApartment ? (
+        <ApartmentDetailModal 
+          apartment={detailApartment} 
+          onClose={() => setDetailApartment(null)}
+          canEdit={canWrite || auth?.role === 'CASHIER'}
+          onUpdated={(updated) => {
+            setApartments((prev) => prev.map((x) => (x.id === updated.id ? updated : x)));
+            setDetailApartment(updated);
+          }}
         />
-      )}
+      ) : null}
     </div>
   );
 }
-
