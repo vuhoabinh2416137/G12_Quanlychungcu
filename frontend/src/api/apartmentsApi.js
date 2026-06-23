@@ -49,6 +49,11 @@ export async function addApartmentVehicle(id, payload) {
   return data;
 }
 
+export async function updateApartmentVehicle(id, vehicleId, payload) {
+  const { data } = await apiClient.put(`/apartments/${id}/vehicles/${vehicleId}`, payload);
+  return data;
+}
+
 export async function deleteApartmentVehicle(id, vehicleId) {
   await apiClient.delete(`/apartments/${id}/vehicles/${vehicleId}`);
 }

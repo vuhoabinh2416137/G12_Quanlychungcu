@@ -102,6 +102,17 @@ public class ApartmentController {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/{id}/vehicles/{vehicleId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<VehicleDto> updateVehicle(
+            @PathVariable Long id,
+            @PathVariable Long vehicleId,
+            @Valid @RequestBody com.bluemoon.dto.request.VehicleRequestDto requestDto
+    ) {
+        com.bluemoon.model.Vehicle updated = apartmentService.updateVehicle(id, vehicleId, requestDto);
+        return ResponseEntity.ok(new VehicleDto(updated));
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApartmentResponseAdminDto> create(@Valid @RequestBody ApartmentRequestDto requestDto) {

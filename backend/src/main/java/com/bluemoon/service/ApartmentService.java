@@ -20,5 +20,7 @@ public interface ApartmentService {
 
     com.bluemoon.model.Vehicle addVehicleToApartment(Long apartmentId, com.bluemoon.dto.request.VehicleRequestDto dto);
 
+    com.bluemoon.model.Vehicle updateVehicle(Long apartmentId, Long vehicleId, com.bluemoon.dto.request.VehicleRequestDto dto);
+
     void deleteVehicle(Long apartmentId, Long vehicleId);
 }

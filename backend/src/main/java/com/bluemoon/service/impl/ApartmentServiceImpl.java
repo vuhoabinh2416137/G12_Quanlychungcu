@@ -134,4 +134,41 @@ public class ApartmentServiceImpl implements ApartmentService {
         
         vehicleRepository.delete(vehicle);
     }
+
+    @Override
+    @Transactional
+    public com.bluemoon.model.Vehicle updateVehicle(Long apartmentId, Long vehicleId, com.bluemoon.dto.request.VehicleRequestDto dto) {
+        Apartment apartment = getApartmentById(apartmentId);
+        com.bluemoon.model.Vehicle vehicle = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phương tiện với ID: " + vehicleId));
+        if (!vehicle.getApartment().getId().equals(apartmentId)) {
+            throw new IllegalArgumentException("Phương tiện không thuộc căn hộ này");
+        }
+
+        String oldType = vehicle.getType();
+        String newType = dto.getType();
+
+        if (oldType != null && !oldType.equalsIgnoreCase(newType)) {
+            if ("O_TO".equalsIgnoreCase(oldType)) {
+                int current = apartment.getCarCount() == null ? 0 : apartment.getCarCount();
+                apartment.setCarCount(Math.max(0, current - 1));
+            } else {
+                int current = apartment.getMotorbikeCount() == null ? 0 : apartment.getMotorbikeCount();
+                apartment.setMotorbikeCount(Math.max(0, current - 1));
+            }
+
+            if ("O_TO".equalsIgnoreCase(newType)) {
+                apartment.setCarCount((apartment.getCarCount() == null ? 0 : apartment.getCarCount()) + 1);
+            } else {
+                apartment.setMotorbikeCount((apartment.getMotorbikeCount() == null ? 0 : apartment.getMotorbikeCount()) + 1);
+            }
+            apartmentRepository.save(apartment);
+        }
+
+        vehicle.setLicensePlate(dto.getLicensePlate());
+        vehicle.setType(newType);
+        vehicle.setColor(dto.getColor());
+
+        return vehicleRepository.save(vehicle);
+    }
 }
