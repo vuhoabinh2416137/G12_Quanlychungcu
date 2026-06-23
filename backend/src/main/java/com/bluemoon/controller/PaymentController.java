@@ -75,6 +75,20 @@ public class PaymentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(paymentMapper.toAdminDto(saved));
     }
 
+    @PostMapping("/voluntary/apartment/{apartmentId}")
+    @PreAuthorize("hasRole('RESIDENT')")
+    @Transactional
+    public ResponseEntity<PaymentResponseUserDto> processVoluntary(
+            @PathVariable Long apartmentId,
+            @Valid @RequestBody PaymentRequestDto requestDto,
+            Authentication auth
+    ) {
+        residentAccessService.ensureResidentApartmentAccess(auth, apartmentId);
+        Payment payment = paymentMapper.toEntity(requestDto);
+        Payment saved = paymentService.processVoluntaryPayment(apartmentId, payment, auth.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(paymentMapper.toUserDto(saved));
+    }
+
     @GetMapping("/apartment/{apartmentId}/history")
     @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     @Transactional(readOnly = true)

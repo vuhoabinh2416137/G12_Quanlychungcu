@@ -1,0 +1,1336 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[vietnamese]{babel}
+\usepackage{amsmath, amsfonts, amssymb}
+\usepackage{graphicx}
+\usepackage[hidelinks]{hyperref}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{titlesec}
+\usepackage{tikz}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{caption}
+
+\setstretch{1.3}
+
+\geometry{a4paper, top=25mm, bottom=25mm, left=30mm, right=20mm}
+\usetikzlibrary{calc}
+
+% Định nghĩa kiểu căn lề bảng
+\newcolumntype{C}[1]{>{\centering\arraybackslash}m{#1}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}m{#1}}
+
+% ====================== HEADER/FOOTER ======================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\small Nhóm 12}
+\fancyhead[L]{\small IT3180 – Nhập môn công nghệ phần mềm}
+\fancyfoot[R]{\small Trang \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\begin{document}
+
+% Include the title page and preamble
+% ==========================================
+% TRANG BÌA
+% ==========================================
+\begin{titlepage}
+\begin{tikzpicture}[remember picture, overlay]
+    % Khung viền đôi nghệ thuật bo góc hoa văn chuẩn mẫu gốc
+    \draw[line width=1.5pt] ($(current page.north west) + (25mm,-20mm)$) rectangle ($(current page.south east) + (-15mm,20mm)$);
+    \draw[line width=0.5pt] ($(current page.north west) + (26.5mm,-21.5mm)$) rectangle ($(current page.south east) + (-16.5mm,21.5mm)$);
+\end{tikzpicture}
+
+\begin{center}
+    \singlespacing
+    \large\textbf{TRƯỜNG ĐẠI HỌC BÁCH KHOA HÀ NỘI} \\
+    \small\textbf{VIỆN CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG} \\
+    \small\rule{3cm}{0.4pt}\, * \,\rule{3cm}{0.4pt} \\
+    \vspace{15mm}
+    
+    % Logo Đại học Bách Khoa Hà Nội
+    % \includegraphics[width=0.22\textwidth]{logo-bach-khoa.jpg} \\
+    \vspace{15mm}
+    
+    \Huge\textbf{BÀI TẬP LỚN} \\
+    \vspace{5mm}
+    \Large\textbf{MÔN: NHẬP MÔN CÔNG NGHỆ PHẦN MỀM} \\
+    \vspace{15mm}
+    \huge\textbf{Quản lý thu phí, đóng góp và dân cư chung cư} \\
+    \vspace{5mm}
+    \large\textbf{(Dự án BlueMoon)} \\
+    \vspace{15mm}
+    
+    \normalsize
+    \begin{tabular}{ll}
+        \textbf{Nhóm} & \textbf{: 12} \\
+        \textbf{Giáo viên hướng dẫn} & \textbf{: Ths. Nguyễn Mạnh Tuấn} \\
+    \end{tabular}
+    
+    \vspace{5mm}
+    \textbf{Danh sách sinh viên thực hiện:} \\
+    \vspace{3mm}
+    
+    \begin{tabular}{|c|l|l|l|}
+        \hline
+        \textbf{STT} & \textbf{Họ tên} & \textbf{Mã sinh viên} & \textbf{Vai trò} \\
+        \hline
+        1 & Vũ Hòa Bình & 202416137 & Trưởng nhóm (PM) \\
+        \hline
+        2 & Lý Công Hiếu & 202416200 & Developer \\
+        \hline
+        3 & Đỗ Duy Đức & 202400001 & Developer \\
+        \hline
+        4 & Hoàng Công Đức & 202400002 & Developer \\
+        \hline
+        5 & Phạm Duy Nguyên Lâm & 202400003 & Developer \\
+        \hline
+    \end{tabular}
+    
+    \vfill
+    
+    \textbf{Hà Nội, tháng 5 năm 2026}
+\end{center}
+\end{titlepage}
+
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{2}
+
+% ====================== LỜI NÓI ĐẦU ======================
+\section*{LỜI NÓI ĐẦU}
+\addcontentsline{toc}{section}{LỜI NÓI ĐẦU}
+
+Hiện nay, sự phát triển nhanh chóng của các khu đô thị và chung cư đòi hỏi một hệ thống quản lý chuyên nghiệp, minh bạch và hiệu quả. Việc quản lý thu chi, quản lý nhân khẩu, hộ khẩu, cũng như tiếp nhận ý kiến đóng góp của cư dân tại các khu chung cư là một bài toán phức tạp. Quản lý thu chi là việc mà bất cứ khu dân cư, ban quản trị nào cũng phải giải quyết để giúp minh bạch thông tin, công khai các khoản thu, ghi chép và lưu trữ lại những thông tin nộp phí. Để giải quyết vấn đề này, việc quản lý thủ công qua sổ sách hoặc các công cụ bảng tính đơn giản không còn đáp ứng được yêu cầu về tốc độ và tính chính xác, dẫn đến nguy cơ sai sót, thất thoát và thiếu minh bạch.
+
+Để tiếp cận và hoàn thiện đề tài, nhóm chúng em đã quyết định xây dựng phần mềm \textbf{BlueMoon} - Hệ thống quản lý chung cư toàn diện. Phần mềm được xây dựng dựa trên kiến trúc hiện đại với Frontend sử dụng React.js (Vite), Backend sử dụng Spring Boot và cơ sở dữ liệu MySQL. Phần mềm BlueMoon cung cấp đầy đủ các tính năng quản lý cư dân, căn hộ, quản lý khoản thu, phí dịch vụ, hỗ trợ cư dân nộp tiền, xem lịch sử thanh toán, đồng thời tích hợp tính năng gửi thông báo và tiếp nhận ý kiến đóng góp từ cư dân. Đặc biệt, hệ thống cung cấp tính năng phân quyền rõ ràng cho Ban quản trị, Thủ quỹ và Cư dân, đảm bảo an toàn thông tin và tính chuyên môn hóa cao trong quy trình quản lý.
+
+Mặc dù đã cố gắng hết sức, nhưng do giới hạn về mặt thời gian và kiến thức, báo cáo và sản phẩm chắc chắn không tránh khỏi những thiếu sót. Chúng em rất mong nhận được sự góp ý và chỉ bảo từ Thầy để hoàn thiện hơn nữa.
+
+\vspace{1cm}
+\begin{flushright}
+\textbf{Nhóm sinh viên thực hiện}
+\end{flushright}
+
+\newpage
+
+% ====================== BẢNG PHÂN CÔNG ======================
+\section*{PHÂN CÔNG THÀNH VIÊN TRONG NHÓM}
+\addcontentsline{toc}{section}{PHÂN CÔNG THÀNH VIÊN TRONG NHÓM}
+
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|C{1cm}|L{3.5cm}|X|C{2cm}|}
+    \hline
+    \textbf{STT} & \textbf{Họ và tên} & \textbf{Tổng hợp công việc thực hiện} & \textbf{Đánh giá} \\
+    \hline
+    1 & Vũ Hòa Bình & Quản lý dự án, thiết kế kiến trúc, phát triển API Backend (Auth, Users), viết báo cáo & Hoàn thành \\
+    \hline
+    2 & Lý Công Hiếu & Thiết kế giao diện (UI/UX) Frontend, tích hợp API quản lý cư dân, căn hộ & Hoàn thành \\
+    \hline
+    3 & Đỗ Duy Đức & Phát triển API Backend (Khoản thu, Thanh toán), thiết kế Database & Hoàn thành \\
+    \hline
+    4 & Hoàng Công Đức & Phát triển tính năng Thông báo, Phản hồi, Thống kê, kiểm thử hệ thống & Hoàn thành \\
+    \hline
+    5 & Phạm Duy Nguyên Lâm & Hỗ trợ phát triển Frontend, xử lý phân quyền, cấu hình Docker và Server & Hoàn thành \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\newpage
+
+
+% ====================== MỤC LỤC ======================
+\renewcommand{\contentsname}{MỤC LỤC}
+\tableofcontents
+\newpage
+
+\listoffigures
+\newpage
+
+\listoftables
+\newpage
+
+% Include chapters
+\section{KHẢO SÁT BÀI TOÁN}
+
+\subsection{Mô tả yêu cầu bài toán}
+Bài toán quản lý chung cư, đặc biệt là quản lý thu phí và đóng góp (yêu cầu nghiệp vụ cốt lõi), là một quy trình đòi hỏi sự chính xác, minh bạch và khả năng truy xuất nhanh chóng. Trong các khu chung cư hiện đại, số lượng căn hộ có thể lên tới hàng nghìn, số lượng cư dân rất đông đúc. Do đó, yêu cầu đặt ra cho bài toán quản lý này vô cùng đa dạng và phức tạp:
+
+\begin{itemize}
+    \item \textbf{Quản lý cư dân và căn hộ:} Hệ thống cần lưu trữ thông tin của từng hộ gia đình (căn hộ) và danh sách nhân khẩu (cư dân) sinh sống trong căn hộ đó. Cần ghi nhận chủ hộ, số lượng thành viên, tình trạng tạm trú/thường trú.
+    \item \textbf{Quản lý khoản phí bắt buộc:} Hàng tháng hoặc hàng năm, Ban quản trị cần thực hiện thu các khoản phí bắt buộc như phí quản lý chung cư (tính theo diện tích), phí điện (theo kWh tiêu thụ), phí nước (theo m³ tiêu thụ), phí gửi xe (theo số lượng xe), phí dịch vụ (tính theo số nhân khẩu, ví dụ: 100.000 VNĐ/người/tháng).
+    \item \textbf{Quản lý khoản đóng góp tự nguyện:} Bên cạnh các khoản thu bắt buộc, thường xuyên có các đợt vận động đóng góp từ cộng đồng như: ``Ủng hộ đồng bào bị lũ lụt'', ``Quỹ khuyến học'', ``Quỹ đền ơn đáp nghĩa''. Các khoản này không quy định số tiền bắt buộc và phụ thuộc vào lòng hảo tâm của từng hộ.
+    \item \textbf{Quy trình thu và ghi nhận:} Cán bộ kế toán hoặc thủ quỹ sẽ lập danh sách các khoản thu và thông báo đến từng hộ gia đình. Cư dân có thể nộp tiền trực tiếp hoặc chuyển khoản. Thủ quỹ sẽ xác nhận và ghi nhận số tiền đã nộp vào hệ thống.
+    \item \textbf{Thống kê và báo cáo:} Hệ thống cần hỗ trợ tra cứu, thống kê tổng số tiền đã thu trong mỗi đợt, số lượng hộ đã nộp, số hộ còn nợ phí. Cung cấp báo cáo minh bạch cho Ban quản trị.
+    \item \textbf{Tương tác với cư dân (Thông báo \& Ý kiến):} Cần có một kênh liên lạc trực tiếp để Ban quản lý gửi thông báo đến cư dân (như thông báo cắt điện, cắt nước, đóng phí) và cư dân có thể gửi ý kiến phản hồi hoặc báo cáo sự cố (hỏng thang máy, vệ sinh) lên Ban quản lý.
+\end{itemize}
+
+\subsection{Khảo sát bài toán}
+Thực trạng hiện nay tại nhiều chung cư chưa áp dụng phần mềm quản lý là việc ghi chép thông qua các sổ sách hoặc các công cụ như Excel. Điều này dẫn đến nhiều bất cập:
+\begin{itemize}
+    \item Dữ liệu bị phân mảnh, khó tìm kiếm và tra cứu. Khi một cư dân muốn xem lại lịch sử đóng phí của các tháng trước, thủ quỹ phải tốn nhiều thời gian lật sổ sách.
+    \item Dễ xảy ra sai sót trong quá trình tính toán phí (nhân nhầm diện tích, tính thiếu nhân khẩu) dẫn đến khiếu nại.
+    \item Việc thông báo thu phí thường thực hiện bằng cách dán giấy ở thang máy hoặc loa phát thanh, hiệu quả tiếp cận không cao, nhiều cư dân không nhận được thông báo kịp thời.
+    \item Công tác báo cáo doanh thu, quỹ tồn đọng cuối tháng gặp khó khăn, tốn kém nhân lực.
+\end{itemize}
+Từ quá trình khảo sát thực tế, chúng tôi nhận thấy sự cần thiết phải xây dựng một giải pháp phần mềm toàn diện, số hóa quy trình quản lý, tạo ra sự liên kết chặt chẽ giữa Ban Quản Trị, Thủ Quỹ và Cư Dân.
+
+\subsection{Xác định thông tin cơ bản cho nghiệp vụ của bài toán}
+Dựa trên khảo sát, chúng tôi phân loại thông tin nghiệp vụ cơ bản như sau:
+
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|L{3cm}|X|X|}
+    \hline
+    \textbf{Nghiệp vụ} & \textbf{Input (Đầu vào)} & \textbf{Output (Đầu ra) / Xử lý} \\
+    \hline
+    \textbf{Quản lý Căn hộ \& Nhân khẩu} & Thông tin căn hộ (Mã căn, Diện tích, Trạng thái). Thông tin cư dân (Họ tên, CMND, Tuổi, SĐT, Quan hệ với chủ hộ). & Danh sách hộ gia đình, danh sách nhân khẩu. Dữ liệu làm cơ sở để tính phí quản lý. \\
+    \hline
+    \textbf{Phí bắt buộc} & Số hộ gia đình, Diện tích căn hộ/Số nhân khẩu. Loại phí, Đơn giá. & Tính toán số tiền mỗi hộ cần nộp. Tạo hóa đơn định kỳ. Danh sách nợ phí, đã nộp phí. \\
+    \hline
+    \textbf{Phí tự nguyện} & Tên đợt vận động. Thời gian. Thông tin chủ hộ đóng góp. Số tiền tự nguyện nộp. & Tổng số tiền thu được trong từng đợt. Danh sách các hộ gia đình đã ủng hộ. In ấn danh sách minh bạch. \\
+    \hline
+    \textbf{Thu phí} & Mã hóa đơn, Số tiền nộp, Người nộp, Phương thức thanh toán (Tiền mặt, Chuyển khoản). & Phiếu thu/Biên lai. Cập nhật trạng thái hóa đơn thành "Đã thanh toán". Cập nhật tổng quỹ. \\
+    \hline
+    \textbf{Thông báo \& Phản hồi} & Nội dung thông báo, Đối tượng nhận. Ý kiến cư dân, Nội dung sự cố. & Hiển thị thông báo đến ứng dụng cư dân. Chuyển tiếp ý kiến đến Ban quản trị. Trạng thái xử lý sự cố. \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\subsection{Xây dựng biểu đồ mô tả nghiệp vụ và phân cấp chức năng}
+
+\subsubsection{Biểu đồ phân cấp chức năng (BFD - Business Function Diagram)}
+Hệ thống được chia thành 4 phân hệ lớn:
+\begin{enumerate}
+    \item \textbf{Phân hệ Quản lý dân cư:} Bao gồm Quản lý căn hộ và Quản lý nhân khẩu.
+    \item \textbf{Phân hệ Quản lý tài chính:} Bao gồm Quản lý khoản thu (Bắt buộc/Tự nguyện) và Quản lý nộp phí (Duyệt hóa đơn, Thanh toán).
+    \item \textbf{Phân hệ Tương tác:} Bao gồm Quản lý thông báo, Phản hồi ý kiến và Báo cáo sự cố.
+    \item \textbf{Phân hệ Hệ thống:} Quản lý người dùng, phân quyền, cấu hình hệ thống (giá điện, giá nước cơ bản, v.v.).
+\end{enumerate}
+
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|L{4cm}|X|C{4cm}|}
+    \hline
+    \textbf{Tên chức năng} & \textbf{Mô tả} & \textbf{Đánh giá mức độ ưu tiên} \\
+    \hline
+    Quản lý nhân/hộ khẩu & Thêm, sửa, xóa, tìm kiếm thông tin cư dân và các căn hộ trong tòa nhà. & Cao (Cốt lõi) \\
+    \hline
+    Quản lý khoản thu & Tạo các đợt thu phí, thiết lập mức phí, quản lý loại phí (Bắt buộc/Tự nguyện). & Cao (Cốt lõi) \\
+    \hline
+    Ghi nhận nộp tiền & Thủ quỹ xác nhận số tiền cư dân nộp, duyệt biên lai thanh toán. & Cao (Cốt lõi) \\
+    \hline
+    Thống kê & Thống kê tổng doanh thu, quỹ đóng góp, số nợ của từng hộ. Xuất báo cáo. & Cao \\
+    \hline
+    Thông báo \& Phản hồi & Gửi thông báo đến app cư dân. Nhận feedback và xử lý sự cố. & Trung bình \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\subsection{Xây dựng kế hoạch dự án đơn giản}
+Kế hoạch dự án phần mềm BlueMoon được thực hiện theo phương pháp Agile/Scrum. Dự án chia làm nhiều Sprint.
+
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|L{3cm}|X|C{3cm}|C{3cm}|}
+    \hline
+    \textbf{Giai đoạn} & \textbf{Công việc chi tiết} & \textbf{Thời gian} & \textbf{Nhân lực} \\
+    \hline
+    Khởi động & Phân tích yêu cầu, xác định đối tượng, thiết kế UI/UX cơ bản, khảo sát nghiệp vụ. & 2 tuần & Cả nhóm \\
+    \hline
+    Sprint 1 & Thiết kế Database (ERD), thiết lập Base project (Spring Boot, React), tính năng Auth, User. & 2 tuần & Backend: Đức, Bình\newline Frontend: Hiếu, Lâm \\
+    \hline
+    Sprint 2 & Phát triển Quản lý Căn hộ, Quản lý Cư dân. Xây dựng API và giao diện hiển thị. & 2 tuần & Cả nhóm \\
+    \hline
+    Sprint 3 & Phát triển Quản lý Khoản thu, Nộp phí, Duyệt hóa đơn. Module Thống kê cơ bản. & 2 tuần & Cả nhóm \\
+    \hline
+    Sprint 4 & Phát triển tính năng Thông báo, Phản hồi. Cấu hình hệ thống. & 1 tuần & Cả nhóm \\
+    \hline
+    Sprint 5 & Kiểm thử tích hợp, sửa lỗi (bug fix), đóng gói và triển khai lên Docker/Cloud. Viết báo cáo. & 1 tuần & Cả nhóm \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\textbf{Quản lý rủi ro:}
+\begin{itemize}
+    \item \textbf{Mất dữ liệu trong quá trình dev:} Khắc phục bằng cách sử dụng GitHub để quản lý source code và lưu trữ database schema.
+    \item \textbf{Chậm tiến độ do bug tích hợp:} Tăng cường Unit Test và kiểm tra Postman trước khi ghép nối Frontend và Backend.
+\end{itemize}
+
+\section{ĐẶC TẢ YÊU CẦU BÀI TOÁN}
+
+\subsection{Giới thiệu chung}
+Phần mềm \textbf{BlueMoon} được xây dựng với mục tiêu số hóa toàn diện quy trình quản lý của Ban quản trị chung cư, từ việc quản lý nhân khẩu, hộ khẩu, thu phí dịch vụ cho đến tương tác với cư dân.
+
+\textbf{Các tác nhân (Actors) của hệ thống:}
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|c|l|X|}
+    \hline
+    \textbf{STT} & \textbf{Tên tác nhân} & \textbf{Mô tả tác nhân} \\
+    \hline
+    1 & \textbf{Ban Quản Trị (Admin)} & Người quản lý cao nhất của hệ thống, có quyền quản lý cư dân, căn hộ, tạo khoản thu, gửi thông báo, cấu hình hệ thống. \\
+    \hline
+    2 & \textbf{Thủ Quỹ (Cashier)} & Người phụ trách tài chính, duyệt các khoản đóng góp, hóa đơn thanh toán của cư dân và quản lý quỹ chung. \\
+    \hline
+    3 & \textbf{Cư Dân (Resident)} & Người sử dụng hệ thống để xem thông tin phí phải nộp, lịch sử nộp tiền, xem thông báo từ Ban quản trị và gửi ý kiến đóng góp. \\
+    \hline
+    4 & \textbf{Hệ Thống (System)} & Tác nhân tự động thực hiện các tác vụ ngầm như tính toán phí hàng tháng (FeeScheduler), tạo thông báo nhắc nhở tự động trong ứng dụng. \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\textbf{Danh sách các Use Case (UC) cốt lõi:}
+\begin{longtable}{|c|l|L{4cm}|L{2cm}|c|}
+    \hline
+    \textbf{STT} & \textbf{Mã UC} & \textbf{Tên Use Case} & \textbf{Tác nhân} & \textbf{Độ phức tạp} \\
+    \hline
+    \endhead
+    1 & UC01 & Đăng nhập & Tất cả & Thấp \\
+    2 & UC02 & Xem danh sách Căn hộ & Admin & Thấp \\
+    3 & UC03 & Thêm mới Căn hộ & Admin & Trung bình \\
+    4 & UC04 & Sửa/Xóa Căn hộ & Admin & Trung bình \\
+    5 & UC05 & Xem danh sách Cư dân & Admin & Thấp \\
+    6 & UC06 & Thêm mới Cư dân & Admin & Trung bình \\
+    7 & UC07 & Sửa/Xóa Cư dân & Admin & Trung bình \\
+    8 & UC08 & Quản lý Khoản Thu & Admin & Trung bình \\
+    9 & UC09 & Xem thông tin nợ phí & Resident & Thấp \\
+    10 & UC10 & Thanh toán phí (Nộp tiền) & Resident & Trung bình \\
+    11 & UC11 & Duyệt thanh toán & Cashier & Trung bình \\
+    12 & UC12 & Gửi thông báo & Admin & Thấp \\
+    13 & UC13 & Xem thông báo & Resident & Thấp \\
+    14 & UC14 & Gửi phản hồi / Ý kiến & Resident & Thấp \\
+    15 & UC15 & Trả lời phản hồi & Admin & Trung bình \\
+    16 & UC16 & Thống kê doanh thu & Admin, Cashier & Cao \\
+    17 & UC17 & Thống kê nhân khẩu & Admin & Cao \\
+    18 & UC18 & Quản lý tài khoản User & Admin & Trung bình \\
+    19 & UC19 & Đổi mật khẩu & Tất cả & Thấp \\
+    20 & UC20 & Cấu hình hệ thống & Admin & Trung bình \\
+    \hline
+\end{longtable}
+
+\subsection{Biểu đồ Use Case}
+\subsubsection{Biểu đồ Use Case Tổng Quan}
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[scale=0.8, transform shape]
+        % Box Hệ thống
+        \draw[thick] (0,0) rectangle (10,12);
+        \node at (5, 11.5) {\textbf{Hệ thống Quản lý BlueMoon}};
+        
+        % Actors
+        \node (admin) at (-3, 9) [circle, draw, thick, minimum size=1cm] {Admin};
+        \node (cashier) at (-3, 5) [circle, draw, thick, minimum size=1cm] {ThuQuy};
+        \node (resident) at (-3, 1) [circle, draw, thick, minimum size=1cm] {CuDan};
+        
+        % Use Cases
+        \node (uc1) at (5, 10) [ellipse, draw, thick, align=center] {Đăng nhập};
+        \node (uc2) at (5, 8.5) [ellipse, draw, thick, align=center] {Quản lý Cư dân \\ \& Căn hộ};
+        \node (uc3) at (5, 7) [ellipse, draw, thick, align=center] {Quản lý Khoản thu};
+        \node (uc4) at (5, 5.5) [ellipse, draw, thick, align=center] {Duyệt thanh toán};
+        \node (uc5) at (5, 4) [ellipse, draw, thick, align=center] {Thống kê};
+        \node (uc6) at (5, 2.5) [ellipse, draw, thick, align=center] {Gửi/Xem Thông báo};
+        \node (uc7) at (5, 1) [ellipse, draw, thick, align=center] {Thanh toán \& \\ Xem lịch sử};
+        
+        % Lines
+        \draw[->] (admin) -- (uc1);
+        \draw[->] (admin) -- (uc2);
+        \draw[->] (admin) -- (uc3);
+        \draw[->] (admin) -- (uc5);
+        \draw[->] (admin) -- (uc6);
+        
+        \draw[->] (cashier) -- (uc1);
+        \draw[->] (cashier) -- (uc4);
+        \draw[->] (cashier) -- (uc5);
+        
+        \draw[->] (resident) -- (uc1);
+        \draw[->] (resident) -- (uc6);
+        \draw[->] (resident) -- (uc7);
+    \end{tikzpicture}
+    \caption{Biểu đồ Use Case tổng quan}
+\end{figure}
+
+\subsection{Đặc tả Use Case chi tiết}
+
+Dưới đây là phần đặc tả chi tiết cho các Use Case quan trọng nhất của hệ thống, mỗi bảng đặc tả cung cấp thông tin về mục đích, tác nhân, sự kiện kích hoạt, luồng sự kiện chính, và các luồng sự kiện thay thế (nếu có).
+
+% ==================== UC01 ====================
+\subsubsection{Đặc tả UC01: Đăng nhập}
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabularx}{\textwidth}{|l|X|}
+    \hline
+    \textbf{Mã Use Case} & \textbf{UC01} \\
+    \hline
+    \textbf{Tên Use Case} & Đăng nhập \\
+    \hline
+    \textbf{Mục đích} & Cho phép người dùng (Admin, Cashier, Resident) xác thực và truy cập vào hệ thống. \\
+    \hline
+    \textbf{Tác nhân} & Tất cả người dùng \\
+    \hline
+    \textbf{Điều kiện tiên quyết} & Người dùng đã có tài khoản (được Admin cấp hoặc tự đăng ký qua chức năng Đăng ký). \\
+    \hline
+    \textbf{Sự kiện kích hoạt} & Người dùng mở ứng dụng và truy cập trang đăng nhập. \\
+    \hline
+    \textbf{Luồng sự kiện chính} &
+    \begin{enumerate}
+        \item Hệ thống hiển thị Form đăng nhập.
+        \item Người dùng nhập \texttt{Username} và \texttt{Password}, sau đó bấm ``Login''.
+        \item Hệ thống gửi dữ liệu lên Backend để kiểm tra với Database.
+        \item Backend xác nhận thông tin hợp lệ, tạo chuỗi \texttt{JWT Token} và trả về cho Frontend.
+        \item Hệ thống chuyển hướng người dùng: Admin/Cashier được chuyển tới Dashboard, trong khi Resident được chuyển tới trang Căn hộ của tôi (\texttt{/apartments}).
+    \end{enumerate} \\
+    \hline
+    \textbf{Luồng thay thế} &
+    \textbf{3a. Đăng ký tài khoản (Dành cho Cư dân):} Cư dân nhấn ``Đăng ký ngay'', nhập Số điện thoại. Hệ thống gọi API kiểm tra. Nếu số điện thoại khớp với một \texttt{Resident} có sẵn trong hệ thống (đã được Admin thêm trước đó), hệ thống sẽ hiển thị Tên cư dân và cho phép tạo tài khoản liên kết với \texttt{Resident} đó. Nếu sai, hệ thống báo lỗi không tìm thấy.\\
+    & \textbf{3b. Sai thông tin:} Nếu sai \texttt{Username} hoặc \texttt{Password}, hệ thống hiển thị lỗi.\\
+    & \textbf{3c. Tài khoản bị khóa:} Nếu tài khoản đã bị khóa (\texttt{active = false}), hiển thị thông báo lỗi. \\
+    \hline
+    \textbf{Hậu điều kiện} & Người dùng được đăng nhập và JWT Token được lưu ở LocalStorage. \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+% ==================== UC02 ====================
+\subsubsection{Đặc tả UC02: Xem danh sách Căn hộ}
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabularx}{\textwidth}{|l|X|}
+    \hline
+    \textbf{Mã Use Case} & \textbf{UC02} \\
+    \hline
+    \textbf{Tên Use Case} & Xem danh sách Căn hộ \\
+    \hline
+    \textbf{Mục đích} & Hiển thị toàn bộ danh sách các căn hộ trong tòa nhà cùng với trạng thái hiện tại của chúng. \\
+    \hline
+    \textbf{Tác nhân} & Admin \\
+    \hline
+    \textbf{Điều kiện tiên quyết} & Admin đã đăng nhập thành công. \\
+    \hline
+    \textbf{Luồng sự kiện chính} &
+    \begin{enumerate}
+        \item Admin truy cập vào menu ``Quản lý căn hộ''.
+        \item Hệ thống truy vấn cơ sở dữ liệu để lấy danh sách căn hộ.
+        \item Hệ thống hiển thị danh sách dưới dạng bảng (bao gồm: Số phòng, Diện tích, Trạng thái, Chủ hộ hiện tại).
+        \item Admin có thể sử dụng bộ lọc để tìm kiếm theo số phòng hoặc trạng thái (Đã bán, Trống).
+    \end{enumerate} \\
+    \hline
+    \textbf{Hậu điều kiện} & Danh sách căn hộ được hiển thị. \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+% ==================== UC03 ====================
+\subsubsection{Đặc tả UC03: Thêm mới Căn hộ}
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabularx}{\textwidth}{|l|X|}
+    \hline
+    \textbf{Mã Use Case} & \textbf{UC03} \\
+    \hline
+    \textbf{Tên Use Case} & Thêm mới Căn hộ \\
+    \hline
+    \textbf{Mục đích} & Admin thêm thông tin một căn hộ mới vào hệ thống. \\
+    \hline
+    \textbf{Tác nhân} & Admin \\
+    \hline
+    \textbf{Luồng sự kiện chính} &
+    \begin{enumerate}
+        \item Tại màn hình Quản lý căn hộ, Admin nhấn nút ``Thêm mới''.
+        \item Hệ thống hiển thị form nhập liệu.
+        \item Admin điền Số phòng (VD: A1-105), Diện tích, Trạng thái.
+        \item Admin nhấn ``Lưu''.
+        \item Hệ thống kiểm tra số phòng không được trùng lặp.
+        \item Hệ thống lưu vào Database và thông báo thành công.
+    \end{enumerate} \\
+    \hline
+    \textbf{Luồng thay thế} & \textbf{5a. Trùng lặp:} Nếu số phòng đã tồn tại, hệ thống báo lỗi ``Số phòng đã tồn tại''. \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+% ==================== UC06 ====================
+\subsubsection{Đặc tả UC06: Thêm mới Cư dân}
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabularx}{\textwidth}{|l|X|}
+    \hline
+    \textbf{Mã Use Case} & \textbf{UC06} \\
+    \hline
+    \textbf{Tên Use Case} & Thêm mới Cư dân (Nhân khẩu) \\
+    \hline
+    \textbf{Mục đích} & Cho phép Admin quản lý dữ liệu nhân khẩu của tòa nhà. \\
+    \hline
+    \textbf{Tác nhân} & Admin \\
+    \hline
+    \textbf{Điều kiện tiên quyết} & Admin đã đăng nhập thành công. Căn hộ phải tồn tại trước khi thêm cư dân vào. \\
+    \hline
+    \textbf{Luồng sự kiện chính} &
+    \begin{enumerate}
+        \item Admin chọn mục ``Quản lý Cư dân'' trên menu.
+        \item Hệ thống hiển thị danh sách cư dân hiện tại.
+        \item Admin nhấn nút ``Thêm Cư Dân''.
+        \item Hệ thống hiển thị form nhập thông tin (Họ tên, CMND, Ngày sinh, Số điện thoại, Mã căn hộ, Quan hệ với chủ hộ).
+        \item Admin điền thông tin và nhấn ``Lưu''.
+        \item Hệ thống kiểm tra tính hợp lệ của dữ liệu (Không để trống các trường bắt buộc, CMND không trùng lặp).
+        \item Hệ thống lưu thông tin vào DB và thông báo ``Thêm mới thành công''.
+    \end{enumerate} \\
+    \hline
+    \textbf{Luồng thay thế} &
+    \textbf{6a. Trùng CMND:} Hệ thống báo lỗi ``Số CMND đã tồn tại trong hệ thống''.\\
+    & \textbf{6b. Thiếu trường bắt buộc:} Hệ thống highlight đỏ các trường thiếu và yêu cầu điền đầy đủ.\\
+    \hline
+    \textbf{Hậu điều kiện} & Dữ liệu cư dân mới được cập nhật vào hệ thống. \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+% ==================== UC08 ====================
+\subsubsection{Đặc tả UC08: Quản lý Khoản Thu}
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabularx}{\textwidth}{|l|X|}
+    \hline
+    \textbf{Mã Use Case} & \textbf{UC08} \\
+    \hline
+    \textbf{Tên Use Case} & Tạo khoản thu mới (Phí bắt buộc / Tự nguyện) \\
+    \hline
+    \textbf{Mục đích} & Admin tạo các khoản thu định kỳ (phí dịch vụ, tiền nước) hoặc đợt ủng hộ. \\
+    \hline
+    \textbf{Tác nhân} & Admin \\
+    \hline
+    \textbf{Luồng sự kiện chính} &
+    \begin{enumerate}
+        \item Admin truy cập trang ``Quản lý Khoản Thu''.
+        \item Chọn ``Tạo khoản thu''.
+        \item Điền thông tin: Tên khoản thu, Loại phí (Bắt buộc/Tự nguyện), Đơn giá (nếu là phí cố định), Thời hạn đóng.
+        \item Nhấn ``Tạo''.
+        \item \textbf{[Phí bắt buộc]}: Hệ thống tự động tính toán số tiền cho từng Căn hộ dựa trên cấu hình (theo diện tích hoặc theo nhân khẩu) và sinh ra các bản ghi Hóa Đơn (Payment) với trạng thái ``Chưa thanh toán''.
+        \item \textbf{[Phí tự nguyện]}: Hệ thống chỉ tạo danh mục khoản thu, Cư dân tự nhập số tiền khi nộp.
+        \item Hệ thống tự động tạo thông báo (Notification) trong ứng dụng đến các Cư dân liên quan.
+    \end{enumerate} \\
+    \hline
+    \textbf{Hậu điều kiện} & Danh sách khoản thu được cập nhật. Hóa đơn được tạo trong hệ thống. \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+% ==================== UC10 ====================
+\subsubsection{Đặc tả UC10: Thanh toán phí (Nộp tiền)}
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabularx}{\textwidth}{|l|X|}
+    \hline
+    \textbf{Mã Use Case} & \textbf{UC10} \\
+    \hline
+    \textbf{Tên Use Case} & Cư dân thanh toán khoản thu \\
+    \hline
+    \textbf{Mục đích} & Cư dân thực hiện đóng các khoản phí đang nợ. \\
+    \hline
+    \textbf{Tác nhân} & Cư Dân (Resident) \\
+    \hline
+    \textbf{Luồng sự kiện chính} &
+    \begin{enumerate}
+        \item Cư dân đăng nhập, vào mục ``Hóa đơn / Phí cần đóng''.
+        \item Hệ thống hiển thị danh sách các khoản phí đang nợ.
+        \item Cư dân chọn hóa đơn cần thanh toán hoặc chọn tính năng ``Đóng phí tự nguyện''.
+        \item \textbf{[Chuyển khoản QR]:} Hệ thống hiển thị mã QR tĩnh kèm thông tin tài khoản ngân hàng của Ban quản trị (cố định). Cư dân quét QR bằng app ngân hàng, sau đó nhấn ``Đã chuyển khoản''. Hệ thống tạo giao dịch với trạng thái ``PENDING'' chờ Thủ quỹ xác nhận.
+        \item \textbf{[Trực tiếp]:} Cư dân nộp tiền mặt trực tiếp cho Thủ quỹ. Giao dịch được hoàn tất ngay lập tức (``COMPLETED'').
+    \end{enumerate} \\
+    \hline
+    \textbf{Hậu điều kiện} & Hóa đơn được chuyển sang trạng thái chờ duyệt. \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+% ==================== UC11 ====================
+\subsubsection{Đặc tả UC11: Duyệt thanh toán}
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabularx}{\textwidth}{|l|X|}
+    \hline
+    \textbf{Mã Use Case} & \textbf{UC11} \\
+    \hline
+    \textbf{Tên Use Case} & Thủ quỹ duyệt giao dịch \\
+    \hline
+    \textbf{Mục đích} & Thủ quỹ đối soát tiền vào tài khoản ngân hàng và xác nhận giao dịch trên hệ thống. \\
+    \hline
+    \textbf{Tác nhân} & Thủ Quỹ (Cashier) \\
+    \hline
+    \textbf{Luồng sự kiện chính} &
+    \begin{enumerate}
+        \item Thủ quỹ truy cập mục ``Duyệt giao dịch''.
+        \item Hệ thống hiển thị danh sách các giao dịch ``PENDING''.
+        \item Thủ quỹ kiểm tra tài khoản ngân hàng để đối chiếu.
+        \item Thủ quỹ nhập số tiền thực nhận và nhấn ``Xác nhận''.
+        \item Hệ thống cập nhật trạng thái giao dịch thành ``COMPLETED''. Đối với phí tự nguyện, số tiền hóa đơn tự cập nhật bằng số thực nhận.
+        \item Hệ thống tự động tạo mục hoàn tiền (Refund) nếu có tiền thừa.
+        \item Hệ thống hiển thị thông báo thành công.
+    \end{enumerate} \\
+    \hline
+    \textbf{Luồng thay thế} &
+    \textbf{4a. Tiền thừa (Hoàn tiền):} Nếu số tiền thực nhận lớn hơn mức phí (và không phải phí tự nguyện), hệ thống tính tiền chênh lệch và đưa vào danh sách hoàn tiền. \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+% ==================== UC12 ====================
+\subsubsection{Đặc tả UC12: Gửi thông báo}
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabularx}{\textwidth}{|l|X|}
+    \hline
+    \textbf{Mã Use Case} & \textbf{UC12} \\
+    \hline
+    \textbf{Tên Use Case} & Gửi thông báo đến cư dân \\
+    \hline
+    \textbf{Mục đích} & Truyền tải thông tin từ Ban quản trị đến toàn bộ hoặc một nhóm cư dân. \\
+    \hline
+    \textbf{Tác nhân} & Admin \\
+    \hline
+    \textbf{Luồng sự kiện chính} &
+    \begin{enumerate}
+        \item Admin truy cập trang ``Thông báo''.
+        \item Chọn ``Tạo thông báo mới''.
+        \item Điền Tiêu đề, Nội dung, Mức độ ưu tiên.
+        \item Chọn đối tượng nhận (Tất cả, hoặc theo danh sách Căn hộ).
+        \item Nhấn ``Gửi''.
+        \item Hệ thống lưu thông báo vào cơ sở dữ liệu. Cư dân sẽ thấy thông báo khi đăng nhập ứng dụng.
+    \end{enumerate} \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+% ==================== UC14 ====================
+\subsubsection{Đặc tả UC14: Gửi phản hồi / Ý kiến}
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabularx}{\textwidth}{|l|X|}
+    \hline
+    \textbf{Mã Use Case} & \textbf{UC14} \\
+    \hline
+    \textbf{Tên Use Case} & Cư dân gửi ý kiến phản hồi \\
+    \hline
+    \textbf{Mục đích} & Giúp cư dân báo cáo sự cố kỹ thuật hoặc góp ý xây dựng. \\
+    \hline
+    \textbf{Tác nhân} & Resident \\
+    \hline
+    \textbf{Luồng sự kiện chính} &
+    \begin{enumerate}
+        \item Cư dân vào tab ``Phản hồi''.
+        \item Nhập tiêu đề, nội dung sự cố.
+        \item Nhấn ``Gửi ý kiến''.
+        \item Hệ thống lưu lại và thông báo cho Admin. Cư dân có thể theo dõi trạng thái xử lý (Chờ phản hồi, Đã phản hồi).
+    \end{enumerate} \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+% ==================== UC16 ====================
+\subsubsection{Đặc tả UC16: Thống kê doanh thu}
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabularx}{\textwidth}{|l|X|}
+    \hline
+    \textbf{Mã Use Case} & \textbf{UC16} \\
+    \hline
+    \textbf{Tên Use Case} & Thống kê doanh thu và công nợ \\
+    \hline
+    \textbf{Mục đích} & Giúp Admin và Cashier nắm bắt được tình hình tài chính của tòa nhà. \\
+    \hline
+    \textbf{Tác nhân} & Admin, Cashier \\
+    \hline
+    \textbf{Luồng sự kiện chính} &
+    \begin{enumerate}
+        \item Người dùng chọn ``Tổng quan'' (Dashboard).
+                \item Hệ thống hiển thị các thẻ thống kê (StatCard) tổng hợp: Tổng số căn hộ, Tổng số cư dân, Tổng số khoản phí.
+        \item Hiển thị bảng danh sách các khoản phí chưa thanh toán.
+        \item Người dùng có thể xem chi tiết từng khoản phí và trạng thái thanh toán.
+    \end{enumerate} \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+% ==================== UC17 ====================
+\subsubsection{Đặc tả UC17: Quản lý Hồ sơ cá nhân}
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabularx}{\textwidth}{|l|X|}
+    \hline
+    \textbf{Mã Use Case} & \textbf{UC17} \\
+    \hline
+    \textbf{Tên Use Case} & Quản lý Hồ sơ cá nhân và Đổi mật khẩu \\
+    \hline
+    \textbf{Mục đích} & Cho phép người dùng xem và cập nhật thông tin cá nhân (Email, SĐT) và thay đổi mật khẩu đăng nhập. \\
+    \hline
+    \textbf{Tác nhân} & Tất cả người dùng \\
+    \hline
+    \textbf{Luồng sự kiện chính} &
+    \begin{enumerate}
+        \item Người dùng chọn ``Hồ sơ'' trên menu.
+        \item Hệ thống lấy dữ liệu hồ sơ từ Backend thông qua JWT.
+        \item Người dùng chỉnh sửa Họ tên, Email, Số điện thoại và nhấn ``Lưu thay đổi''. Hệ thống cập nhật thông tin thành công.
+        \item Để đổi mật khẩu, người dùng nhập Mật khẩu hiện tại, Mật khẩu mới và Xác nhận mật khẩu mới.
+        \item Hệ thống kiểm tra Mật khẩu hiện tại. Nếu đúng, mật khẩu được thay đổi và mã hóa lưu vào Database.
+    \end{enumerate} \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\subsection{Các yêu cầu phi chức năng}
+
+Bên cạnh các yêu cầu về mặt nghiệp vụ (Functional Requirements), phần mềm BlueMoon cũng cần đáp ứng các tiêu chuẩn kỹ thuật khắt khe về yêu cầu phi chức năng (Non-Functional Requirements) để đảm bảo chất lượng và khả năng ứng dụng trong thực tế.
+
+\subsubsection{Yêu cầu về giao diện và tính dễ dùng (Usability)}
+\begin{itemize}
+    \item Giao diện phần mềm (UI) cần được thiết kế hiện đại, theo phong cách tối giản (Minimalism) nhưng trực quan, giúp người dùng dễ dàng thao tác mà không cần trải qua quá trình đào tạo phức tạp.
+    \item Hỗ trợ thiết kế dạng Responsive, tương thích với mọi kích thước màn hình: Desktop, Tablet, và Mobile. Cư dân có thể truy cập bằng điện thoại để xem thông báo và nộp tiền dễ dàng.
+    \item Phản hồi thao tác (UX) mượt mà, sử dụng các hiệu ứng loading, spinner khi hệ thống đang xử lý dữ liệu.
+\end{itemize}
+
+\subsubsection{Yêu cầu về tính ổn định và hiệu suất (Reliability \& Performance)}
+\begin{itemize}
+    \item \textbf{Khả năng hoạt động:} Hệ thống cần hoạt động ổn định 24/7. Tỷ lệ thời gian hoạt động (Uptime) phải đạt 99.9\%.
+    \item \textbf{Thời gian phản hồi:} Các tác vụ thông thường (xem danh sách, tìm kiếm) phải phản hồi dưới 2 giây. Các tác vụ phức tạp (như thống kê, xuất file Excel) không vượt quá 5 giây.
+    \item \textbf{Khả năng mở rộng (Scalability):} Backend Spring Boot cần được thiết kế theo kiến trúc Stateless (sử dụng JWT) để dễ dàng triển khai load balancing. Database có khả năng lưu trữ hàng triệu bản ghi hóa đơn và thông báo mà không làm giảm hiệu suất query.
+\end{itemize}
+
+\subsubsection{Yêu cầu về tính bảo mật (Security)}
+\begin{itemize}
+    \item Mật khẩu của người dùng bắt buộc phải được băm (hash) bằng thuật toán mạnh (ví dụ: BCrypt) trước khi lưu vào Database. Tuyệt đối không lưu mật khẩu dạng plain text.
+    \item Mọi API đều phải được bảo vệ bởi cơ chế xác thực JWT Token. Các Endpoint liên quan đến quản lý (tạo khoản thu, duyệt hóa đơn) phải phân quyền chặt chẽ thông qua Role-based Access Control (RBAC). Cư dân không thể gọi API của Admin.
+    \item Hệ thống chống lại các cuộc tấn công phổ biến như SQL Injection, XSS (Cross-site Scripting), và CSRF.
+\end{itemize}
+
+\section{PHÂN TÍCH YÊU CẦU}
+
+\subsection{Xác định các lớp phân tích}
+
+Dựa trên việc đặc tả các Use Case ở chương trước, chúng ta tiến hành xác định các lớp phân tích (Analysis Classes) theo mô hình MVC (Model - View - Controller). Trong giai đoạn này, các lớp được phân thành 3 loại chính:
+\begin{itemize}
+    \item \textbf{Entity Classes (Lớp thực thể):} Đại diện cho các đối tượng nghiệp vụ được lưu trữ lâu dài trong cơ sở dữ liệu (ví dụ: User, Resident, Apartment, Fee, Payment).
+    \item \textbf{Boundary Classes (Lớp biên):} Giao diện giao tiếp giữa người dùng và hệ thống (các màn hình giao diện UI trên React).
+    \item \textbf{Control Classes (Lớp điều khiển):} Chứa các logic nghiệp vụ, tiếp nhận yêu cầu từ lớp biên, xử lý dữ liệu với lớp thực thể và trả kết quả về (các Service/Controller trong Spring Boot).
+\end{itemize}
+
+\subsection{Xây dựng biểu đồ trình tự (Sequence Diagrams)}
+
+Biểu đồ trình tự thể hiện sự tương tác, gửi thông điệp giữa các đối tượng trong hệ thống theo trình tự thời gian. Đây là cơ sở quan trọng để thiết kế các hàm (methods) cho từng lớp.
+
+\subsubsection{Biểu đồ trình tự: Đăng nhập}
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[scale=0.8, transform shape]
+        % Objects
+        \node (user) at (0, 0) [align=center] {\includegraphics[width=1cm]{example-image-duck}\\{User}}; % Placeholder for actor icon
+        \node (ui) at (4, 0) [rectangle, draw, thick, minimum width=2.5cm, minimum height=1cm] {LoginUI};
+        \node (ctrl) at (8, 0) [rectangle, draw, thick, minimum width=2.5cm, minimum height=1cm] {AuthController};
+        \node (db) at (12, 0) [rectangle, draw, thick, minimum width=2.5cm, minimum height=1cm] {Database};
+        
+        % Lifelines
+        \draw[dashed] (user) -- (0, -8);
+        \draw[dashed] (ui) -- (4, -8);
+        \draw[dashed] (ctrl) -- (8, -8);
+        \draw[dashed] (db) -- (12, -8);
+        
+        % Activations
+        \draw[thick, fill=white] (-0.2, -1) rectangle (0.2, -7.5);
+        \draw[thick, fill=white] (3.8, -1.5) rectangle (4.2, -7);
+        \draw[thick, fill=white] (7.8, -2.5) rectangle (8.2, -6.5);
+        \draw[thick, fill=white] (11.8, -3.5) rectangle (12.2, -5.5);
+        
+        % Messages
+        \draw[->, thick] (0.2, -1.5) -- node[above] {1. Nhập Username/Pass} (3.8, -1.5);
+        \draw[->, thick] (4.2, -2.5) -- node[above] {2. Gửi yêu cầu Login(DTO)} (7.8, -2.5);
+        \draw[->, thick] (8.2, -3.5) -- node[above] {3. findByUsername()} (11.8, -3.5);
+        \draw[<-, thick, dashed] (8.2, -4.5) -- node[above] {4. Trả về thông tin User} (11.8, -4.5);
+        
+        % Self message for password check
+        \draw[->, thick] (8.2, -4.8) -- ++(1,0) -- ++(0,-0.5) -- node[right] {5. verifyPassword()} ++(-1,0);
+        
+        \draw[<-, thick, dashed] (4.2, -6) -- node[above] {6. Trả về JWT Token} (7.8, -6);
+        \draw[<-, thick, dashed] (0.2, -7) -- node[above] {7. Chuyển hướng Dashboard} (3.8, -7);
+    \end{tikzpicture}
+    \caption{Biểu đồ trình tự: Đăng nhập}
+\end{figure}
+
+\subsubsection{Biểu đồ trình tự: Thêm Khoản Thu mới}
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[scale=0.8, transform shape]
+        % Objects
+        \node (admin) at (0, 0) [align=center] {\textbf{Admin}};
+        \node (ui) at (4, 0) [rectangle, draw, thick, minimum width=2.5cm, minimum height=1cm] {FeeUI};
+        \node (ctrl) at (8, 0) [rectangle, draw, thick, minimum width=2.5cm, minimum height=1cm] {FeeService};
+        \node (db) at (12, 0) [rectangle, draw, thick, minimum width=2.5cm, minimum height=1cm] {FeeRepo};
+        
+        % Lifelines
+        \draw[dashed] (admin) -- (0, -8);
+        \draw[dashed] (ui) -- (4, -8);
+        \draw[dashed] (ctrl) -- (8, -8);
+        \draw[dashed] (db) -- (12, -8);
+        
+        % Activations
+        \draw[thick, fill=white] (-0.2, -1) rectangle (0.2, -7.5);
+        \draw[thick, fill=white] (3.8, -1.5) rectangle (4.2, -7);
+        \draw[thick, fill=white] (7.8, -2.5) rectangle (8.2, -6.5);
+        \draw[thick, fill=white] (11.8, -3.5) rectangle (12.2, -5.5);
+        
+        % Messages
+        \draw[->, thick] (0.2, -1.5) -- node[above] {1. Nhập thông tin khoản thu} (3.8, -1.5);
+        \draw[->, thick] (4.2, -2.5) -- node[above] {2. createFee(FeeDTO)} (7.8, -2.5);
+        \draw[->, thick] (8.2, -3.5) -- node[above] {3. save(FeeEntity)} (11.8, -3.5);
+        \draw[<-, thick, dashed] (8.2, -4.5) -- node[above] {4. Xác nhận đã lưu} (11.8, -4.5);
+        
+        % Self message to generate Payments
+        \draw[->, thick] (8.2, -4.8) -- ++(1,0) -- ++(0,-0.5) -- node[right] {5. generatePaymentsForApts()} ++(-1,0);
+        
+        \draw[<-, thick, dashed] (4.2, -6) -- node[above] {6. Trả về kết quả Success} (7.8, -6);
+        \draw[<-, thick, dashed] (0.2, -7) -- node[above] {7. Hiển thị danh sách cập nhật} (3.8, -7);
+    \end{tikzpicture}
+    \caption{Biểu đồ trình tự: Thêm Khoản Thu mới}
+\end{figure}
+
+\subsubsection{Biểu đồ trình tự: Cư dân Nộp Tiền (Thanh Toán)}
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[scale=0.8, transform shape]
+        % Objects
+        \node (resident) at (0, 0) [align=center] {\textbf{Resident}};
+        \node (ui) at (4, 0) [rectangle, draw, thick, minimum width=2.5cm, minimum height=1cm] {PaymentUI};
+        \node (ctrl) at (8, 0) [rectangle, draw, thick, minimum width=2.5cm, minimum height=1cm] {PaymentService};
+        \node (db) at (12, 0) [rectangle, draw, thick, minimum width=2.5cm, minimum height=1cm] {PaymentRepo};
+        
+        % Lifelines
+        \draw[dashed] (resident) -- (0, -7);
+        \draw[dashed] (ui) -- (4, -7);
+        \draw[dashed] (ctrl) -- (8, -7);
+        \draw[dashed] (db) -- (12, -7);
+        
+        % Activations
+        \draw[thick, fill=white] (-0.2, -1) rectangle (0.2, -6.5);
+        \draw[thick, fill=white] (3.8, -1.5) rectangle (4.2, -6);
+        \draw[thick, fill=white] (7.8, -2.5) rectangle (8.2, -5.5);
+        \draw[thick, fill=white] (11.8, -3.5) rectangle (12.2, -4.5);
+        
+        % Messages
+        \draw[->, thick] (0.2, -1.5) -- node[above] {1. Nhấn ``Đã chuyển khoản''} (3.8, -1.5);
+        \draw[->, thick] (4.2, -2.5) -- node[above] {2. createPayment(PaymentDTO)} (7.8, -2.5);
+        \draw[->, thick] (8.2, -3.5) -- node[above] {3. save(status=PENDING)} (11.8, -3.5);
+        \draw[<-, thick, dashed] (8.2, -4.5) -- node[above] {4. Trả về thành công} (11.8, -4.5);
+        
+        \draw[<-, thick, dashed] (4.2, -5.5) -- node[above] {5. Trả về kết quả Success} (7.8, -5.5);
+        \draw[<-, thick, dashed] (0.2, -6) -- node[above] {6. Hiển thị "Đang chờ duyệt"} (3.8, -6);
+    \end{tikzpicture}
+    \caption{Biểu đồ trình tự: Cư dân nộp tiền}
+\end{figure}
+
+\subsection{Xây dựng biểu đồ thực thể liên kết (ERD)}
+
+Dữ liệu của hệ thống quản lý chung cư vô cùng phong phú và có nhiều mối quan hệ chéo với nhau. Dưới đây là phân tích chi tiết về các thực thể (Entities) và mối quan hệ (Relationships).
+
+\textbf{Các thực thể chính:}
+\begin{itemize}
+    \item \textbf{User:} Quản lý tài khoản đăng nhập (id, username, password, role, full\_name, email, phone, active, created\_at).
+    \item \textbf{Apartment (Căn hộ):} Lưu thông tin vật lý của căn hộ (id, apartment\_number, building, floor, area, balance, so\_dien\_tieu\_thu, so\_nuoc\_tieu\_thu, motorbike\_count, car\_count, status).
+    \item \textbf{Resident (Cư dân/Nhân khẩu):} Lưu thông tin con người (id, user\_id, full\_name, date\_of\_birth, gender, id\_card, phone, email, apartment\_id, relationship).
+    \item \textbf{Fee (Khoản thu):} Thông tin khoản phí gắn với căn hộ (id, apartment\_id, name, type [DIEN, NUOC, QUAN\_LY, GUI\_XE, DICH\_VU, DONG\_GOP, KHAC], amount, description, due\_date, paid).
+    \item \textbf{Payment (Giao dịch nộp tiền):} Quản lý lịch sử thanh toán (id, fee\_id, payer\_id, amount, status [PENDING, COMPLETED, REJECTED], method, transfer\_time, receipt\_number, refund\_amount, refund\_status).
+    \item \textbf{Notification (Thông báo):} (id, sender\_id, apartment\_id, title, content, type, created\_at).
+    \item \textbf{Feedback (Ý kiến):} (id, apartment\_id, author\_id, title, content, status [PENDING, REPLIED], reply, replied\_at).
+\end{itemize}
+
+\textbf{Mô tả các mối quan hệ (Relationships):}
+\begin{itemize}
+    \item Một \textbf{Apartment} có thể chứa nhiều \textbf{Resident} (Quan hệ 1-N).
+    \item Một \textbf{Resident} chỉ trực thuộc một \textbf{Apartment} tại một thời điểm.
+    \item Một \textbf{Fee} (Khoản thu) gắn trực tiếp với một \textbf{Apartment} cụ thể. Mỗi Fee có thể có nhiều \textbf{Payment} (Quan hệ 1-N giữa Fee và Payment).
+    \item Một \textbf{Apartment} sẽ có nhiều \textbf{Fee} (Khoản phí) qua các tháng (Quan hệ 1-N).
+    \item Mỗi \textbf{User} (nếu là Cư dân) được liên kết với một \textbf{Resident} thông qua khóa ngoại \texttt{user\_id} trong bảng Residents (Quan hệ 1-1).
+\end{itemize}
+
+Sơ đồ ERD mô hình hóa được xây dựng trên cơ sở dữ liệu quan hệ (Relational Database) sử dụng MySQL. Việc thiết lập các khóa ngoại (Foreign Keys) như \texttt{apartment\_id} trong bảng \texttt{resident}, \texttt{fee\_id} và \texttt{apartment\_id} trong bảng \texttt{payment} giúp đảm bảo tính toàn vẹn dữ liệu (Data Integrity). Tránh trường hợp xóa một căn hộ nhưng vẫn còn nợ phí chưa giải quyết (hệ thống sẽ áp dụng chính sách chặn xóa nếu còn foreign key constraints).
+
+\subsection{Xây dựng biểu đồ lớp (Class Diagram)}
+
+Trong giai đoạn phân tích này, chúng ta xác định các lớp chính sẽ tham gia vào việc hiện thực hóa các Use Case. Lấy ví dụ module Quản lý cư dân:
+
+\begin{itemize}
+    \item \textbf{ResidentController (Control Class):} Nhận request từ HTTP. Các hàm: \texttt{getResidents()}, \texttt{addResident()}, \texttt{updateResident()}, \texttt{deleteResident()}.
+    \item \textbf{ResidentService (Control Class):} Xử lý logic. Các hàm: \texttt{save(ResidentDTO)}, \texttt{checkDuplicateCmnd(String cmnd)}.
+    \item \textbf{ResidentRepository (Entity/DB Class):} Truy vấn DB. Các hàm: \texttt{findById()}, \texttt{findAll()}, \texttt{findByApartmentId()}.
+    \item \textbf{Resident (Entity Class):} Lớp lưu trữ dữ liệu. Các thuộc tính: \texttt{id}, \texttt{fullName}, \texttt{dateOfBirth}, \texttt{idCard}, \texttt{phone}, \texttt{email}.
+\end{itemize}
+Tương tự cho các module \texttt{Apartment}, \texttt{Fee}, \texttt{Payment}. Sự phân chia này đảm bảo nguyên lý S (Single Responsibility) trong SOLID, giúp mã nguồn dễ bảo trì và dễ viết Unit Test.
+
+\section{THIẾT KẾ CHƯƠNG TRÌNH}
+
+\subsection{Thiết kế kiến trúc hệ thống}
+
+Phần mềm \textbf{BlueMoon} được phát triển dựa trên kiến trúc Web hiện đại với sự phân tách rõ ràng giữa Frontend và Backend. Khác với kiến trúc Monolithic truyền thống (render HTML từ Server), kiến trúc này cung cấp RESTful API, cho phép các Client độc lập (Web, Mobile App) giao tiếp một cách linh hoạt.
+
+\textbf{Cấu trúc tổng quan:}
+\begin{itemize}
+    \item \textbf{Frontend (Client-side):} Xây dựng bằng React.js 18 kết hợp Vite để tối ưu hóa tốc độ build. Sử dụng Tailwind CSS để thiết kế giao diện (UI) và Axios để gửi các HTTP Request. Cấu trúc component hóa giúp tái sử dụng code hiệu quả.
+    \item \textbf{Backend (Server-side):} Xây dựng bằng Java với framework Spring Boot 3.x. Đóng vai trò xử lý logic nghiệp vụ, bảo mật bằng Spring Security \& JWT, và tương tác với Database thông qua Spring Data JPA.
+    \item \textbf{Database (Data layer):} Sử dụng MySQL 8.0 chạy thông qua Docker tại cổng \texttt{3307} (\textit{localhost}), đảm bảo dữ liệu dễ dàng deploy và quản lý.
+\end{itemize}
+
+\subsection{Thiết kế cơ sở dữ liệu (Database Schema)}
+
+Dưới đây là đặc tả chi tiết toàn bộ các bảng trong cơ sở dữ liệu MySQL của hệ thống.
+
+\subsubsection{Bảng Users (Tài khoản người dùng)}
+Lưu trữ thông tin xác thực và phân quyền của người sử dụng.
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|L{2.5cm}|c|c|X|c|}
+    \hline
+    \textbf{Tên trường} & \textbf{Kiểu dữ liệu} & \textbf{Kích thước} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+    \hline
+    id & BIGINT & & Khóa chính (PK), AUTO\_INCREMENT & ID tài khoản \\
+    \hline
+    username & VARCHAR & 50 & UNIQUE, NOT NULL & Tên đăng nhập \\
+    \hline
+    password & VARCHAR & 255 & NOT NULL & Mật khẩu (Hash BCrypt) \\
+    \hline
+    role & VARCHAR & 20 & ['ADMIN', 'CASHIER', 'MAINTENANCE', 'RESIDENT'] & Vai trò \\
+    \hline
+    full\_name & VARCHAR & 100 & NOT NULL & Tên hiển thị \\
+    \hline
+    email & VARCHAR & 100 & UNIQUE & Email liên hệ \\
+    \hline
+    phone & VARCHAR & 20 & & Số điện thoại \\
+    \hline
+    active & BOOLEAN & & DEFAULT TRUE & Trạng thái hoạt động \\
+    \hline
+    created\_at & TIMESTAMP & & & Thời gian tạo \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\subsubsection{Bảng Apartments (Căn hộ)}
+Lưu trữ thông tin các căn hộ trong tòa nhà.
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|L{3cm}|c|X|c|}
+    \hline
+    \textbf{Tên trường} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+    \hline
+    id & BIGINT & Khóa chính (PK), AUTO\_INCREMENT & ID căn hộ \\
+    \hline
+    apartment\_number & VARCHAR(20) & UNIQUE, NOT NULL & Số phòng (VD: A1-102) \\
+    \hline
+    building & VARCHAR(50) & & Tòa nhà \\
+    \hline
+    floor & VARCHAR(10) & & Tầng \\
+    \hline
+    area & DECIMAL & NOT NULL & Diện tích ($m^2$) \\
+    \hline
+    balance & DECIMAL(15,2) & & Số dư khả dụng \\
+    \hline
+    so\_dien\_tieu\_thu & DECIMAL(10,2) & & Số điện tiêu thụ \\
+    \hline
+    so\_nuoc\_tieu\_thu & DECIMAL(10,2) & & Số nước tiêu thụ \\
+    \hline
+    motorbike\_count & INT & & Số lượng xe máy \\
+    \hline
+    car\_count & INT & & Số lượng ô tô \\
+    \hline
+    resident\_count & INT & & Số cư dân \\
+    \hline
+    status & VARCHAR(20) & ['VACANT', 'OCCUPIED'] & Trạng thái căn hộ \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\subsubsection{Bảng Residents (Nhân khẩu)}
+Lưu trữ thông tin cư dân sinh sống.
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|L{3cm}|c|X|c|}
+    \hline
+    \textbf{Tên trường} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+    \hline
+    id & BIGINT & Khóa chính (PK) & ID nhân khẩu \\
+    \hline
+    user\_id & BIGINT & FK $\rightarrow$ users(id) & Tài khoản tương ứng \\
+    \hline
+    full\_name & VARCHAR(100) & NOT NULL & Họ và tên \\
+    \hline
+    id\_card & VARCHAR(20) & UNIQUE, NOT NULL & Số CCCD / Hộ chiếu \\
+    \hline
+    phone & VARCHAR(15) & & Số điện thoại \\
+    \hline
+    date\_of\_birth & DATE & & Ngày sinh \\
+    \hline
+    gender & VARCHAR(10) & & Giới tính \\
+    \hline
+    email & VARCHAR(100) & & Email cá nhân \\
+    \hline
+    apartment\_id & BIGINT & Khóa ngoại (FK) $\rightarrow$ apartments(id) & Căn hộ đang ở \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\subsubsection{Bảng Fees (Khoản thu) \& Payments (Thanh toán)}
+Bảng \texttt{Fees} lưu các khoản phí gắn với từng căn hộ cụ thể (mỗi Fee là một hóa đơn cho một căn hộ), trong khi \texttt{Payments} lưu lại lịch sử giao dịch thanh toán.
+
+\begin{table}[H]
+    \centering
+    \caption{Bảng Fees (Danh mục khoản thu)}
+    \begin{tabularx}{\textwidth}{|L{2.5cm}|c|X|c|}
+    \hline
+    \textbf{Tên trường} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+    \hline
+    id & BIGINT & PK & ID Khoản thu \\
+    \hline
+    apartment\_id & BIGINT & FK $\rightarrow$ apartments(id) & Căn hộ nợ phí \\
+    \hline
+    name & VARCHAR & NOT NULL & Tên khoản thu (Phí vệ sinh) \\
+    \hline
+    type & VARCHAR & ['DIEN', 'NUOC', 'QUAN\_LY', 'GUI\_XE', 'DICH\_VU', 'DONG\_GOP', 'KHAC'] & Loại phí \\
+    \hline
+    amount & DECIMAL & & Số tiền cần đóng \\
+    \hline
+    description & TEXT & & Ghi chú \\
+    \hline
+    paid & BOOLEAN & & Trạng thái đã đóng đủ hay chưa \\
+    \hline
+    due\_date & DATE & & Hạn nộp \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \caption{Bảng Payments (Giao dịch nộp tiền)}
+    \begin{tabularx}{\textwidth}{|L{2.5cm}|c|X|c|}
+    \hline
+    \textbf{Tên trường} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+    \hline
+    id & BIGINT & PK & ID Hóa đơn \\
+    \hline
+    fee\_id & BIGINT & FK $\rightarrow$ fees(id) & Thuộc đợt thu nào \\
+    \hline
+    payer\_id & BIGINT & FK $\rightarrow$ users(id) & Người thực hiện đóng \\
+    \hline
+    amount & DECIMAL & NOT NULL & Số tiền \\
+    \hline
+    status & VARCHAR & ['PENDING', 'COMPLETED', 'REJECTED'] & Trạng thái \\
+    \hline
+    method & VARCHAR & ['TRỰC TIẾP', 'QR'] & Phương thức \\
+    \hline
+    transfer\_time & TIMESTAMP & & Thời gian chuyển khoản \\
+    \hline
+    receipt\_number & VARCHAR & & Mã biên lai \\
+    \hline
+    refund\_amount & DECIMAL & & Số tiền hoàn lại (nếu có) \\
+    \hline
+    refund\_status & VARCHAR & ['PENDING\_INFO', 'PENDING\_REFUND', 'COMPLETED'] & Trạng thái hoàn tiền \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\subsubsection{Bảng Notifications (Thông báo) \& Feedbacks (Ý kiến)}
+Lưu trữ thông tin liên lạc nội bộ trong tòa nhà.
+\begin{table}[H]
+    \centering
+    \caption{Bảng Feedbacks (Ý kiến phản hồi)}
+    \begin{tabularx}{\textwidth}{|L{2.5cm}|c|X|c|}
+    \hline
+    \textbf{Tên trường} & \textbf{Kiểu dữ liệu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+    \hline
+    id & BIGINT & PK & ID Phản hồi \\
+    \hline
+    apartment\_id & BIGINT & FK $\rightarrow$ apartments(id) & Căn hộ gửi \\
+    \hline
+    author\_id & BIGINT & FK $\rightarrow$ users(id) & Tài khoản gửi \\
+    \hline
+    title & VARCHAR & NOT NULL & Tiêu đề \\
+    \hline
+    content & TEXT & NOT NULL & Nội dung chi tiết \\
+    \hline
+    status & VARCHAR & ['PENDING', 'REPLIED'] & Trạng thái xử lý \\
+    \hline
+    reply & TEXT & & Nội dung phản hồi từ Admin \\
+    \hline
+    replied\_at & TIMESTAMP & & Thời gian phản hồi \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\subsubsection{Các bảng phụ trợ khác (Vehicles, Incidents, System\_Config)}
+Hệ thống còn hỗ trợ các bảng sau để mở rộng tính năng:
+\begin{itemize}
+    \item \textbf{Vehicles (Phương tiện):} Quản lý xe cộ của các căn hộ (id, apartment\_id, license\_plate, type [O\_TO, XE\_MAY, XE\_DAP\_DIEN], color). Tính năng này đã được hoàn thiện để thu phí gửi xe hàng tháng.
+    \item \textbf{Incidents (Sự cố):} Quản lý báo cáo sự cố kỹ thuật riêng biệt với Feedback (id, title, description, status [PENDING, PROCESSING, RESOLVED]).
+    \item \textbf{System\_Config (Cấu hình hệ thống):} Lưu trữ các cấu hình đơn giá dùng chung cho toàn hệ thống (config\_key, config\_value, description). Gồm 7 cấu hình: phí quản lý/m², phí xe máy, phí ô tô, phí điện/kWh, phí nước/m³, phí dịch vụ/người, ngày hạn nộp hàng tháng. FeeScheduler sử dụng các cấu hình này kết hợp với số liệu tiêu thụ điện/nước thực tế của căn hộ để tự động phát phí vào ngày 1 hàng tháng, sau đó reset chỉ số tiêu thụ về 0.
+\end{itemize}
+
+\subsection{Thiết kế API (RESTful API Documentation)}
+
+Để Frontend và Backend giao tiếp được với nhau, hệ thống định nghĩa một tập hợp các API REST chuẩn mực. Tất cả các endpoint đều trả về định dạng \texttt{JSON}.
+
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|c|L{4cm}|L{2cm}|X|}
+    \hline
+    \textbf{HTTP Method} & \textbf{Endpoint} & \textbf{Quyền (Role)} & \textbf{Mô tả} \\
+    \hline
+    POST & \texttt{/api/auth/login} & Tự do & Nhận Username/Password, trả về JWT Token. \\
+    \hline
+    POST & \texttt{/api/auth/register} & Tự do & Đăng ký tài khoản mới cho Cư dân. \\
+    \hline
+    GET & \texttt{/api/auth/check-resident} & Tự do & Kiểm tra số điện thoại cư dân trước khi đăng ký. \\
+    \hline
+    GET & \texttt{/api/users/me} & Tất cả & Lấy thông tin hồ sơ cá nhân và vai trò hiện tại. \\
+    \hline
+    GET & \texttt{/api/residents/apartment/\{id\}} & Admin & Trả về danh sách cư dân theo căn hộ. \\
+    \hline
+    POST & \texttt{/api/residents/apartment/\{id\}} & Admin & Thêm mới cư dân vào căn hộ. Body nhận \texttt{ResidentDTO}. \\
+    \hline
+    PATCH & \texttt{/api/apartments/\{id\}/consumption} & Admin/Cashier & Cập nhật số điện/nước tiêu thụ thực tế để chuẩn bị tính phí. \\
+    \hline
+    GET & \texttt{/api/payments/apartment/\{id\}/history/my} & Resident & Trả về danh sách lịch sử thanh toán của căn hộ mà Resident đang đăng nhập. \\
+    \hline
+    POST & \texttt{/api/payments/voluntary/apartment/\{id\}} & Resident & Nộp phí tự nguyện. \\
+    \hline
+    POST & \texttt{/api/payments/\{id\}} & Admin/Cashier & Cập nhật thanh toán và trạng thái COMPLETED. \\
+    \hline
+    POST & \texttt{/api/feedbacks} & Resident & Cư dân gửi phản hồi/sự cố. \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\subsection{Thiết kế chi tiết các gói (Packages)}
+
+Cấu trúc mã nguồn Backend Spring Boot được thiết kế theo chuẩn MVC Controller-Service-Repository nhằm chia rẽ các lớp trách nhiệm một cách rõ ràng.
+
+    \item \textbf{\texttt{com.bluemoon.controller}}: Chứa các lớp REST Controller.
+    \item \textbf{\texttt{com.bluemoon.service}}: Chứa logic nghiệp vụ (Business Logic).
+    \item \textbf{\texttt{com.bluemoon.repository}}: Chứa các Interface kế thừa \texttt{JpaRepository}.
+    \item \textbf{\texttt{com.bluemoon.security}}: Chứa cấu hình bảo mật Spring Security \& JWT.
+    \item \textbf{\texttt{com.bluemoon.dto}}: Chứa các lớp Data Transfer Object dùng để chuyển đổi dữ liệu.
+    \item \textbf{\texttt{com.bluemoon.model}}: Chứa các lớp Entity ánh xạ với bảng trong Database.
+    \item \textbf{\texttt{com.bluemoon.config}}: Chứa cấu hình cho CORS, OpenAPI, WebMvc.
+    \item \textbf{\texttt{com.bluemoon.exception}}: Quản lý lỗi hệ thống (GlobalExceptionHandler).
+    \item \textbf{\texttt{com.bluemoon.scheduler}}: Quản lý các tiến trình chạy ngầm (FeeScheduler tự động tính phí).
+    \item \textbf{\texttt{com.bluemoon.util}}: Chứa các hàm tiện ích.
+
+Frontend React được tổ chức thành các thư mục \texttt{components} (các nút bấm, bảng dùng chung), \texttt{pages} (các giao diện trang lớn), \texttt{api} (cấu hình Axios), và \texttt{routes} (cấu hình đường dẫn React Router).
+
+\section{XÂY DỰNG VÀ KIỂM THỬ CHƯƠNG TRÌNH}
+
+\subsection{Công cụ và Thư viện phát triển}
+
+Để xây dựng hệ thống phần mềm BlueMoon, nhóm đã lựa chọn các công nghệ hiện đại, có cộng đồng hỗ trợ lớn và tính ổn định cao:
+
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|L{3.5cm}|c|X|}
+    \hline
+    \textbf{Tên công cụ/Thư viện} & \textbf{Phiên bản} & \textbf{Mục đích sử dụng} \\
+    \hline
+    Java JDK & 17+ & Ngôn ngữ lập trình cốt lõi cho Backend. \\
+    \hline
+    Spring Boot & 3.x & Framework xây dựng RESTful API mạnh mẽ, cung cấp Dependency Injection. \\
+    \hline
+    Spring Security \& JWT & Mới nhất & Quản lý phân quyền và xác thực người dùng an toàn. \\
+    \hline
+    React.js \& Vite & 18.x & Xây dựng giao diện Frontend Single Page Application (SPA), render siêu tốc. \\
+    \hline
+    Tailwind CSS & 3.x & Framework CSS tiện ích giúp xây dựng UI nhanh chóng, dễ dàng responsive. \\
+    \hline
+    MySQL & 8.0 & Hệ quản trị cơ sở dữ liệu quan hệ mạnh mẽ. \\
+    \hline
+    Docker & Mới nhất & Ảo hóa môi trường, giúp triển khai dự án dễ dàng trên mọi máy tính. \\
+    \hline
+    MapStruct & 1.5+ & Tự động sinh mã ánh xạ (mapping) giữa Entity và DTO, giảm boilerplate code. \\
+    \hline
+    Spring Validation & 3.x & Xác thực dữ liệu đầu vào (Bean Validation) trên Backend. \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\subsection{Giao diện minh họa các chức năng chính}
+
+Quá trình thiết kế giao diện được chú trọng vào User Experience (UX), đảm bảo cả Admin và Cư dân đều dễ dàng sử dụng phần mềm.
+
+\begin{itemize}
+    \item \textbf{Màn hình Đăng nhập (Login):} Được thiết kế theo phong cách Glassmorphism với màu sắc hiện đại. Người dùng điền tên đăng nhập và mật khẩu. Hệ thống sẽ tự nhận diện Role để đưa vào Dashboard phù hợp.
+    \item \textbf{Màn hình Tổng quan (Dashboard):} Dành cho Admin/Thủ quỹ. Hiển thị các thẻ thống kê tổng quan (StatCards) như: Tổng số căn hộ, Tổng số cư dân, Tổng số khoản phí. Bên dưới là bảng danh sách các khoản phí chưa thanh toán.
+    \item \textbf{Màn hình Quản lý Cư dân:} Bao gồm một bảng (Table) lớn hiển thị danh sách cư dân. Có thanh công cụ tìm kiếm, bộ lọc theo căn hộ. Cột hành động có các nút Thêm/Sửa/Xóa. Khi nhấn Thêm, một Modal Form sẽ hiện ra ngay trên màn hình.
+    \item \textbf{Màn hình Thanh toán (Dành cho Cư dân):} Hiển thị danh sách các khoản phí đang nợ. Khi cư dân nhấn ``Thanh toán QR'', ứng dụng hiển thị mã QR cố định kèm thông tin tài khoản ngân hàng của Ban quản trị (Techcombank). Cư dân quét mã, chuyển khoản và nhấn ``Đã chuyển khoản'' để ghi nhận giao dịch.
+    \item \textbf{Màn hình Duyệt thanh toán (Dành cho Thủ quỹ):} Trình bày danh sách các giao dịch đang chờ duyệt (PENDING). Thủ quỹ kiểm tra tài khoản ngân hàng, nhập số tiền thực nhận và nhấn ``Xác nhận''. Nếu nộp thừa, hệ thống tự động tạo mục hoàn tiền (Refund).
+\end{itemize}
+
+\subsection{Kiểm thử phần mềm (Software Testing)}
+
+Hoạt động kiểm thử là bước không thể thiếu để đảm bảo phần mềm hoạt động trơn tru. Nhóm thực hiện kiểm thử theo hai hướng chính: Unit Test (Kiểm thử đơn vị cho Backend) và Manual Test (Kiểm thử thủ công cho các luồng nghiệp vụ trên UI). Dưới đây là các kịch bản kiểm thử (Test Cases) chi tiết.
+
+\subsubsection{Kịch bản kiểm thử: Đăng nhập hệ thống}
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|c|L{4cm}|X|c|c|}
+    \hline
+    \textbf{Test ID} & \textbf{Dữ liệu đầu vào (Input)} & \textbf{Kết quả mong đợi (Expected Output)} & \textbf{Thực tế} & \textbf{Pass/Fail} \\
+    \hline
+    TC01 & Bỏ trống username và password & Hệ thống chặn không cho gửi form, báo đỏ "Không được để trống". & Hoạt động đúng & Pass \\
+    \hline
+    TC02 & Nhập sai password & Backend trả về HTTP 401, Frontend hiện "Mật khẩu không đúng". & Hoạt động đúng & Pass \\
+    \hline
+    TC03 & Nhập đúng tài khoản Cư dân & Đăng nhập thành công, chuyển hướng đến trang của Cư dân (không thấy menu Admin). & Hoạt động đúng & Pass \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\subsubsection{Kịch bản kiểm thử: Quản lý Cư dân}
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|c|L{4cm}|X|c|c|}
+    \hline
+    \textbf{Test ID} & \textbf{Dữ liệu đầu vào (Input)} & \textbf{Kết quả mong đợi (Expected Output)} & \textbf{Thực tế} & \textbf{Pass/Fail} \\
+    \hline
+    TC04 & Nhập cư dân có CMND trùng với cư dân đã tồn tại. & Backend ném ra DataIntegrityViolationException, Frontend báo lỗi "CMND đã tồn tại". & Hoạt động đúng & Pass \\
+    \hline
+    TC05 & Nhập mã căn hộ không tồn tại trong hệ thống. & Báo lỗi không tìm thấy Căn hộ tương ứng. Cư dân không được lưu. & Hoạt động đúng & Pass \\
+    \hline
+    TC06 & Nhập đầy đủ thông tin hợp lệ. & Lưu thành công vào Database. Danh sách hiển thị thêm dòng mới ngay lập tức. & Hoạt động đúng & Pass \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\subsubsection{Kịch bản kiểm thử: Tạo khoản phí bắt buộc}
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|c|L{4cm}|X|c|c|}
+    \hline
+    \textbf{Test ID} & \textbf{Dữ liệu đầu vào (Input)} & \textbf{Kết quả mong đợi (Expected Output)} & \textbf{Thực tế} & \textbf{Pass/Fail} \\
+    \hline
+    TC07 & Tạo phí Rác, đơn giá 50,000/hộ & Form hợp lệ, tạo thành công. Hệ thống tự tạo hóa đơn 50,000 cho TẤT CẢ các căn hộ đang có người ở. & Hoạt động đúng & Pass \\
+    \hline
+    TC08 & Tạo phí Quản lý, đơn giá 10,000/$m^2$ & Tạo thành công. Hóa đơn được tính tự động (Diện tích x 10,000). Căn 50$m^2$ sẽ nợ 500,000. & Hoạt động đúng & Pass \\
+    \hline
+    TC09 & Nhập đơn giá là số âm (-500) & Backend báo lỗi Validation "Đơn giá phải lớn hơn 0". & Hoạt động đúng & Pass \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\subsubsection{Kịch bản kiểm thử: Nộp tiền và Duyệt}
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|c|L{4cm}|X|c|c|}
+    \hline
+    \textbf{Test ID} & \textbf{Dữ liệu đầu vào (Input)} & \textbf{Kết quả mong đợi (Expected Output)} & \textbf{Thực tế} & \textbf{Pass/Fail} \\
+    \hline
+    TC10 & Cư dân tạo yêu cầu thanh toán chuyển khoản & Hóa đơn đổi trạng thái thành PENDING. & Hoạt động đúng & Pass \\
+    \hline
+    TC11 & Thủ quỹ xác nhận số tiền bằng đúng tiền nợ & Hóa đơn đổi thành COMPLETED, Fee tương ứng cập nhật paid = true. & Hoạt động đúng & Pass \\
+    \hline
+    TC12 & Thủ quỹ xác nhận số tiền lớn hơn tiền nợ & Hóa đơn thành COMPLETED, chuyển số dư vào hoàn tiền (Refund). & Hoạt động đúng & Pass \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\subsubsection{Kịch bản kiểm thử: Bảo mật (Security)}
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{|c|L{4cm}|X|c|c|}
+    \hline
+    \textbf{Test ID} & \textbf{Dữ liệu đầu vào (Input)} & \textbf{Kết quả mong đợi (Expected Output)} & \textbf{Thực tế} & \textbf{Pass/Fail} \\
+    \hline
+    TC13 & Người dùng chưa đăng nhập gọi API lấy danh sách cư dân & Bị chặn lại, Spring Security trả về HTTP 403 Forbidden. & Hoạt động đúng & Pass \\
+    \hline
+    TC14 & Tài khoản Resident gọi API tạo Khoản thu mới & Bị chặn lại, Spring Security trả về HTTP 403 Forbidden (Thiếu quyền ADMIN). & Hoạt động đúng & Pass \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+Kết quả kiểm thử cho thấy toàn bộ các luồng chức năng chính đều hoạt động chính xác. Hệ thống Spring Security bảo vệ API rất tốt khỏi các request trái phép. Có một số lỗi nhỏ liên quan đến CSS vỡ giao diện trên màn hình rất nhỏ (dưới 360px), nhưng đã được nhóm khắc phục bằng cách sử dụng các Flexbox classes của Tailwind CSS.
+
+\section{HƯỚNG DẪN CÀI ĐẶT VÀ SỬ DỤNG}
+
+\subsection{Yêu cầu hệ thống và công cụ cần thiết}
+Để chạy phần mềm BlueMoon trên máy cá nhân, yêu cầu cài đặt sẵn các công cụ sau:
+\begin{itemize}
+    \item \textbf{Java Development Kit (JDK) 17:} Bắt buộc để khởi chạy Spring Boot.
+    \item \textbf{Node.js 18+ \& npm:} Bắt buộc để cài đặt thư viện và khởi chạy môi trường React Vite.
+    \item \textbf{Docker Desktop:} (Tùy chọn nhưng khuyến nghị) Sử dụng để chạy Database MySQL cục bộ. Nếu không có Docker, cần có MySQL Server.
+\end{itemize}
+
+\subsection{Cài đặt và chạy nhanh (Tự động 1-Click)}
+Nhóm đã cấu hình sẵn một Script tự động (\texttt{run-all.bat}) dành riêng cho hệ điều hành Windows. Đây là cách nhanh nhất để khởi chạy hệ thống mà không cần gõ lệnh thủ công.
+
+\textbf{Quy trình khởi chạy:}
+\begin{enumerate}
+    \item Giải nén mã nguồn dự án vào một thư mục bất kỳ (ví dụ: \texttt{D:/BlueMoon}).
+    \item Đảm bảo Docker Desktop đã được mở (nếu chạy cơ sở dữ liệu qua Docker).
+    \item Nhấn đúp chuột (Double click) vào tệp \texttt{run-all.bat} nằm ở thư mục gốc.
+    \item Kịch bản sẽ tự động mở 3 cửa sổ Terminal:
+    \begin{itemize}
+        \item Terminal 1: Gọi lệnh \texttt{docker-compose up -d} để khởi tạo Database.
+        \item Terminal 2: Chạy Maven Wrapper (\texttt{mvnw spring-boot:run}) để tải thư viện Java và bật Backend Server tại cổng \texttt{8080}.
+        \item Terminal 3: Chạy \texttt{npm install} và \texttt{npm run dev} để bật Frontend Server tại cổng \texttt{5173}.
+    \end{itemize}
+    \item Sau khi cả 3 cửa sổ báo chạy thành công, mở trình duyệt và truy cập: \url{http://localhost:5173}.
+\end{enumerate}
+
+\subsection{Cài đặt thủ công (Dành cho macOS / Linux / Custom server)}
+Trong trường hợp không thể sử dụng tệp lệnh \texttt{.bat}, người dùng có thể khởi chạy bằng các lệnh terminal:
+\begin{itemize}
+    \item \textbf{Bước 1 - Chạy Database:} Đi tới thư mục chứa \texttt{docker-compose.yml}, gõ \texttt{docker-compose up -d}. Database MySQL sẽ được tạo tại cổng \texttt{3307} (map tới cổng MySQL nội bộ 3306). Dữ liệu mẫu sẽ được tự động tạo bởi \texttt{DatabaseSeedConfig} khi Backend khởi động.
+    \item \textbf{Bước 2 - Chạy Backend:} Mở terminal mới, truy cập thư mục \texttt{backend/}. Gõ lệnh \texttt{./mvnw spring-boot:run}. Backend sẽ kiểm tra database và bắt đầu phục vụ REST API. 
+    \item \textbf{Bước 3 - Chạy Frontend:} Mở terminal mới, truy cập thư mục \texttt{frontend/}. Gõ lệnh \texttt{npm install} để tải thư viện. Sau đó gõ \texttt{npm run dev}.
+\end{itemize}
+
+\subsection{Hướng dẫn sử dụng cơ bản}
+\begin{itemize}
+    \item \textbf{Đăng nhập:} Sử dụng tài khoản mặc định \texttt{admin} / \texttt{admin123} để truy cập với quyền cao nhất.
+    \item \textbf{Thêm cư dân:} Chuyển tới tab ``Nhân khẩu'', nhấn ``Thêm mới''. Điền đầy đủ thông tin cá nhân và số căn hộ mà họ đang sinh sống.
+    \item \textbf{Quản lý thu phí:} Admin vào tab ``Khoản thu'', tạo một phí ``Phí vệ sinh'' bắt buộc. Sau đó, Thủ quỹ (hoặc Admin) chuyển sang tab ``Thu tiền'', sẽ thấy hệ thống tự động sinh hóa đơn cho các căn hộ. Cư dân có thể đăng nhập bằng mã căn hộ của mình để thấy số tiền nợ.
+\end{itemize}
+
+\newpage
+\section*{KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}
+\addcontentsline{toc}{section}{KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}
+
+\textbf{1. Kết quả đạt được} \\
+Trải qua thời gian nghiên cứu, phân tích và thực hiện, nhóm đã hoàn thành phần mềm \textbf{BlueMoon - Quản lý chung cư} đúng với các yêu cầu đã đặt ra ban đầu. Phần mềm có thiết kế kiến trúc chuẩn chỉnh, bảo mật tốt với JWT, giao diện trực quan và dễ sử dụng. Các chức năng cốt lõi như quản lý cư dân, tính toán phí tự động, hỗ trợ thanh toán và duyệt hóa đơn đã được hoàn thiện. Đặc biệt, việc áp dụng công nghệ mới như React 18, Spring Boot 3 giúp sản phẩm có tốc độ phản hồi nhanh, đáp ứng được bài toán thực tế của các chung cư có quy mô lớn.
+
+\textbf{2. Hạn chế còn tồn tại} \\
+Do giới hạn về thời gian và nguồn lực, phần mềm vẫn còn một số điểm cần cải thiện. Hiện tại phần mềm mới chỉ đáp ứng cho mô hình một tòa nhà chung cư duy nhất (Single-tenant). Việc tích hợp thanh toán tự động qua Cổng thanh toán (Payment Gateway như VNPay, MoMo) vẫn chưa được thực hiện hoàn chỉnh (hiện tại sử dụng mã QR tĩnh và Thủ quỹ duyệt thủ công). Ngoài ra, ứng dụng chưa có phiên bản Native Mobile App dành riêng cho iOS/Android mà chỉ hỗ trợ Responsive Web.
+
+\textbf{3. Hướng phát triển trong tương lai} \\
+Nhóm đã lên kế hoạch Roadmap cho phiên bản 2.0 (v2.0) với các mục tiêu nâng cấp cụ thể:
+\begin{itemize}
+    \item Cấu trúc lại cơ sở dữ liệu để hỗ trợ đa tòa nhà (Multi-tenant), cho phép quản lý một khu đô thị gồm nhiều Block (ví dụ Block A, Block B).
+    \item Tích hợp Cổng thanh toán trực tuyến (VNPAY / ZaloPay) để tự động hóa hoàn toàn quy trình duyệt giao dịch. Khi cư dân thanh toán, hệ thống ngân hàng sẽ gọi Webhook về Backend để tự động cập nhật trạng thái hóa đơn thành PAID, loại bỏ sự can thiệp thủ công của Thủ quỹ.
+    \item Quản lý dịch vụ mở rộng: Thêm tính năng xuất báo cáo Excel, biểu đồ thống kê doanh thu (biểu đồ tròn, biểu đồ cột, biểu đồ đường) để hỗ trợ Ban quản trị phân tích tài chính.
+    \item Xây dựng Mobile App bằng React Native để gửi thông báo Push trực tiếp đến điện thoại cư dân.
+\end{itemize}
+
+Thông qua đề tài này, nhóm đã củng cố được kiến thức về quy trình phát triển phần mềm, làm quen với các framework hiện đại và kỹ năng làm việc nhóm. Đây là tiền đề rất tốt để nhóm phát triển các dự án thực tế có quy mô lớn hơn trong tương lai.
+
+
+\end{document}

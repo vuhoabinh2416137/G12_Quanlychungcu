@@ -13,6 +13,7 @@ import { useAuth } from '../../hooks/useAuth.js';
 import { isNonEmptyString, isValidISODate } from '../../utils/validators.js';
 import QrPaymentModal from '../../components/payment/QrPaymentModal.jsx';
 import AutoFeeModal from './AutoFeeModal.jsx';
+import VoluntaryFeeModal from './VoluntaryFeeModal.jsx';
 
 const FEE_TYPES = ['DIEN', 'NUOC', 'QUAN_LY', 'GUI_XE', 'KHAC'];
 
@@ -60,6 +61,7 @@ export default function FeesPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAutoModalOpen, setIsAutoModalOpen] = useState(false);
+  const [isVoluntaryModalOpen, setIsVoluntaryModalOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [createMode, setCreateMode] = useState('apartment');
   const [createTouched, setCreateTouched] = useState({});
@@ -216,6 +218,13 @@ export default function FeesPage() {
                 ➕ Tạo khoản phí phát sinh
               </button>
             </>
+          ) : auth?.role === 'RESIDENT' ? (
+            <button
+              className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 active:scale-95 sm:w-auto"
+              onClick={() => setIsVoluntaryModalOpen(true)}
+            >
+              ❤️ Đóng phí tự nguyện
+            </button>
           ) : null}
         </div>
       </div>
@@ -513,6 +522,18 @@ export default function FeesPage() {
       <AutoFeeModal
         isOpen={isAutoModalOpen}
         onClose={() => setIsAutoModalOpen(false)}
+      />
+
+      {/* Modal Đóng phí tự nguyện */}
+      <VoluntaryFeeModal
+        isOpen={isVoluntaryModalOpen}
+        onClose={() => setIsVoluntaryModalOpen(false)}
+        apartmentId={selectedApartmentId === 'ALL' ? apartments[0]?.id : selectedApartmentId}
+        onSuccess={() => {
+          setIsVoluntaryModalOpen(false);
+          alert('Đã gửi yêu cầu đóng phí tự nguyện thành công!');
+          reloadFees(selectedApartmentId);
+        }}
       />
 
     </div>

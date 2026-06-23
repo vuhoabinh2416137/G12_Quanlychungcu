@@ -10,6 +10,15 @@ export async function createPayment(feeId, payload) {
   return response.data;
 }
 
+export async function submitVoluntaryPayment(apartmentId, payload) {
+  if (isMockApi()) {
+    console.log('[MOCK] submitVoluntaryPayment', apartmentId, payload);
+    return { id: Date.now(), ...payload, status: 'PENDING' };
+  }
+  const response = await axiosInstance.post(`/payments/voluntary/apartment/${apartmentId}`, payload);
+  return response.data;
+}
+
 export async function fetchPendingPayments() {
   if (isMockApi()) {
     return [

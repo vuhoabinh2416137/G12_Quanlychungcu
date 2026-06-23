@@ -88,6 +88,35 @@ public class PaymentServiceImpl implements PaymentService {
 
         return savedPayment;
     }
+
+    @Override
+    @Transactional
+    public Payment processVoluntaryPayment(Long apartmentId, Payment payment, String username) {
+        Apartment apartment = apartmentRepository.findById(apartmentId)
+                .orElseThrow(() -> new RuntimeException("Khong tim thay can ho!"));
+
+        User payer = null;
+        if (username != null) {
+            payer = userRepository.findByUsername(username).orElse(null);
+        }
+
+        // Tao Fee tu nguyen
+        Fee fee = new Fee();
+        fee.setApartment(apartment);
+        fee.setName("Dong gop tu nguyen");
+        fee.setDescription(payment.getNote() != null ? payment.getNote() : "Dong gop tu nguyen");
+        fee.setAmount(payment.getAmount());
+        fee.setType("DONG_GOP");
+        fee.setDueDate(java.time.LocalDate.now());
+        fee.setPaid(false);
+        Fee savedFee = feeRepository.save(fee);
+
+        payment.setPayer(payer);
+        payment.setFee(savedFee);
+        payment.setStatus("PENDING");
+
+        return paymentRepository.save(payment);
+    }
     
     @Transactional
     public Payment confirmPayment(Long paymentId, BigDecimal actualAmount) {
@@ -110,6 +139,17 @@ public class PaymentServiceImpl implements PaymentService {
     private void processCompletedPayment(Payment payment, BigDecimal actualAmount) {
         Fee fee = payment.getFee();
         Apartment apartment = fee.getApartment();
+        
+        // Xu ly dac biet cho phi tu nguyen (khong hoan tien)
+        if ("DONG_GOP".equals(fee.getType())) {
+            fee.setAmount(actualAmount);
+            fee.setPaid(true);
+            payment.setAmount(actualAmount);
+            paymentRepository.save(payment);
+            feeRepository.save(fee);
+            return;
+        }
+
         if (actualAmount.compareTo(fee.getAmount()) >= 0) {
             BigDecimal diff = actualAmount.subtract(fee.getAmount());
             if (diff.compareTo(BigDecimal.ZERO) > 0) {

@@ -8,6 +8,9 @@ public interface PaymentService {
     // Cư dân thực hiện thanh toán cho 1 hóa đơn
     Payment processPayment(Long feeId, Payment payment, String username);
 
+    // Cư dân đóng phí tự nguyện
+    Payment processVoluntaryPayment(Long apartmentId, Payment payment, String username);
+
     Payment confirmPayment(Long paymentId, BigDecimal actualAmount);
 
     // Xem lịch sử giao dịch của 1 hóa đơn

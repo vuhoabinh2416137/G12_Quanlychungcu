@@ -11,7 +11,7 @@ const ROLES = ['ADMIN', 'CASHIER', 'RESIDENT'];
 
 const ROLE_LABELS = {
   ADMIN: 'Quản trị viên',
-  MANAGER: 'Thủ quỹ',
+  CASHIER: 'Thủ quỹ',
   RESIDENT: 'Cư dân',
 };
 

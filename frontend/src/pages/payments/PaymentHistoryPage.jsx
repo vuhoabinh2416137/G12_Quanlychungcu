@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import * as XLSX from 'xlsx';
 import { useAuth } from '../../hooks/useAuth.js';
 import { fetchPaymentHistoryByApartment, fetchPaymentHistoryForAll } from '../../api/paymentsApi.js';
 import { fetchApartments } from '../../api/apartmentsApi.js';
@@ -94,6 +95,25 @@ export default function PaymentHistoryPage() {
     });
   }, [query, history]);
 
+  const handleExportExcel = () => {
+    const dataToExport = filtered.map((item, index) => ({
+      'STT': index + 1,
+      'Căn hộ': item.apartmentNumber || '-',
+      'Mã Biên Lai': item.receiptNumber || `PAY-${item.id}`,
+      'Tên Phí': item.feeName || 'Phí chung cư',
+      'Số Tiền (VND)': item.amount,
+      'Phương Thức': item.method || 'TIỀN MẶT',
+      'Ngày Thanh Toán': formatDateTime(item.transferTime || item.paymentDate),
+      'Người Nộp': item.payerName || '-',
+      'Ghi chú': item.note || ''
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Lich_Su_Thanh_Toan');
+    XLSX.writeFile(workbook, `Lich_Su_Thanh_Toan_${selectedApartmentId === 'ALL' ? 'ChungCu' : selectedApartmentId}_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
   return (
     <div className="animate-fade-in-up space-y-6 pb-12">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -127,6 +147,16 @@ export default function PaymentHistoryPage() {
               onChange={(e) => setQuery(e.target.value)}
             />
           </div>
+          <button
+            onClick={handleExportExcel}
+            disabled={filtered.length === 0}
+            className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 active:scale-95 disabled:opacity-50 disabled:pointer-events-none sm:w-auto"
+          >
+            <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Xuất Excel
+          </button>
         </div>
       </div>
 
