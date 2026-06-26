@@ -35,7 +35,7 @@ export default function PaymentHistoryPage() {
         if (!cancelled) {
           setApartments(occupiedApts);
           if (occupiedApts.length > 0) {
-            setSelectedApartmentId('ALL');
+            setSelectedApartmentId(isResident ? String(occupiedApts[0].id) : 'ALL');
           } else {
             if (isResident) {
               setError('Bạn chưa được gán vào căn hộ nào.');
