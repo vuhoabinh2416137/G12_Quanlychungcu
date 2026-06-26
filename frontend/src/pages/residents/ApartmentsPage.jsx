@@ -520,28 +520,7 @@ export default function ApartmentsPage() {
                   ) : null}
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700">Trạng thái <span className="text-red-500">*</span></label>
-                  <div className="relative">
-                    <select
-                      className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
-                      value={editForm.status}
-                      onChange={(e) => setEditForm((f) => ({ ...f, status: e.target.value }))}
-                    >
-                      {STATUSES.map((s) => (
-                        <option key={s} value={s}>
-                          {s === 'VACANT' ? 'Trống' : 'Đang ở'} ({s})
-                        </option>
-                      ))}
-                    </select>
-                    <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                  {editTouched.status && editErrors.status ? (
-                    <div className="text-xs text-red-500">{editErrors.status}</div>
-                  ) : null}
-                </div>
+
 
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-slate-700">Tòa</label>

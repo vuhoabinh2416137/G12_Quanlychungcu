@@ -90,7 +90,8 @@ export default function PaymentHistoryPage() {
     const q = query.trim().toLowerCase();
     if (!q) return history;
     return history.filter((item) => {
-      const searchStr = `${item.receiptNumber || ''} ${item.feeName || ''} ${item.note || ''} ${item.method || ''}`.toLowerCase();
+      const receiptCode = item.receiptNumber || `PAY-${item.id}`;
+      const searchStr = `${receiptCode} ${item.feeName || ''} ${item.note || ''} ${item.method || ''}`.toLowerCase();
       return searchStr.includes(q);
     });
   }, [query, history]);

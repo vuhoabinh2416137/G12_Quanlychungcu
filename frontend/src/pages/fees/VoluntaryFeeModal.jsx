@@ -11,11 +11,6 @@ export default function VoluntaryFeeModal({ isOpen, onClose, apartmentId, onSucc
   if (!isOpen) return null;
 
   const handleNext = () => {
-    const amountNum = Number(amount);
-    if (!Number.isFinite(amountNum) || amountNum <= 0) {
-      setError('Số tiền phải lớn hơn 0.');
-      return;
-    }
     setError('');
     setStep(2);
   };
@@ -25,7 +20,7 @@ export default function VoluntaryFeeModal({ isOpen, onClose, apartmentId, onSucc
     setError('');
     try {
       await submitVoluntaryPayment(apartmentId, {
-        amount: Number(amount),
+        amount: 0,
         method: 'QR',
         note: note || 'Đóng góp tự nguyện',
         transferTime: new Date().toISOString()
@@ -49,18 +44,7 @@ export default function VoluntaryFeeModal({ isOpen, onClose, apartmentId, onSucc
 
         {step === 1 && (
           <div className="space-y-4">
-            <p className="text-sm text-slate-600">Nhập số tiền và ghi chú cho khoản đóng góp tự nguyện của bạn.</p>
-            
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700">Số tiền (VNĐ) <span className="text-red-500">*</span></label>
-              <input
-                type="number"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition-all focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="VD: 500000"
-              />
-            </div>
+            <p className="text-sm text-slate-600">Nhập ghi chú cho khoản đóng góp tự nguyện của bạn.</p>
             
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-slate-700">Ghi chú</label>
@@ -93,7 +77,7 @@ export default function VoluntaryFeeModal({ isOpen, onClose, apartmentId, onSucc
 
         {step === 2 && (
           <div className="space-y-4">
-            <p className="text-center text-sm text-slate-600">Quét mã QR bên dưới để chuyển khoản số tiền <span className="font-bold text-slate-900">{Number(amount).toLocaleString('vi-VN')} VND</span></p>
+            <p className="text-center text-sm text-slate-600">Quét mã QR bên dưới để chuyển khoản</p>
             
             <div className="flex justify-center">
               <img src="/IMG_0792.jpg" alt="Mã QR Thanh Toán" className="h-64 w-64 rounded-xl object-cover shadow-sm" />
